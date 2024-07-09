@@ -1,0 +1,35 @@
+
+# Bugs
+
+* DESC: Change "Start Game" menu click user confirmation from "color based" to "movement based"
+* PRIORITY: LOW
+
+* DESC: after minimizing and then increasing the screen slider goes black, due to not using flip
+* PRIORITY: LOW
+
+* DESC: Some hair is placed under shirts not on them. (IF first pressed on a shirt and then on the hair then the hair falls on the shirt. possible lazy fix, don't show hair choosing option until shirt is clicked once
+* PRIORITY: MEDIUM
+
+# Optimization
+
+* DESC: changing Color takes a long time.
+* PRIORITY: Optimization
+* RESULT: from 623 ms to 186 ms (3.3 times faster) (Specifically Coloring tool)
+
+
+# Features
+
+* DESC: Create FPS Slider
+* PRIORITY: Feature
+
+* DESC: fix side view, (Looks awful)
+* PRIORITY: Feature
+
+* DESC: Make function to count how many characters are created if its more than 9 dont allow the "New" button to be pressed (Similarly how "Load" button is gray if there are no load files)
+* PRIORITY: Feature
+
+# Testing
+
+* DESC: Test Click down on a button and release anywhere else (On other buttons, off-screen, on images)
+* PRIORITY: Test
+

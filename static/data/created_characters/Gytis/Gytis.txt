@@ -1,0 +1,30 @@
+Name: Gytis
+
+Gender: Boy
+Age: 26
+Race: Elf
+
+Eyes: (100, 100, 200, 255)
+Skin: (250, 200, 154, 255)
+Skin2: (200, 150, 100, 255)
+
+Hair: Hair_5
+Shir: Shir_6
+Pant: Pant_2
+Shoe: Shoe_1
+
+Color_Hair: (1, 128, 128, 255)
+Color_Shir: (0, 101, 200, 255)
+Color_Pant: (0, 100, 201, 255)
+Color_Shoe: (1, 129, 128, 255)
+
+Last Save: 2024/07/07 21:07
+
+
+
+Level: 1
+Experience: 0
+
+Alignment: Unaligned
+
+Class: Not trained
