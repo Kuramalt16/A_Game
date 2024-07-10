@@ -124,7 +124,7 @@ def walking(dx, dy, collide, data, last_orientation):
         data["Zoom_rect"].x += movement[(dx, dy)][0] * I.info.FAST
         data["Zoom_rect"].y += movement[(dx, dy)][1] * I.info.FAST
         last_orientation = movement[(dx, dy)]
-    else:
+    elif collide[0] != "mob":
         # if collision occurs only able to move away from target.
         if movement[(dx, dy)] == last_orientation or movement[(dx, dy)][0] == last_orientation[0] or movement[(dx, dy)][1] == last_orientation[1]:
             data["Zoom_rect"].x -= 0
@@ -132,6 +132,11 @@ def walking(dx, dy, collide, data, last_orientation):
         else:
             data["Zoom_rect"].x += movement[(dx, dy)][0] * I.info.FAST
             data["Zoom_rect"].y += movement[(dx, dy)][1] * I.info.FAST
+    else:
+        differance = (collide[1]["current_pos"].x - data["Zoom_rect"].x, collide[1]["current_pos"].y - data["Zoom_rect"].y)
+        dx, dy = ((differance[0] > 150) - (differance[0] < 150), (differance[1] > 80) - (differance[1] < 80))
+        data["Zoom_rect"].x -= movement[(dx, dy)][0] * 7
+        data["Zoom_rect"].y -= movement[(dx, dy)][1] * 7
     return last_orientation
 
 def keypress_handle(screen):
@@ -232,7 +237,9 @@ def handle_combat():
 def handle_music(song, hit):
     duration = song.song[song.current_note][1]
     start_time = song.start_time
+    # if not hit:
     if I.pg.time.get_ticks() - start_time > duration:
         song.next_note()
-    # if hit:
-    #     print("hit")
+    # else:
+    #     song.play_once(I.A.NOTES["C2"])
+    #     song.play_once(I.A.NOTES["E2"])

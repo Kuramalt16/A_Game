@@ -35,3 +35,8 @@ class Song:
         self.current_note += 1
         self.play_song_by_note(self.song)
         return self.song[self.current_note][1]
+
+    def play_once(self, frequency):
+        wave = self.generate_sine_wave(frequency, 1)
+        sound = I.pg.sndarray.make_sound(wave)
+        sound.play(0)

@@ -97,13 +97,11 @@ def Update(screen, data, mob_gif, combat_rect, mob, gif):
                 gif.Start_gif("Blunt", current_mob)
                 # Ff.add_image_to_screen(sub_image, S.COMBAT_PATH["Blunt"][0] + str(mob_gif) + ".png", [mob_rect.x, mob_rect.y, mob_rect.w, mob_rect.h])
         if me.colliderect(rect):
-            Collide = (current_mob, mob_rect.x, mob_rect.y)
-            print("you collided with: ", current_mob)
+            Collide = ('mob', current_mob, mob_rect.x, mob_rect.y)
         if mob_gif == S.MOB_PATH[mob.name][1] - 1:
             target_pos = (me.x + data["Zoom_rect"].x, me.y + data["Zoom_rect"].y)
             mob_rect.x, mob_rect.y, current_mob["visible"] = Ff.move_towards(target_pos, current_mob, 1, displayed_rects, data["Zoom_rect"], sub_image)
             mob.update_position(mob_rect.x, mob_rect.y, current_mob)
-            # HERE RECEIVE DAMAGE
         if gif.start_gif and current_mob == gif.rect:
             frame = gif.next_frame()
             sub_image.blit(frame, (mob_x, mob_y))  # made specifically for damage displaying
