@@ -2,6 +2,7 @@ from Render import Background_Render as br
 from Values import Settings as S
 from utils import Imports as I, Frequent_functions as Ff
 import random
+from static.data.play_data import mob_data
 
 movement = {
     (0, 0): (0, 0),
@@ -16,7 +17,7 @@ movement = {
 }
 
 def Start(screen, clock):
-
+    mob = mob_data.Mob(name="Slime_S", exp=10, hp=8, allignment=0, count=20)
     stance = 0
     mob_gif = 0
     collide = False
@@ -26,7 +27,7 @@ def Start(screen, clock):
     mob_gif_time = 75
     start_time = I.pg.time.get_ticks()
     start_time1 = I.pg.time.get_ticks()
-    data = br.Start([I.info.START_POS[0], I.info.START_POS[1]])
+    data = br.Start([I.info.START_POS[0], I.info.START_POS[1]], mob)
     last_orientation = (0, 0)
     harvestable_objects = I.info.HARVESTED_OBJECTS.keys()
     while S.PLAY:
@@ -53,14 +54,14 @@ def Start(screen, clock):
             start_time1 = I.pg.time.get_ticks()
             if mob_gif >= S.MOB_PATH["Slime_S"][1]:
                 mob_gif = 0
-                make_mobs_jump_around(data)
+                make_mobs_jump_around(mob)
 
 
         harvest_timeout(harvestable_objects)
 
         dx, dy, gif_time, combat_rect = keypress_handle(screen)
 
-        collide = br.Update(screen, data, mob_gif, combat_rect)
+        collide = br.Update(screen, data, mob_gif, combat_rect, mob)
 
         last_orientation = walking(dx, dy, collide, data, last_orientation)
 
@@ -171,18 +172,11 @@ def update_display_text(screen, disp_text):
                 a = disp_text.index(text)
                 disp_text[a] = lines[0] + ",," + str(time)
 
-def make_mobs_jump_around(data):
+def make_mobs_jump_around(mob):
     # CURRENTLY ONLY WORKS FOR SLIMES
-    print("make this mob count number more global. also whenever mob is killed exclude this mob from here.")
     x = random.randint(-3, 3)
     y = random.randint(-3, 3)
-    mob_count = 20  # IMPORTANT COUNTER COUNTS HOW MANY SLIMES
-    for mob in range(0, mob_count):
-        if data["Slime_S"][mob]["visible"]:
-            continue
-        for i in range(0, S.MOB_PATH["Slime_S"][1]):
-            data["Slime_S"][mob]["rect"][i].x += x
-            data["Slime_S"][mob]["rect"][i].y += y
+    mob.move_mobs_randomly(x, y)
 
 def handle_combat():
     orientation = I.info.LAST_ORIENT[0].split(".")[0]

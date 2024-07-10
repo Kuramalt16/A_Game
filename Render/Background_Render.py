@@ -8,10 +8,10 @@ B_Top = 0
 B_W = S.SCREEN_WIDTH
 B_H = S.SCREEN_HEIGHT
 
-def Start(pos):
+def Start(pos, mob):
     data = {}
     decor_count = {"Bush_S_1": 30, "Bush_S_2": 30, "Tree_T_1": 40}
-    monster_count = {"Slime_S": 50}
+    monster_count = {mob.name: mob.count}
     data["Window size"] = (B_W, B_H)  # Defines the size of the window (The rest is black)
     data["Zoom"] = (B_W / 4, B_H / 4)  # Defines how zoomed in to the picture the view is
     data["Image"] = I.pg.image.load(S.DECOR_PATH["Grass"]).convert_alpha()  # uploads the background image with transparent convert
@@ -20,22 +20,20 @@ def Start(pos):
     for key in decor_count:
         data[key] = generate_decor(decor_count[key], data["Image_rect"].size, S.DECOR_PATH[key])
     for key in monster_count:
-        data[key] = generate_mobs(monster_count[key], data["Image_rect"].size, key)
+        data[key] = generate_mobs(mob, data["Image_rect"].size)
 
     data["House_1"] = place_decor_by_coordinates(600, 380, S.DECOR_PATH["House_1"], (1.5, 1.5), (1.5, 1.4))
     # image_data["Church_1"] = place_decor_by_coordinates(200, 280, S.DECOR_PATH["Church_1"], (2, 2), (2, 2))
     return data
 
-def Update(screen, data, mob_gif, combat_rect):
+def Update(screen, data, mob_gif, combat_rect, mob):
     data["Zoom_rect"].x = max(0, min(data["Zoom_rect"].x, data["Image_rect"].width - data["Zoom"][0]))
     data["Zoom_rect"].y = max(0, min(data["Zoom_rect"].y, data["Image_rect"].height - data["Zoom"][1]))
     sub_image = data["Image"].subsurface(data["Zoom_rect"]).copy()
     Collide = False
     me = I.pg.Rect(150, 85, S.SCREEN_WIDTH / 100, S.SCREEN_HEIGHT / 100)  # Player rect (if it gets hit with other rect. colide is set to True
     decor_options = ["House_1", "Bush_S_1", "Bush_S_2", "Tree_T_1"]
-    mob_options = ["Slime_S"]
     displayed_rects = []  # List to keep track of displayed rectangles
-    displayed_mobs = []
 
     for option in decor_options:
         for decor in data[option].values():
@@ -57,35 +55,33 @@ def Update(screen, data, mob_gif, combat_rect):
                             Collide = ("Door", door_rect.x, door_rect.y)
                     if me.colliderect(rect):
                         Collide = (option, decor["rect"].x, decor["rect"].y)
-    killed_mobs = []
-    for option in mob_options:
-        for mob, value in data[option].items():
-            decor_x = value["rect"][mob_gif].x - data["Zoom_rect"].x
-            decor_y = value["rect"][mob_gif].y - data["Zoom_rect"].y
-            rect = I.pg.Rect(decor_x, decor_y, value["rect"][mob_gif].w, value["rect"][mob_gif].h)
 
-            sub_image.blit(value["image"][mob_gif], (decor_x, decor_y))
-            displayed_mobs.append(rect)
-            if combat_rect != 0:
-                I.T.Make_rect_visible(sub_image, combat_rect)
-                if combat_rect.colliderect(rect):
-                    value["hp"] -= 1
-                    if value["hp"] <= 0:
-                        killed_mobs.append(mob)
-            if me.colliderect(rect):
-                Collide = (option, value["rect"][mob_gif].x, value["rect"][mob_gif].y)
-                print("you collided with: ", option)
-                # HERE RECIEVE DAMAGE
-            if mob_gif == S.MOB_PATH[option][1]-1:
-                touching_rect = Ff.check_if_mob_collides(displayed_rects, rect)  # returns 0 if no collision or returns obj number to what collides
-                (value["rect"][mob_gif].x, value["rect"][mob_gif].y), value["visible"] = Ff.move_towards(touching_rect, data, value, (me.x + data["Zoom_rect"].x, me.y + data["Zoom_rect"].y),(value["rect"][mob_gif].x, value["rect"][mob_gif].y), 1, displayed_rects)
-                # makes all coordinates the same so the gif works properly and not just one frame moved towards me
-                for i in range(0, mob_gif):
-                    value["rect"][i].x = value["rect"][mob_gif].x
-                    value["rect"][i].y = value["rect"][mob_gif].y
-    if killed_mobs != []:
-        for key in killed_mobs:
-            del data["Slime_S"][key]
+    for current_mob in mob.mobs:
+        mob_rect = current_mob["rect"][mob_gif]
+        mob_x = mob_rect.x - data["Zoom_rect"].x
+        mob_y = mob_rect.y - data["Zoom_rect"].y
+        rect = I.pg.Rect(mob_x, mob_y, mob_rect.w, mob_rect.h)
+        sub_image.blit(current_mob["image"][mob_gif], (mob_x, mob_y))
+        if combat_rect != 0:
+            I.T.Make_rect_visible(sub_image, combat_rect)
+            if combat_rect.colliderect(rect):
+                print(current_mob)
+
+                # mob.kill_mobs(combat_rect, 2)
+                mob.deal_damage(current_mob, 2)
+        if me.colliderect(rect):
+            Collide = (current_mob, mob_rect.x, mob_rect.y)
+            print("you collided with: ", current_mob)
+        if mob_gif == S.MOB_PATH[mob.name][1] - 1:
+            target_pos = (me.x + data["Zoom_rect"].x, me.y + data["Zoom_rect"].y)
+            mob_rect.x, mob_rect.y, current_mob["visible"] = Ff.move_towards(target_pos, current_mob, 1, displayed_rects, data["Zoom_rect"], sub_image)
+            mob.update_position(mob_rect.x, mob_rect.y, current_mob)
+            # for i in range(mob_gif):
+            #     current_mob["rect"][i].x = mob_rect.x
+            #     current_mob["rect"][i].y = mob_rect.y
+
+            # HERE RECEIVE DAMAGE
+
     scaled_image = I.pg.transform.scale(sub_image, data["Window size"])
     screen.blit(scaled_image, (0, 0))
     return Collide
@@ -134,21 +130,12 @@ def generate_decor(num_of_items, background_size, path):
         rect = image.get_rect(topleft=(x, y))
         items[i] = {"image": image, "rect": rect}
     return items
-def generate_mobs(num_of_mobs, background_size, name):
-    path = S.MOB_PATH[name][0]
-    items = {}
-    for i in range(num_of_mobs):
-        x = random.randint(0, background_size[0]-100)
-        y = random.randint(0, background_size[1]-350)
-        image_list = []
-        rect_list = []
-        for a in range(0, S.MOB_PATH[name][1]):
-            image = I.pg.image.load(path + name + "_" + str(a) + ".png").convert_alpha()
-            rect = image.get_rect(topleft=(x, y))
-            image_list.append(image)
-            rect_list.append(rect)
-        items[i] = {"image": image_list, "rect": rect_list, "visible": 0, "hp": I.mob_data.HP["Slime_S"]}
-    return items
+def generate_mobs(mob, background_size):
+    path = S.MOB_PATH[mob.name][0]
+    mob_gif_count = S.MOB_PATH[mob.name][1]
+    mob.spawn_mobs(background_size, path, mob_gif_count)
+    return mob.mobs
+
 def BackPack(screen):
     pressed = 0
     fill_backpack(screen)
