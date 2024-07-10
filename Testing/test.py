@@ -229,4 +229,31 @@ def end_mesure(start_time):
 #
 #     get_body_coordinates(screen)
 
-
+# import pygame
+# import numpy as np
+#
+# pygame.mixer.pre_init(44100, -16, 2, 512)
+# pygame.init()
+#
+# # Function to generate a sine wave for a given frequency
+# def generate_sine_wave(frequency, duration, sample_rate=44100, amplitude=32767/10):
+#     t = np.linspace(0, duration, int(sample_rate * duration), False)
+#     wave = amplitude * np.sin(2 * np.pi * frequency * t)
+#     wave = wave.astype(np.int16)
+#     stereo_wave = np.zeros((wave.size, 2), dtype=np.int16)
+#     stereo_wave[:, 0] = wave  # Left channel
+#     stereo_wave[:, 1] = wave  # Right channel
+#     return stereo_wave
+#
+# # Function to play a note
+# def play_sine_wave(frequency, duration):
+#     wave = generate_sine_wave(frequency, duration)
+#     sound = pygame.sndarray.make_sound(wave)
+#     sound.play(0)  # Play the sound once
+#     pygame.time.wait(int(duration * 1000))  # Wait for the duration of the note
+#
+# # Example: Play a C4 note (261.63 Hz) for 0.1 second
+# play_sine_wave(261.63, 0.1)
+#
+# # Quit Pygame
+# pygame.quit()

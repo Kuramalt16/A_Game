@@ -31,6 +31,36 @@ def Start(screen, clock):
     data = br.Start([I.info.START_POS[0], I.info.START_POS[1]], mob)
     last_orientation = (0, 0)
     combat_rect = 0
+    music = [
+        (I.A.NOTES["C3"], 500),
+        (I.A.NOTES["G3"], 500),
+        (I.A.NOTES["E3"], 500),
+        (I.A.NOTES["C4"], 500),
+
+        (I.A.NOTES["C3"], 500),
+        (I.A.NOTES["G3"], 500),
+        (I.A.NOTES["E3"], 500),
+        (I.A.NOTES["C4"], 500),
+
+        (I.A.NOTES["C3"], 500),
+        (I.A.NOTES["G3"], 500),
+        (I.A.NOTES["E3"], 500),
+        (I.A.NOTES["C4"], 500),
+
+        (I.A.NOTES["C3"], 500),
+        (I.A.NOTES["G3"], 500),
+        (I.A.NOTES["E3"], 500),
+        (I.A.NOTES["C4"], 500),
+
+    ]
+    # song = Ff.generate_sine_wave_multiple(music)
+
+    # print(song)
+    # Ff.play_sine_wave_waveform(song)
+    song = I.Songs.Song("Background", music)
+
+
+
     c_t = 0
     harvestable_objects = I.info.HARVESTED_OBJECTS.keys()
     while S.PLAY:
@@ -76,7 +106,7 @@ def Start(screen, clock):
 
         br.display_char(dx, dy, screen, stance, combat_rect)
 
-
+        handle_music(song, collide)
 
 
         update_display_text(screen, disp_text)
@@ -198,3 +228,11 @@ def handle_combat():
                         "Right": (10, 0)}
     combat_rect = I.pg.Rect(150 + attack_direction[orientation][0], 85 + attack_direction[orientation][1], S.SCREEN_WIDTH / 100, S.SCREEN_HEIGHT / 100)  # Player rect (if it gets hit with other rect. colide is set to True
     return combat_rect
+
+def handle_music(song, hit):
+    duration = song.song[song.current_note][1]
+    start_time = song.start_time
+    if I.pg.time.get_ticks() - start_time > duration:
+        song.next_note()
+    # if hit:
+    #     print("hit")

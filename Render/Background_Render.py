@@ -9,9 +9,7 @@ B_W = S.SCREEN_WIDTH
 B_H = S.SCREEN_HEIGHT
 
 def read_txt_file(path):
-    print(path)
     data_dict = {}
-
     with open(path, 'r') as file:
         for line in file:
             line = line.strip()
@@ -144,9 +142,9 @@ def display_char(dx, dy, screen, stance, combat_rect):
             dx = 0
             dy = 0
         else:
-            character_center_pos = [S.SCREEN_WIDTH / 2 - S.SCREEN_WIDTH / 20 + dx * 10,S.SCREEN_HEIGHT / 2 - S.SCREEN_HEIGHT / 20 * 2 + dy * 10, S.SCREEN_WIDTH / 14,S.SCREEN_HEIGHT / 7]
+            character_center_pos = [S.SCREEN_WIDTH / 2 - S.SCREEN_WIDTH / 20 + dx * 10, S.SCREEN_HEIGHT / 2 - S.SCREEN_HEIGHT / 20 * 2 + dy * 10, S.SCREEN_WIDTH / 14, S.SCREEN_HEIGHT / 7]
     else:
-        character_center_pos = [S.SCREEN_WIDTH / 2 - S.SCREEN_WIDTH / 20,S.SCREEN_HEIGHT / 2 - S.SCREEN_HEIGHT / 20 * 2, S.SCREEN_WIDTH / 14,S.SCREEN_HEIGHT / 7]
+        character_center_pos = [S.SCREEN_WIDTH / 2 - S.SCREEN_WIDTH / 20, S.SCREEN_HEIGHT / 2 - S.SCREEN_HEIGHT / 20 * 2, S.SCREEN_WIDTH / 14, S.SCREEN_HEIGHT / 7]
 
     orient = orientation[dxdy]
     if orient in orientation_images:
@@ -286,24 +284,3 @@ def place_decor_by_coordinates(x, y, path, scale, rect_scale):
     rect.h = rect.h * rect_scale[1]
     items[0] = {"image": image, "rect": rect}
     return items
-
-
-def render_attack(screen, path, pos, combat_rect):
-    if combat_rect != 0:
-
-        character_center_pos = [S.SCREEN_WIDTH / 2 - S.SCREEN_WIDTH / 20, S.SCREEN_HEIGHT / 2 - S.SCREEN_HEIGHT / 20 * 2, S.SCREEN_WIDTH / 14, S.SCREEN_HEIGHT / 7]
-        # orientation = I.info.LAST_ORIENT[0].split(".")[0]
-        # attack_direction = {"Front": (character_center_pos[2] * 0.1, character_center_pos[3] * 0.35),
-        #                     "Back": (0, 0),
-        #                     "Left": (-character_center_pos[2] * 0.2, 0),
-        #                     "Right": (character_center_pos[2] * 0.2, 0)}
-
-        if I.info.EQUIPED["Hand1"] == 0 and I.info.EQUIPED["Hand2"] == 0:
-            # shirt_rect = I.pg.Rect(character_center_pos[0] + attack_direction[orientation][0], character_center_pos[1] + attack_direction[orientation][1], character_center_pos[2] * 0.15, character_center_pos[3] * 0.2)
-            # combat_rect.y = 80
-
-            # combat_rect.w = S.SCREEN_WIDTH / 200
-            # combat_rect.h = S.SCREEN_HEIGHT / 200
-            # print(data["Player"])
-            # I.T.Make_rect_visible(screen, shirt_rect, data["Player"]["Color_Shir"])
-            I.T.Make_rect_visible(screen, shirt_rect, data["Player"]["Skin"])
