@@ -24,4 +24,11 @@ HARVESTED_OBJECTS = {
     "Bush_S_2": []
 }
 
+EQUIPED = {"Hand1": 0,
+           "Hand2": 0,
+           "Legs": 0,
+           "Arms": 0,
+           "Feet": 0,
+           "Head": 0,
+           }
 Mob_possition = 0

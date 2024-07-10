@@ -102,6 +102,9 @@ DECOR_PATH = {
 MOB_PATH = {
     "Slime_S": ('static/images/Mobs/Ooze/Slime_S/', 10),
 }
+COMBAT_PATH = {
+    "Blunt": ('static/images/Combat/Blunt/Blunt_', 11)
+}
 CHAR_SAVE_PATH = 'static/data/created_characters'
 
 

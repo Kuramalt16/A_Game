@@ -62,8 +62,8 @@ class Mob:
         return killed_mobs
     def knockback(self, victim, spaces):
         rects = victim['rect']
-        push = {"Back": (0, spaces),
-                "Front": (0, -spaces),
+        push = {"Back": (0, -spaces),
+                "Front": (0, spaces),
                 "Left": (-spaces, 0),
                 "Right": (spaces, 0)}
         direction = I.info.LAST_ORIENT[0].split(".")[0]
@@ -75,14 +75,14 @@ class Mob:
         """Remove a mob from the list by id."""
         self.count -= 1
         self.mobs = [mob for mob in self.mobs if mob["id"] != mob_id]
-    def deal_damage(self, victim, damage):
-        damage = damage / 3
-        victim["hp"] -= damage
-        if victim["hp"] <= 0:
-            self.remove_mob(victim["id"])
-        else:
-            self.knockback(victim, 2)
-            print(I.info.LAST_ORIENT)
+    def deal_damage(self, victim):
+        if I.info.EQUIPED["Hand1"] == 0 and I.info.EQUIPED["Hand2"] == 0:
+            damage = 2 / 3
+            victim["hp"] -= damage
+            if victim["hp"] <= 0:
+                self.remove_mob(victim["id"])
+            else:
+                self.knockback(victim, 2)
 
 
 

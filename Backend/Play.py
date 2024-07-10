@@ -18,6 +18,7 @@ movement = {
 
 def Start(screen, clock):
     mob = mob_data.Mob(name="Slime_S", exp=10, hp=8, allignment=0, count=20)
+    gif = I.gifs.Gif(name="Blunt", frame_count=S.COMBAT_PATH["Blunt"][1], initial_path=S.COMBAT_PATH["Blunt"][0], delay=50)
     stance = 0
     mob_gif = 0
     collide = False
@@ -29,6 +30,8 @@ def Start(screen, clock):
     start_time1 = I.pg.time.get_ticks()
     data = br.Start([I.info.START_POS[0], I.info.START_POS[1]], mob)
     last_orientation = (0, 0)
+    combat_rect = 0
+    c_t = 0
     harvestable_objects = I.info.HARVESTED_OBJECTS.keys()
     while S.PLAY:
         for event in I.pg.event.get():
@@ -37,12 +40,18 @@ def Start(screen, clock):
             if event.type == I.pg.KEYDOWN:
                 if event.key == I.pg.K_c:
                     pressed = I.pg.K_c
+                if event.key == I.pg.K_x:
+                    if pressed != I.pg.K_x:
+                        combat_rect = handle_combat()
+                        c_t = I.pg.time.get_ticks()
+                    pressed = I.pg.K_x
             elif event.type == I.pg.KEYUP:
-                if event.key == pressed:
+                if event.key == pressed and event.key == I.pg.K_c:
                     disp_text = interract(collide, disp_text)
-                    # I.pg.display.flip()
                     pressed = 0
-
+                elif event.key == pressed and event.key == I.pg.K_x:
+                    combat_rect = 0
+                    pressed = 0
 
         if I.pg.time.get_ticks() - gif_time >= start_time:
             stance += 1
@@ -59,18 +68,25 @@ def Start(screen, clock):
 
         harvest_timeout(harvestable_objects)
 
-        dx, dy, gif_time, combat_rect = keypress_handle(screen)
+        dx, dy, gif_time = keypress_handle(screen)
 
-        collide = br.Update(screen, data, mob_gif, combat_rect, mob)
+        collide = br.Update(screen, data, mob_gif, combat_rect, mob, gif)
 
         last_orientation = walking(dx, dy, collide, data, last_orientation)
 
-        br.display_char(dx, dy, screen, stance)
+        br.display_char(dx, dy, screen, stance, combat_rect)
+
+
+
 
         update_display_text(screen, disp_text)
 
+
         I.pg.display.flip()
         clock.tick(I.info.TICK)
+
+        if I.pg.time.get_ticks() - c_t > 100:
+            combat_rect = 0
 
 def walking(dx, dy, collide, data, last_orientation):
     if (dx, dy) in movement and not collide:
@@ -90,7 +106,6 @@ def walking(dx, dy, collide, data, last_orientation):
 
 def keypress_handle(screen):
     keys = I.pg.key.get_pressed()
-
     dx = (keys[I.pg.K_RIGHT] - keys[I.pg.K_LEFT])
     dy = (keys[I.pg.K_DOWN] - keys[I.pg.K_UP])
 
@@ -104,11 +119,8 @@ def keypress_handle(screen):
         print("something")
     if keys[I.pg.K_b]:
         br.BackPack(screen)
-    if keys[I.pg.K_x]:
-        combat_rect = handle_combat()
-        return dx, dy, gif_time, combat_rect
-    else:
-        return dx, dy, gif_time, 0
+
+    return dx, dy, gif_time
 
 def interract(collide, disp_text):
     if collide:

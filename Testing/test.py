@@ -133,8 +133,8 @@ def Put_a_stone(screen):
     screen.blit(image, (0, 0))
     I.pg.display.flip()  # send display data
 
-def Make_rect_visible(screen, rect):
-    I.pg.draw.rect(screen, "black", rect)
+def Make_rect_visible(screen, rect, color):
+    I.pg.draw.rect(screen, color, rect)
 
 
 def get_time_diferance(time1, time2):
