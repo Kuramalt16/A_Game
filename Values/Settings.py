@@ -89,6 +89,9 @@ PATHS = {
 
 PLAYING_PATH = {
     "Backpack_Empty": 'static/images/Playing/Backpack_Empty.png',
+    "Char_bar": "static/images/Playing/Char_bar.png",
+    "Grave": "static/images/Playing/Grave.png",
+    "Dead": "static/images/Playing/Dead/Dead_",
     "Light Berries": 'static/images/Items/Light Berries.png',
 }
 DECOR_PATH = {

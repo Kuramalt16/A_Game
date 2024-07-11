@@ -39,6 +39,7 @@ def read_txt_file(path):
 def Start(pos, mob):
     data = {}
     data["Player"] = read_txt_file('static/data/created_characters/' + I.info.SELECTED_CHARACTER + "/" + I.info.SELECTED_CHARACTER + ".txt")
+    data["Player"] = update_character(data["Player"])
     decor_count = {"Bush_S_1": 30, "Bush_S_2": 30, "Tree_T_1": 40}
     monster_count = {mob.name: mob.count}
     data["Window size"] = (B_W, B_H)  # Defines the size of the window (The rest is black)
@@ -102,19 +103,28 @@ def Update(screen, data, mob_gif, combat_rect, mob, gif, song):
                 # Ff.add_image_to_screen(sub_image, S.COMBAT_PATH["Blunt"][0] + str(mob_gif) + ".png", [mob_rect.x, mob_rect.y, mob_rect.w, mob_rect.h])
         if me.colliderect(rect):
             Collide = ('mob', current_mob, mob_rect.x, mob_rect.y)
-        if mob_gif == S.MOB_PATH[mob.name][1] - 1:
+            data["Player"]["hp"] = data["Player"]["hp"][0] - current_mob["damage"][0], data["Player"]["hp"][1]
+        if mob_gif == S.MOB_PATH[mob.name][1] - 1 and not data["Player"]["dead"]:
             target_pos = (me.x + data["Zoom_rect"].x, me.y + data["Zoom_rect"].y)
 
             mob_rect.x, mob_rect.y, current_mob["visible"] = Ff.move_towards(target_pos, current_mob, 1, displayed_rects, data["Zoom_rect"])
             mob.update_position(mob_rect.x, mob_rect.y, current_mob)
+        else:
+            current_mob["visible"] = False
         if gif.start_gif and current_mob == gif.rect:
-            frame = gif.next_frame()
-            sub_image.blit(frame, (mob_x-5, mob_y))  # made specifically for damage displaying
+            frame = gif.next_frame(False) # made specifically for damage displaying
+            sub_image.blit(frame, (mob_x-5, mob_y))
+        if data["Player"]["dead"]:
+            image = I.pg.image.load(S.PLAYING_PATH["Grave"]).convert_alpha()
+            image = I.pg.transform.scale(image, (S.SCREEN_WIDTH / 60, S.SCREEN_HEIGHT / 30))
+            sub_image.blit(image, (data["Player"]["dead"].x - data["Zoom_rect"].x + me.x, data["Player"]["dead"].y - data["Zoom_rect"].y + me.y))
 
     scaled_image = I.pg.transform.scale(sub_image, data["Window size"])
     screen.blit(scaled_image, (0, 0))
+    if data["Player"]["dead"] and Collide[0] == "mob":  # dont hit mobs when u dead
+        Collide = False, 0, 0, 0
     return Collide
-def display_char(dx, dy, screen, stance, combat_rect):
+def display_char(dx, dy, screen, stance, combat_rect, ghost):
     character_path = 'static/data/created_characters/' + I.info.SELECTED_CHARACTER + "/" + I.info.SELECTED_CHARACTER
     dxdy = (dx, dy)
     orientation = {
@@ -134,34 +144,38 @@ def display_char(dx, dy, screen, stance, combat_rect):
         "Right": ["Right.png", "Right1.png", "Right2.png"],
         "Left": ["Left.png", "Left1.png", "Left2.png"]
     }
-    if combat_rect != 0:
-        if dx == 0 and dy == 0:
-            for key, value in orientation.items():
-                if value == I.info.LAST_ORIENT[0].split(".")[0]:
-                    dx = key[0]
-                    dy = key[1]
-                    break
-            character_center_pos = [S.SCREEN_WIDTH / 2 - S.SCREEN_WIDTH / 20 + dx * 5,S.SCREEN_HEIGHT / 2 - S.SCREEN_HEIGHT / 20 * 2 + dy * 5, S.SCREEN_WIDTH / 14,S.SCREEN_HEIGHT / 7]
-            dx = 0
-            dy = 0
-        else:
-            character_center_pos = [S.SCREEN_WIDTH / 2 - S.SCREEN_WIDTH / 20 + dx * 10, S.SCREEN_HEIGHT / 2 - S.SCREEN_HEIGHT / 20 * 2 + dy * 10, S.SCREEN_WIDTH / 14, S.SCREEN_HEIGHT / 7]
+    if ghost.start_gif:
+        frame = ghost.next_frame(True)
+        frame = I.pg.transform.scale(frame, (S.SCREEN_WIDTH / 18, S.SCREEN_HEIGHT / 7))
+        screen.blit(frame, [S.SCREEN_WIDTH / 2 - S.SCREEN_WIDTH / 20, S.SCREEN_HEIGHT / 2 - S.SCREEN_HEIGHT / 20 * 2])
     else:
-        character_center_pos = [S.SCREEN_WIDTH / 2 - S.SCREEN_WIDTH / 20, S.SCREEN_HEIGHT / 2 - S.SCREEN_HEIGHT / 20 * 2, S.SCREEN_WIDTH / 14, S.SCREEN_HEIGHT / 7]
+        if combat_rect != 0:
+            if dx == 0 and dy == 0:
+                for key, value in orientation.items():
+                    if value == I.info.LAST_ORIENT[0].split(".")[0]:
+                        dx = key[0]
+                        dy = key[1]
+                        break
+                character_center_pos = [S.SCREEN_WIDTH / 2 - S.SCREEN_WIDTH / 20 + dx * 5,S.SCREEN_HEIGHT / 2 - S.SCREEN_HEIGHT / 20 * 2 + dy * 5, S.SCREEN_WIDTH / 14,S.SCREEN_HEIGHT / 7]
+                dx = 0
+                dy = 0
+            else:
+                character_center_pos = [S.SCREEN_WIDTH / 2 - S.SCREEN_WIDTH / 20 + dx * 10, S.SCREEN_HEIGHT / 2 - S.SCREEN_HEIGHT / 20 * 2 + dy * 10, S.SCREEN_WIDTH / 14, S.SCREEN_HEIGHT / 7]
+        else:
+            character_center_pos = [S.SCREEN_WIDTH / 2 - S.SCREEN_WIDTH / 20, S.SCREEN_HEIGHT / 2 - S.SCREEN_HEIGHT / 20 * 2, S.SCREEN_WIDTH / 14, S.SCREEN_HEIGHT / 7]
 
-    orient = orientation[dxdy]
-    if orient in orientation_images:
-        images = orientation_images[orient]
-        if stance == 0 or stance == 2:
-            body = Ff.add_image_to_screen(screen, character_path + images[0], character_center_pos)
-        elif stance == 1:
-            body = Ff.add_image_to_screen(screen, character_path + images[1], character_center_pos)
+        orient = orientation[dxdy]
+        if orient in orientation_images:
+            images = orientation_images[orient]
+            if stance == 0 or stance == 2:
+                Ff.add_image_to_screen(screen, character_path + images[0], character_center_pos)
+            elif stance == 1:
+                Ff.add_image_to_screen(screen, character_path + images[1], character_center_pos)
+            else:
+                Ff.add_image_to_screen(screen, character_path + images[2], character_center_pos)
+            I.info.LAST_ORIENT = orientation_images[orient]
         else:
-            body = Ff.add_image_to_screen(screen, character_path + images[2], character_center_pos)
-        I.info.LAST_ORIENT = orientation_images[orient]
-    else:
-        body = Ff.add_image_to_screen(screen, character_path + I.info.LAST_ORIENT[0], character_center_pos)
-    return body
+            Ff.add_image_to_screen(screen, character_path + I.info.LAST_ORIENT[0], character_center_pos)
 
 def generate_decor(num_of_items, background_size, path):
     items = {}
@@ -299,3 +313,18 @@ def update_health(rect, current_mob, sub_image):
     #     print(int(rect.h / 10 * remainder))
     reduced_health_bar = I.pg.Rect(rect.x, rect.y, rect.w * remainder, rect.h / 10)
     I.pg.draw.rect(sub_image, "green", reduced_health_bar)
+
+def update_character(player_disc):
+    hp_by_race = {"Elf": 11,
+                  "Human": 10}
+
+    mana_by_race = {"Elf": 14,
+                    "Human": 10}
+
+    race = player_disc["Race"]
+    level = player_disc["Level"]
+    player_disc["hp"] = (hp_by_race[race] * level, hp_by_race[race] * level)
+    player_disc["mana"] = (mana_by_race[race] * level, mana_by_race[race] * level)
+    player_disc["dead"] = False
+
+    return player_disc

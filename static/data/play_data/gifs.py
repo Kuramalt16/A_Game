@@ -17,20 +17,21 @@ class Gif:
             self.images.append(I.pg.image.load(path).convert_alpha())
 
     # def update_frame(self):
-    def Start_gif(self, name, object):
+    def Start_gif(self, name, rect):
         self.name = name
         self.start_gif = True
         self.frame_time = I.pg.time.get_ticks()
-        self.rect = object
+        self.rect = rect
 
-    def next_frame(self):
+    def next_frame(self, repeat):
         # Check if gif time has passed:
         if I.pg.time.get_ticks() - self.frame_time > self.delay:
             self.current_frame += 1
             self.frame_time = I.pg.time.get_ticks()
             if self.current_frame > self.frame_count:
                 self.current_frame = 0
-                self.start_gif = False
+                if not repeat:
+                    self.start_gif = False
                 return self.images[self.frame_count - 1]
             else:
                 return self.images[self.current_frame - 1]

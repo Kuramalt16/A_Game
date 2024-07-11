@@ -2,13 +2,15 @@ import random
 from utils import Imports as I
 
 class Mob:
-    def __init__(self, name, hp, exp, allignment, count):
+    def __init__(self, name, hp, exp, allignment, count, damage):
         self.name = name
         self.hp = hp
         self.exp = exp
         self.allignment = allignment
         self.count = count
+        self.damage = damage
         self.mobs = [self.create_mob(i) for i in range(count)]  # Create initial list of mobs
+
 
     def create_mob(self, id):
         """Create a single mob instance with unique id."""
@@ -19,7 +21,8 @@ class Mob:
         "rect": [],  # Placeholder for the Pygame rect object
         "image": [],  # Placeholder for the Pygame image list
         "previous_pos": (0, 0, 0, 0),
-        "current_pos": (0, 0, 0, 0)
+        "current_pos": (0, 0, 0, 0),
+        "damage": self.damage,
         }
 
     def spawn_mobs(self, background_size, path, mob_gif_count):

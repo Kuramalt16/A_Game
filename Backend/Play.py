@@ -17,8 +17,9 @@ movement = {
 }
 
 def Start(screen, clock):
-    mob = mob_data.Mob(name="Slime_S", exp=10, hp=8, allignment=0, count=20)
+    mob = mob_data.Mob(name="Slime_S", exp=10, hp=8, allignment=0, count=20, damage=(2, "blunt"))
     gif = I.gifs.Gif(name="Blunt", frame_count=S.COMBAT_PATH["Blunt"][1], initial_path=S.COMBAT_PATH["Blunt"][0], delay=50)
+    ghost = I.gifs.Gif(name="Dead", frame_count=8, initial_path=S.PLAYING_PATH["Dead"], delay=50)
     stance = 0
     mob_gif = 0
     collide = [False]
@@ -104,19 +105,33 @@ def Start(screen, clock):
 
         last_orientation = walking(dx, dy, collide, data, last_orientation)
 
-        br.display_char(dx, dy, screen, stance, combat_rect)
+        br.display_char(dx, dy, screen, stance, combat_rect, ghost)
 
         handle_music(song, collide)
 
-
         update_display_text(screen, disp_text)
 
+        update_char_bar(screen, data, ghost)
 
         I.pg.display.flip()
         clock.tick(I.info.TICK)
 
         if I.pg.time.get_ticks() - c_t > 100:
             combat_rect = 0
+def update_char_bar(screen, data, ghost):
+    rect = Ff.add_image_to_screen(screen, S.PLAYING_PATH["Char_bar"], [0, 0, S.SCREEN_WIDTH / 8, S.SCREEN_HEIGHT / 8])
+    I.pg.draw.rect(screen, "black", (rect.w * 0.1, rect.h * 0.56, rect.w * 0.8, rect.h * 0.08))
+    remainder = data["Player"]["hp"][0] / data["Player"]["hp"][1]
+    I.pg.draw.rect(screen, "red", (rect.w * 0.1, rect.h * 0.56, rect.w * 0.8 * remainder, rect.h * 0.08))
+    if data["Player"]["hp"][0] <= 0 and not data["Player"]["dead"]:
+        data["Player"]["dead"] = data["Zoom_rect"].copy()
+        data["Zoom_rect"].x = I.info.START_POS[0]
+        data["Zoom_rect"].y = I.info.START_POS[1]
+        ghost.Start_gif("Dead",[S.SCREEN_WIDTH / 2 - S.SCREEN_WIDTH / 20, S.SCREEN_HEIGHT / 2 - S.SCREEN_HEIGHT / 20 * 2, S.SCREEN_WIDTH / 14, S.SCREEN_HEIGHT / 7])
+
+    I.pg.draw.rect(screen, "black", (rect.w * 0.1, rect.h * 0.82, rect.w * 0.8, rect.h * 0.08))
+    remainder = data["Player"]["mana"][0] / data["Player"]["mana"][1]
+    I.pg.draw.rect(screen, "blue", (rect.w * 0.1, rect.h * 0.82, rect.w * 0.8 * remainder, rect.h * 0.08))
 
 def walking(dx, dy, collide, data, last_orientation):
     if (dx, dy) in movement and not collide[0]:
@@ -137,6 +152,7 @@ def walking(dx, dy, collide, data, last_orientation):
         dx, dy = ((differance[0] > 150) - (differance[0] < 150), (differance[1] > 80) - (differance[1] < 80))
         data["Zoom_rect"].x -= movement[(dx, dy)][0] * 7
         data["Zoom_rect"].y -= movement[(dx, dy)][1] * 7
+
     return last_orientation
 
 def keypress_handle(screen):
