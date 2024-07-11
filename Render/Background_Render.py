@@ -55,11 +55,11 @@ def Start(pos, mob):
     # image_data["Church_1"] = place_decor_by_coordinates(200, 280, S.DECOR_PATH["Church_1"], (2, 2), (2, 2))
     return data
 
-def Update(screen, data, mob_gif, combat_rect, mob, gif):
+def Update(screen, data, mob_gif, combat_rect, mob, gif, song):
     data["Zoom_rect"].x = max(0, min(data["Zoom_rect"].x, data["Image_rect"].width - data["Zoom"][0]))
     data["Zoom_rect"].y = max(0, min(data["Zoom_rect"].y, data["Image_rect"].height - data["Zoom"][1]))
     sub_image = data["Image"].subsurface(data["Zoom_rect"]).copy()
-    Collide = False
+    Collide = [False]
     me = I.pg.Rect(150, 85, S.SCREEN_WIDTH / 100, S.SCREEN_HEIGHT / 100)  # Player rect (if it gets hit with other rect. colide is set to True
     decor_options = ["House_1", "Bush_S_1", "Bush_S_2", "Tree_T_1"]
     displayed_rects = []  # List to keep track of displayed rectangles
@@ -90,21 +90,26 @@ def Update(screen, data, mob_gif, combat_rect, mob, gif):
         mob_x = mob_rect.x - data["Zoom_rect"].x
         mob_y = mob_rect.y - data["Zoom_rect"].y
         rect = I.pg.Rect(mob_x, mob_y, mob_rect.w, mob_rect.h)
+        update_health(rect, current_mob, sub_image)
         sub_image.blit(current_mob["image"][mob_gif], (mob_x, mob_y))
         if combat_rect != 0:
             if combat_rect.colliderect(rect):
+                thump = song.generate_thump_sound()
+                song.play_effect(thump)
                 mob.deal_damage(current_mob)
                 gif.Start_gif("Blunt", current_mob)
+
                 # Ff.add_image_to_screen(sub_image, S.COMBAT_PATH["Blunt"][0] + str(mob_gif) + ".png", [mob_rect.x, mob_rect.y, mob_rect.w, mob_rect.h])
         if me.colliderect(rect):
             Collide = ('mob', current_mob, mob_rect.x, mob_rect.y)
         if mob_gif == S.MOB_PATH[mob.name][1] - 1:
             target_pos = (me.x + data["Zoom_rect"].x, me.y + data["Zoom_rect"].y)
-            mob_rect.x, mob_rect.y, current_mob["visible"] = Ff.move_towards(target_pos, current_mob, 1, displayed_rects, data["Zoom_rect"], sub_image)
+
+            mob_rect.x, mob_rect.y, current_mob["visible"] = Ff.move_towards(target_pos, current_mob, 1, displayed_rects, data["Zoom_rect"])
             mob.update_position(mob_rect.x, mob_rect.y, current_mob)
         if gif.start_gif and current_mob == gif.rect:
             frame = gif.next_frame()
-            sub_image.blit(frame, (mob_x, mob_y))  # made specifically for damage displaying
+            sub_image.blit(frame, (mob_x-5, mob_y))  # made specifically for damage displaying
 
     scaled_image = I.pg.transform.scale(sub_image, data["Window size"])
     screen.blit(scaled_image, (0, 0))
@@ -282,3 +287,15 @@ def place_decor_by_coordinates(x, y, path, scale, rect_scale):
     rect.h = rect.h * rect_scale[1]
     items[0] = {"image": image, "rect": rect}
     return items
+
+def update_health(rect, current_mob, sub_image):
+    health_bar = I.pg.Rect(rect.x, rect.y, rect.w, rect.h / 10)
+    I.pg.draw.rect(sub_image, "red", health_bar)
+    health = current_mob["hp"]
+    remainder = health[0] / health[1]
+    # if rect.h < 2:
+    #     rect.h = 2
+    # if current_mob["id"] == 0:
+    #     print(int(rect.h / 10 * remainder))
+    reduced_health_bar = I.pg.Rect(rect.x, rect.y, rect.w * remainder, rect.h / 10)
+    I.pg.draw.rect(sub_image, "green", reduced_health_bar)

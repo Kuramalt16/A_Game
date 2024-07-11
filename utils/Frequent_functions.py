@@ -302,7 +302,7 @@ def dress_by_dict(rect, dict, screen, orientation):
     I.pg.display.flip()
 
 
-def move_towards(target, current_mob, step_size, obstacles, zoom_rect, sub_screen):
+def move_towards(target, current_mob, step_size, obstacles, zoom_rect):
     """
     Move the mob towards the target position while avoiding obstacles.
 
@@ -327,7 +327,6 @@ def move_towards(target, current_mob, step_size, obstacles, zoom_rect, sub_scree
         return current_x, current_y, False
     # Check if we are close enough to the target
     if distance < step_size:
-        print("Reached target")
         return target[0], target[1], True
 
     # Normalize direction vector
@@ -340,6 +339,7 @@ def move_towards(target, current_mob, step_size, obstacles, zoom_rect, sub_scree
     new_y = current_y + direction_y * step_size
 
     # Create new Rect for the potential new position
+
     new_rect = I.pg.Rect(new_x - zoom_rect.x, new_y - zoom_rect.y, current_mob['current_pos'].w, current_mob['current_pos'].h)
     # I.T.Make_rect_visible(sub_screen, new_rect)
     # Check for collisions

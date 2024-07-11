@@ -14,7 +14,7 @@ class Mob:
         """Create a single mob instance with unique id."""
         return {
         "id": id,
-        "hp": self.hp,
+        "hp": (self.hp, self.hp),
         "visible": False,
         "rect": [],  # Placeholder for the Pygame rect object
         "image": [],  # Placeholder for the Pygame image list
@@ -49,17 +49,6 @@ class Mob:
         else:
             self.mobs[id]["visible"] = False
 
-    def kill_mobs(self, combat_rect, damage):
-        """Update the state of the mobs, e.g., handling collisions."""
-        killed_mobs = []
-        for mob in self.mobs:
-            if mob["visible"] and combat_rect.colliderect(mob["rect"][9]):
-                mob["hp"] -= damage
-                if mob["hp"] <= 0:
-                    killed_mobs.append(mob["id"])
-        for mob_id in killed_mobs:
-            self.remove_mob(mob_id)
-        return killed_mobs
     def knockback(self, victim, spaces):
         rects = victim['rect']
         push = {"Back": (0, -spaces),
@@ -78,8 +67,8 @@ class Mob:
     def deal_damage(self, victim):
         if I.info.EQUIPED["Hand1"] == 0 and I.info.EQUIPED["Hand2"] == 0:
             damage = 2 / 3
-            victim["hp"] -= damage
-            if victim["hp"] <= 0:
+            victim["hp"] = victim["hp"][0] - damage, victim["hp"][1]
+            if victim["hp"][0] <= 0:
                 self.remove_mob(victim["id"])
             else:
                 self.knockback(victim, 2)

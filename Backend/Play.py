@@ -21,7 +21,7 @@ def Start(screen, clock):
     gif = I.gifs.Gif(name="Blunt", frame_count=S.COMBAT_PATH["Blunt"][1], initial_path=S.COMBAT_PATH["Blunt"][0], delay=50)
     stance = 0
     mob_gif = 0
-    collide = False
+    collide = [False]
     pressed = 0
     disp_text = []
     gif_time = 300
@@ -100,7 +100,7 @@ def Start(screen, clock):
 
         dx, dy, gif_time = keypress_handle(screen)
 
-        collide = br.Update(screen, data, mob_gif, combat_rect, mob, gif)
+        collide = br.Update(screen, data, mob_gif, combat_rect, mob, gif, song)
 
         last_orientation = walking(dx, dy, collide, data, last_orientation)
 
@@ -119,7 +119,7 @@ def Start(screen, clock):
             combat_rect = 0
 
 def walking(dx, dy, collide, data, last_orientation):
-    if (dx, dy) in movement and not collide:
+    if (dx, dy) in movement and not collide[0]:
         # if no collisions walk properly. add or substract 1 from x or y
         data["Zoom_rect"].x += movement[(dx, dy)][0] * I.info.FAST
         data["Zoom_rect"].y += movement[(dx, dy)][1] * I.info.FAST
@@ -234,12 +234,18 @@ def handle_combat():
     combat_rect = I.pg.Rect(150 + attack_direction[orientation][0], 85 + attack_direction[orientation][1], S.SCREEN_WIDTH / 100, S.SCREEN_HEIGHT / 100)  # Player rect (if it gets hit with other rect. colide is set to True
     return combat_rect
 
-def handle_music(song, hit):
+def handle_music(song, collide):
     duration = song.song[song.current_note][1]
     start_time = song.start_time
-    # if not hit:
-    if I.pg.time.get_ticks() - start_time > duration:
-        song.next_note()
-    # else:
-    #     song.play_once(I.A.NOTES["C2"])
-    #     song.play_once(I.A.NOTES["E2"])
+
+    if collide[0] == "mob":
+        bash = song.generate_bash_sound()
+        slice = song.generate_slicing_sound()
+        thump = song.generate_thump_sound()
+        song.play_effect(thump)
+    else:
+        if I.pg.time.get_ticks() - start_time > duration:
+            song.next_note()
+
+    if I.pg.time.get_ticks() - song.effect_time > 500:
+        song.channel1.stop()
