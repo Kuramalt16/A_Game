@@ -18,8 +18,10 @@ movement = {
 
 def Start(screen, clock):
     mob = mob_data.Mob(name="Slime_S", exp=10, hp=8, allignment=0, count=20, damage=(2, "blunt"))
-    gif = I.gifs.Gif(name="Blunt", frame_count=S.COMBAT_PATH["Blunt"][1], initial_path=S.COMBAT_PATH["Blunt"][0], delay=50)
-    ghost = I.gifs.Gif(name="Dead", frame_count=8, initial_path=S.PLAYING_PATH["Dead"], delay=50)
+    gifs = {"ghost": I.gifs.Gif(name="Dead", frame_count=8, initial_path=S.PLAYING_PATH["Dead"], delay=50),
+            "portal": I.gifs.Gif(name="Portal", frame_count=34, initial_path=S.PLAYING_PATH["Portal"], delay=100),
+            "Blunt": I.gifs.Gif(name="Blunt", frame_count=S.COMBAT_PATH["Blunt"][1], initial_path=S.COMBAT_PATH["Blunt"][0], delay=50)
+                 }
     stance = 0
     mob_gif = 0
     collide = [False]
@@ -54,13 +56,7 @@ def Start(screen, clock):
         (I.A.NOTES["C4"], 500),
 
     ]
-    # song = Ff.generate_sine_wave_multiple(music)
-
-    # print(song)
-    # Ff.play_sine_wave_waveform(song)
     song = I.Songs.Song("Background", music)
-
-
 
     c_t = 0
     harvestable_objects = I.info.HARVESTED_OBJECTS.keys()
@@ -72,16 +68,16 @@ def Start(screen, clock):
                 if event.key == I.pg.K_c:
                     pressed = I.pg.K_c
                 if event.key == I.pg.K_x:
-                    if pressed != I.pg.K_x:
+                    if pressed != I.pg.K_x and not data["Player"]["dead"]:
                         combat_rect = handle_combat()
                         c_t = I.pg.time.get_ticks()
                     pressed = I.pg.K_x
             elif event.type == I.pg.KEYUP:
-                if event.key == pressed and event.key == I.pg.K_c:
-                    disp_text = interract(collide, disp_text)
-                    pressed = 0
-                elif event.key == pressed and event.key == I.pg.K_x:
-                    combat_rect = 0
+                if event.key == pressed:
+                    if event.key == I.pg.K_c:
+                        disp_text = interract(collide, disp_text, data)
+                    elif event.key == I.pg.K_x:
+                        combat_rect = 0
                     pressed = 0
 
         if I.pg.time.get_ticks() - gif_time >= start_time:
@@ -101,53 +97,61 @@ def Start(screen, clock):
 
         dx, dy, gif_time = keypress_handle(screen)
 
-        collide = br.Update(screen, data, mob_gif, combat_rect, mob, gif, song)
+        collide = br.Update(screen, data, mob_gif, combat_rect, mob, gifs, song)
 
         last_orientation = walking(dx, dy, collide, data, last_orientation)
 
-        br.display_char(dx, dy, screen, stance, combat_rect, ghost)
+        br.display_char(dx, dy, screen, stance, combat_rect, gifs)
 
         handle_music(song, collide)
 
         update_display_text(screen, disp_text)
 
-        update_char_bar(screen, data, ghost)
+        update_char_bar(screen, data, gifs)
+
+
 
         I.pg.display.flip()
         clock.tick(I.info.TICK)
 
         if I.pg.time.get_ticks() - c_t > 100:
             combat_rect = 0
-def update_char_bar(screen, data, ghost):
+
+
+
+
+def update_char_bar(screen, data, gifs):
     rect = Ff.add_image_to_screen(screen, S.PLAYING_PATH["Char_bar"], [0, 0, S.SCREEN_WIDTH / 8, S.SCREEN_HEIGHT / 8])
     I.pg.draw.rect(screen, "black", (rect.w * 0.1, rect.h * 0.56, rect.w * 0.8, rect.h * 0.08))
     remainder = data["Player"]["hp"][0] / data["Player"]["hp"][1]
     I.pg.draw.rect(screen, "red", (rect.w * 0.1, rect.h * 0.56, rect.w * 0.8 * remainder, rect.h * 0.08))
     if data["Player"]["hp"][0] <= 0 and not data["Player"]["dead"]:
         data["Player"]["dead"] = data["Zoom_rect"].copy()
+        gifs["ghost"].Start_gif("Dead",[S.SCREEN_WIDTH / 2 - S.SCREEN_WIDTH / 20, S.SCREEN_HEIGHT / 2 - S.SCREEN_HEIGHT / 20 * 2, S.SCREEN_WIDTH / 14, S.SCREEN_HEIGHT / 7])
+        gifs["portal"].Start_gif("Portal", [I.info.START_POS[0] + 30, I.info.START_POS[1], S.SCREEN_WIDTH / 14, S.SCREEN_HEIGHT / 7])
         data["Zoom_rect"].x = I.info.START_POS[0]
         data["Zoom_rect"].y = I.info.START_POS[1]
-        ghost.Start_gif("Dead",[S.SCREEN_WIDTH / 2 - S.SCREEN_WIDTH / 20, S.SCREEN_HEIGHT / 2 - S.SCREEN_HEIGHT / 20 * 2, S.SCREEN_WIDTH / 14, S.SCREEN_HEIGHT / 7])
 
     I.pg.draw.rect(screen, "black", (rect.w * 0.1, rect.h * 0.82, rect.w * 0.8, rect.h * 0.08))
     remainder = data["Player"]["mana"][0] / data["Player"]["mana"][1]
     I.pg.draw.rect(screen, "blue", (rect.w * 0.1, rect.h * 0.82, rect.w * 0.8 * remainder, rect.h * 0.08))
 
 def walking(dx, dy, collide, data, last_orientation):
-    if (dx, dy) in movement and not collide[0]:
+    if (dx, dy) in movement and not collide[0] or (dx, dy) in movement and collide[0] in ["Portal"]:
         # if no collisions walk properly. add or substract 1 from x or y
         data["Zoom_rect"].x += movement[(dx, dy)][0] * I.info.FAST
         data["Zoom_rect"].y += movement[(dx, dy)][1] * I.info.FAST
         last_orientation = movement[(dx, dy)]
-    elif collide[0] != "mob":
-        # if collision occurs only able to move away from target.
+    elif collide[0] not in ["mob"]:
+        # if collision not with mob
         if movement[(dx, dy)] == last_orientation or movement[(dx, dy)][0] == last_orientation[0] or movement[(dx, dy)][1] == last_orientation[1]:
             data["Zoom_rect"].x -= 0
             data["Zoom_rect"].y -= 0
         else:
             data["Zoom_rect"].x += movement[(dx, dy)][0] * I.info.FAST
             data["Zoom_rect"].y += movement[(dx, dy)][1] * I.info.FAST
-    else:
+    elif collide[0] == "mob":
+        # if collide is mob
         differance = (collide[1]["current_pos"].x - data["Zoom_rect"].x, collide[1]["current_pos"].y - data["Zoom_rect"].y)
         dx, dy = ((differance[0] > 150) - (differance[0] < 150), (differance[1] > 80) - (differance[1] < 80))
         data["Zoom_rect"].x -= movement[(dx, dy)][0] * 7
@@ -173,9 +177,9 @@ def keypress_handle(screen):
 
     return dx, dy, gif_time
 
-def interract(collide, disp_text):
+def interract(collide, disp_text, data):
     if collide:
-        if collide[0] in I.info.HARVESTABLE.keys():
+        if collide[0] in I.info.HARVESTABLE.keys() and not data["Player"]["dead"]:
             if any((collide[1], collide[2]) == (t[0], t[1]) for t in I.info.HARVESTED_OBJECTS.get(collide[0], [])):
                 pass
             else:

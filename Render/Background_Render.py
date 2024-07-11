@@ -56,7 +56,7 @@ def Start(pos, mob):
     # image_data["Church_1"] = place_decor_by_coordinates(200, 280, S.DECOR_PATH["Church_1"], (2, 2), (2, 2))
     return data
 
-def Update(screen, data, mob_gif, combat_rect, mob, gif, song):
+def Update(screen, data, mob_gif, combat_rect, mob, gifs, song):
     data["Zoom_rect"].x = max(0, min(data["Zoom_rect"].x, data["Image_rect"].width - data["Zoom"][0]))
     data["Zoom_rect"].y = max(0, min(data["Zoom_rect"].y, data["Image_rect"].height - data["Zoom"][1]))
     sub_image = data["Image"].subsurface(data["Zoom_rect"]).copy()
@@ -87,6 +87,7 @@ def Update(screen, data, mob_gif, combat_rect, mob, gif, song):
                         Collide = (option, decor["rect"].x, decor["rect"].y)
 
     for current_mob in mob.mobs:
+
         mob_rect = current_mob["rect"][mob_gif]
         mob_x = mob_rect.x - data["Zoom_rect"].x
         mob_y = mob_rect.y - data["Zoom_rect"].y
@@ -98,9 +99,7 @@ def Update(screen, data, mob_gif, combat_rect, mob, gif, song):
                 thump = song.generate_thump_sound()
                 song.play_effect(thump)
                 mob.deal_damage(current_mob)
-                gif.Start_gif("Blunt", current_mob)
-
-                # Ff.add_image_to_screen(sub_image, S.COMBAT_PATH["Blunt"][0] + str(mob_gif) + ".png", [mob_rect.x, mob_rect.y, mob_rect.w, mob_rect.h])
+                gifs["Blunt"].Start_gif("Blunt", current_mob)
         if me.colliderect(rect):
             Collide = ('mob', current_mob, mob_rect.x, mob_rect.y)
             data["Player"]["hp"] = data["Player"]["hp"][0] - current_mob["damage"][0], data["Player"]["hp"][1]
@@ -111,20 +110,25 @@ def Update(screen, data, mob_gif, combat_rect, mob, gif, song):
             mob.update_position(mob_rect.x, mob_rect.y, current_mob)
         else:
             current_mob["visible"] = False
-        if gif.start_gif and current_mob == gif.rect:
-            frame = gif.next_frame(False) # made specifically for damage displaying
+        if gifs["Blunt"].start_gif and current_mob == gifs["Blunt"].rect:
+            frame = gifs["Blunt"].next_frame(False) # made specifically for damage displaying
             sub_image.blit(frame, (mob_x-5, mob_y))
-        if data["Player"]["dead"]:
-            image = I.pg.image.load(S.PLAYING_PATH["Grave"]).convert_alpha()
-            image = I.pg.transform.scale(image, (S.SCREEN_WIDTH / 60, S.SCREEN_HEIGHT / 30))
-            sub_image.blit(image, (data["Player"]["dead"].x - data["Zoom_rect"].x + me.x, data["Player"]["dead"].y - data["Zoom_rect"].y + me.y))
-
+    if data["Player"]["dead"]:
+        dead_disc = {"Portal": display_portal(sub_image, (I.info.START_POS[0] * 1.6 - data["Zoom_rect"].x , I.info.START_POS[1] + 10 * 20 - data["Zoom_rect"].y), gifs),
+                     "Sign": display_on_subimage(sub_image, (S.SCREEN_WIDTH / 90, S.SCREEN_HEIGHT / 40), S.PLAYING_PATH["Sign"],(I.info.START_POS[0] * 1.6 - data["Zoom_rect"].x,I.info.START_POS[1] + 10 * 10 - data["Zoom_rect"].y)),
+                     "Grave": display_on_subimage(sub_image, (S.SCREEN_WIDTH / 60, S.SCREEN_HEIGHT / 30), S.PLAYING_PATH["Grave"], (data["Player"]["dead"].x - data["Zoom_rect"].x + me.x, data["Player"]["dead"].y - data["Zoom_rect"].y + me.y)),
+                     }
+        dead_list = list(dead_disc.values())
+        if me.collidelistall(dead_list):
+            keys = list(dead_disc.keys())
+            key = keys[me.collidelistall(dead_list)[0]]
+            Collide = (key, dead_disc[key].x, dead_disc[key].y)
     scaled_image = I.pg.transform.scale(sub_image, data["Window size"])
     screen.blit(scaled_image, (0, 0))
     if data["Player"]["dead"] and Collide[0] == "mob":  # dont hit mobs when u dead
         Collide = False, 0, 0, 0
     return Collide
-def display_char(dx, dy, screen, stance, combat_rect, ghost):
+def display_char(dx, dy, screen, stance, combat_rect, gifs):
     character_path = 'static/data/created_characters/' + I.info.SELECTED_CHARACTER + "/" + I.info.SELECTED_CHARACTER
     dxdy = (dx, dy)
     orientation = {
@@ -144,8 +148,8 @@ def display_char(dx, dy, screen, stance, combat_rect, ghost):
         "Right": ["Right.png", "Right1.png", "Right2.png"],
         "Left": ["Left.png", "Left1.png", "Left2.png"]
     }
-    if ghost.start_gif:
-        frame = ghost.next_frame(True)
+    if gifs["ghost"].start_gif:
+        frame = gifs["ghost"].next_frame(True)
         frame = I.pg.transform.scale(frame, (S.SCREEN_WIDTH / 18, S.SCREEN_HEIGHT / 7))
         screen.blit(frame, [S.SCREEN_WIDTH / 2 - S.SCREEN_WIDTH / 20, S.SCREEN_HEIGHT / 2 - S.SCREEN_HEIGHT / 20 * 2])
     else:
@@ -205,6 +209,12 @@ def BackPack(screen):
                 if event.key == pressed:
                     running = False  # exits backpackview
             I.pg.display.flip()
+
+def display_on_subimage(sub_image, size, path, pos):
+    image = I.pg.image.load(path).convert_alpha()
+    image = I.pg.transform.scale(image, (size[0], size[1]))
+    sub_image.blit(image, pos)
+    return I.pg.Rect(pos[0], pos[1], size[0], size[1])
 
 def fill_backpack(screen):
     rect = screen.get_rect()
@@ -328,3 +338,10 @@ def update_character(player_disc):
     player_disc["dead"] = False
 
     return player_disc
+
+def display_portal(sub_image, pos, gifs):
+    frame = gifs["portal"].next_frame(True)
+    frame = I.pg.transform.scale(frame, (S.SCREEN_WIDTH / 16, S.SCREEN_HEIGHT / 10))
+    sub_image.blit(frame, pos)
+    return I.pg.Rect(pos[0], pos[1], S.SCREEN_WIDTH / 16, S.SCREEN_HEIGHT / 10)
+

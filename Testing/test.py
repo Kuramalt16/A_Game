@@ -257,3 +257,46 @@ def end_mesure(start_time):
 #
 # # Quit Pygame
 # pygame.quit()
+
+
+def rename_images_in_folder(folder_path):
+    import os
+    import glob
+    # Check if the folder exists
+    if not os.path.isdir(folder_path):
+        print(f"The folder '{folder_path}' does not exist.")
+        return
+
+    # Get the folder name
+    folder_name = folder_path.split("/")[-1]
+
+    # Get all image files in the folder (assuming common image extensions)
+    image_files = glob.glob(os.path.join(folder_path, '*.*'))
+
+    # # Filter image files to include only common image formats (you can add more if needed)
+    image_files = [f for f in image_files if f.lower().endswith(('.png', '.jpg', '.jpeg', '.gif', '.bmp'))]
+
+    # # Check if there are any image files in the folder
+    if not image_files:
+        print(f"No image files found in the folder '{folder_path}'.")
+        return
+    print(image_files)
+    # # Rename each image file
+    for image_path in image_files:
+        folders = image_path.split("/")
+        # print(folders)
+        new_path = ""
+        for i in range(0, len(folders)-1):
+            new_path += folders[i] + "/"
+        new_path += folder_name + "/"
+        file = folders[-1].split("\\")[1]
+        number = file.split("pixil-frame-")[1]
+        new_path += folder_name + "_" + number
+        os.rename(image_path, new_path)
+
+        # print(new_path)
+
+
+# Example usage
+
+# rename_images_in_folder("C:/Users/gytis/PycharmProjects/A_Game/static/images/Playing/Portal")
