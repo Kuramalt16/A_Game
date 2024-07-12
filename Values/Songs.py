@@ -16,12 +16,12 @@ class Song:
         for frequency, duration in notes:
             if isinstance(frequency, tuple):
                 for a in frequency:
-                    chord.append(self.generate_sine_wave(a, 1))
+                    chord.append(self.generate_sine_wave(a, duration/1000))
                 wave = I.np.sum(I.np.array(chord), axis=0)
                 wave = wave.astype(I.np.int16)
                 chord = []
             else:
-                wave = self.generate_sine_wave(frequency, 1)
+                wave = self.generate_sine_wave(frequency, duration/1000)
             self.music[i] = (wave, duration)
             i += 1
 

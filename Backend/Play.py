@@ -74,30 +74,22 @@ def Start(screen, clock):
         ((I.A.NOTES["G4"], I.A.NOTES["G3"]), 500),
         ((I.A.NOTES["E4"], I.A.NOTES["G3"]), 500),
         ((I.A.NOTES["C5"], I.A.NOTES["G3"]), 500),
-
-        # (I.A.NOTES["E2"], 500),
-        # (I.A.NOTES["G3"], 500),
-        # (I.A.NOTES["D3"], 500),
-        # (I.A.NOTES["A3"], 500),
-        #
-        # (I.A.NOTES["E2"], 500),
-        # (I.A.NOTES["G3"], 500),
-        # (I.A.NOTES["D3"], 500),
-        # (I.A.NOTES["A3"], 500),
-        #
-        # (I.A.NOTES["E2"], 500),
-        # (I.A.NOTES["G3"], 500),
-        # (I.A.NOTES["D3"], 500),
-        # (I.A.NOTES["A3"], 500),
-        #
-        # (I.A.NOTES["E2"], 500),
-        # (I.A.NOTES["G3"], 500),
-        # (I.A.NOTES["D3"], 500),
-        # (I.A.NOTES["A3"], 500),
-
-
     ]
-    song = I.Songs.Song("Background", music)
+    dead_music = [
+        ((I.A.NOTES["C4"], I.A.NOTES["C3"]), 1000),
+        ((I.A.NOTES["C4"], I.A.NOTES["C3"]), 1000),
+        ((I.A.NOTES["D4"], I.A.NOTES["C3"]), 1000),
+        ((I.A.NOTES["D4"], I.A.NOTES["C3"]), 1000),
+
+        ((I.A.NOTES["C4"], I.A.NOTES["F3"]), 1000),
+        ((I.A.NOTES["C4"], I.A.NOTES["F3"]), 1000),
+        ((I.A.NOTES["D4"], I.A.NOTES["F3"]), 1000),
+        ((I.A.NOTES["D4"], I.A.NOTES["F3"]), 1000),
+    ]
+    songs = {"Background": I.Songs.Song("Background", music),
+             "Ghost": I.Songs.Song("Ghost", dead_music),
+             "Playing": "Background"
+             }
     c_t = 0
     harvestable_objects = I.info.HARVESTED_OBJECTS.keys()
     while S.PLAY:
@@ -135,15 +127,15 @@ def Start(screen, clock):
 
         harvest_timeout(harvestable_objects)
 
-        dx, dy, gif_time = keypress_handle(screen, data, song)
+        dx, dy, gif_time = keypress_handle(screen, data, songs)
 
-        collide = br.Update(screen, data, mob_gif, combat_rect, mob, gifs, song)
+        collide = br.Update(screen, data, mob_gif, combat_rect, mob, gifs, songs)
 
         last_orientation = walking(dx, dy, collide, data, last_orientation)
 
         br.display_char(dx, dy, screen, stance, combat_rect, gifs)
 
-        handle_music(song, collide)
+        handle_music(songs, collide, data)
 
         update_display_text(screen, disp_text, gifs, data, collide)
 
@@ -213,9 +205,10 @@ def keypress_handle(screen, data, song):
     if keys[I.pg.K_v]:
         print("something")
     if keys[I.pg.K_b] and not data["Player"]["dead"]:
-        song.channel0.pause()
+        curr_song = song["Playing"]
+        song[curr_song].channel0.pause()
         br.BackPack(screen)
-        song.channel0.unpause()
+        song[curr_song].channel0.unpause()
 
     return dx, dy, gif_time
 
@@ -311,19 +304,23 @@ def handle_combat():
     combat_rect = I.pg.Rect(150 + attack_direction[orientation][0], 85 + attack_direction[orientation][1], S.SCREEN_WIDTH / 100, S.SCREEN_HEIGHT / 100)  # Player rect (if it gets hit with other rect. colide is set to True
     return combat_rect
 
-def handle_music(song, collide):
-
-    start_time = song.start_time
+def handle_music(song, collide, data):
+    if data["Player"]["dead"]:
+        song["Playing"] = "Ghost"
+    else:
+        song["Playing"] = "Background"
+    curr_song = song["Playing"]
+    start_time = song[curr_song].start_time
 
     if collide[0] == "mob":
-        bash = song.generate_bash_sound()
-        slice = song.generate_slicing_sound()
-        thump = song.generate_thump_sound()
-        song.play_effect(thump)
+        bash = song[curr_song].generate_bash_sound()
+        slice = song[curr_song].generate_slicing_sound()
+        thump = song[curr_song].generate_thump_sound()
+        song[curr_song].play_effect(thump)
     else:
-        duration = song.music[song.current_note][1]
+        duration = song[curr_song].music[song[curr_song].current_note][1]
         if I.pg.time.get_ticks() - start_time > duration:
-            song.next_note()
+            song[curr_song].next_note()
 
-    if I.pg.time.get_ticks() - song.effect_time > 500:
-        song.channel1.stop()
+    if I.pg.time.get_ticks() - song[curr_song].effect_time > 500:
+        song[curr_song].channel1.stop()

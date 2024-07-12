@@ -57,6 +57,7 @@ def Start(pos, mob):
     return data
 
 def Update(screen, data, mob_gif, combat_rect, mob, gifs, song):
+    curr_song = song["Playing"]
     data["Zoom_rect"].x = max(0, min(data["Zoom_rect"].x, data["Image_rect"].width - data["Zoom"][0]))
     data["Zoom_rect"].y = max(0, min(data["Zoom_rect"].y, data["Image_rect"].height - data["Zoom"][1]))
     sub_image = data["Image"].subsurface(data["Zoom_rect"]).copy()
@@ -96,8 +97,8 @@ def Update(screen, data, mob_gif, combat_rect, mob, gifs, song):
         sub_image.blit(current_mob["image"][mob_gif], (mob_x, mob_y))
         if combat_rect != 0:
             if combat_rect.colliderect(rect):
-                thump = song.generate_thump_sound()
-                song.play_effect(thump)
+                thump = song[curr_song].generate_thump_sound()
+                song[curr_song].play_effect(thump)
                 mob.deal_damage(current_mob, data["Player"])
                 gifs["Blunt"].Start_gif("Blunt", current_mob)
         if me.colliderect(rect):
