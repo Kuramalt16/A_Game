@@ -94,6 +94,8 @@ PLAYING_PATH = {
     "Dead": "static/images/Playing/Dead/Dead_",
     "Portal": "static/images/Playing/Portal/Portal_",
     "Sign": "static/images/Playing/Sign.png",
+    "Luna": "static/images/Playing/NPC/Luna/Luna_",
+    "Bear": "static/images/Playing/NPC/Bear/Bear_",
 }
 ITEM_PATHS = {
     "Light Berries": 'static/images/Items/Light Berries.png',

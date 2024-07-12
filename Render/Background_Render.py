@@ -88,7 +88,6 @@ def Update(screen, data, mob_gif, combat_rect, mob, gifs, song):
                         Collide = (option, decor["rect"].x, decor["rect"].y)
 
     for current_mob in mob.mobs:
-
         mob_rect = current_mob["rect"][mob_gif]
         mob_x = mob_rect.x - data["Zoom_rect"].x
         mob_y = mob_rect.y - data["Zoom_rect"].y
@@ -115,7 +114,7 @@ def Update(screen, data, mob_gif, combat_rect, mob, gifs, song):
             frame = gifs["Blunt"].next_frame(False) # made specifically for damage displaying
             sub_image.blit(frame, (mob_x-5, mob_y))
     if data["Player"]["dead"]:
-        dead_disc = {"Portal": display_portal(sub_image, (I.info.START_POS[0] * 1.6 - data["Zoom_rect"].x , I.info.START_POS[1] + 10 * 16 - data["Zoom_rect"].y), gifs),
+        dead_disc = {"Portal": display_gif_on_subimgae(sub_image, (S.SCREEN_WIDTH / 16, S.SCREEN_HEIGHT / 10), (I.info.START_POS[0] * 1.6 - data["Zoom_rect"].x , I.info.START_POS[1] + 10 * 16 - data["Zoom_rect"].y), gifs["Portal"]),
                      "Sign": display_on_subimage(sub_image, (S.SCREEN_WIDTH / 90, S.SCREEN_HEIGHT / 40), S.PLAYING_PATH["Sign"],(I.info.START_POS[0] * 1.6 - data["Zoom_rect"].x,I.info.START_POS[1] + 10 * 10 - data["Zoom_rect"].y)),
                      "Grave": display_on_subimage(sub_image, (S.SCREEN_WIDTH / 60, S.SCREEN_HEIGHT / 30), S.PLAYING_PATH["Grave"], (data["Player"]["dead"].x - data["Zoom_rect"].x + me.x, data["Player"]["dead"].y - data["Zoom_rect"].y + me.y)),
                      }
@@ -124,6 +123,9 @@ def Update(screen, data, mob_gif, combat_rect, mob, gifs, song):
             keys = list(dead_disc.keys())
             key = keys[me.collidelistall(dead_list)[0]]
             Collide = (key, dead_disc[key].x, dead_disc[key].y)
+    npc = {"Luna": display_gif_on_subimgae(sub_image, (17,18), (I.info.START_POS[0] * 1.6 - data["Zoom_rect"].x , I.info.START_POS[1] + 10 * 43 - data["Zoom_rect"].y), gifs["Luna"]),
+           "Bear": display_gif_on_subimgae(sub_image, (17,18), (I.info.START_POS[0] * 1.7 - data["Zoom_rect"].x , I.info.START_POS[1] + 10 * 43 - data["Zoom_rect"].y), gifs["Bear"]),
+    }
     scaled_image = I.pg.transform.scale(sub_image, data["Window size"])
     screen.blit(scaled_image, (0, 0))
     if data["Player"]["dead"] and Collide[0] == "mob":  # dont hit mobs when u dead
@@ -422,9 +424,9 @@ def update_character(player_disc):
 
     return player_disc
 
-def display_portal(sub_image, pos, gifs):
-    frame = gifs["portal"].next_frame(True)
-    frame = I.pg.transform.scale(frame, (S.SCREEN_WIDTH / 16, S.SCREEN_HEIGHT / 10))
+def display_gif_on_subimgae(sub_image, size, pos, gif):
+    frame = gif.next_frame(True)
+    frame = I.pg.transform.scale(frame, (size[0], size[1]))
     sub_image.blit(frame, pos)
-    return I.pg.Rect(pos[0], pos[1], S.SCREEN_WIDTH / 16, S.SCREEN_HEIGHT / 10)
+    return I.pg.Rect(pos[0], pos[1], size[0], size[1])
 

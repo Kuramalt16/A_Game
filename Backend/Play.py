@@ -20,7 +20,9 @@ def Start(screen, clock):
     mob = mob_data.Mob(name="Slime_S", exp=10, hp=8, allignment=0, count=20, damage=(2, "blunt"))
     gifs = {"ghost": I.gifs.Gif(name="Dead", frame_count=8, initial_path=S.PLAYING_PATH["Dead"], delay=50),
             "portal": I.gifs.Gif(name="Portal", frame_count=34, initial_path=S.PLAYING_PATH["Portal"], delay=100),
-            "Blunt": I.gifs.Gif(name="Blunt", frame_count=S.COMBAT_PATH["Blunt"][1], initial_path=S.COMBAT_PATH["Blunt"][0], delay=50)
+            "Blunt": I.gifs.Gif(name="Blunt", frame_count=S.COMBAT_PATH["Blunt"][1], initial_path=S.COMBAT_PATH["Blunt"][0], delay=50),
+            "Luna": I.gifs.Gif(name="Luna", frame_count=4, initial_path=S.PLAYING_PATH["Luna"], delay=50),
+            "Bear": I.gifs.Gif(name="Bear", frame_count=4, initial_path=S.PLAYING_PATH["Bear"], delay=50),
                  }
     stance = 0
     mob_gif = 0
