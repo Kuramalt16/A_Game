@@ -219,13 +219,21 @@ def BackPack(screen):
     item_h = list(I.info.BACKPACK_COORDINATES_Y.values())[1] - list(I.info.BACKPACK_COORDINATES_Y.values())[0]
     block = (0, 0)
     border = 1
-    pickup = 0
+    use = 0
     selected = 0
+    color = "Yellow"
     while running:
         for event in I.pg.event.get():
             if event.type == I.pg.KEYDOWN:
                 if event.key == I.pg.K_b:
                     pressed = I.pg.K_b
+                elif event.key == I.pg.K_x:
+                    pressed = I.pg.K_x
+                    color = "Green"
+                    for key, value in I.info.BACKPACK_CONTENT.items():
+                        if value[1] == block[0] and value[2] == block[1]:
+                            # if the possision matches get the key
+                            use = key
                 elif event.key == I.pg.K_c:
                     pressed = I.pg.K_c
                     if selected == 0:
@@ -263,13 +271,23 @@ def BackPack(screen):
             elif event.type == I.pg.KEYUP:
                 if pressed == I.pg.K_b:
                     running = False  # exits backpack view
+                elif pressed == I.pg.K_x:
+                    color = "Yellow"
+                    if use != 0 and use in I.info.CONSUMABLE:
+                        value = I.info.BACKPACK_CONTENT[use]
+                        if value[0] > 1:
+                            I.info.BACKPACK_CONTENT[use] = (value[0]-1, value[1], value[2])  # set the new possision value
+                        else:
+                            del I.info.BACKPACK_CONTENT[use]
+                        use = 0
+                    pressed = 0
                 # if pressed == I.pg.K_c:
                 #     print("hi")
 
 
             rect = I.pg.Rect(list(I.info.BACKPACK_COORDINATES_X.values())[block[0]], list(I.info.BACKPACK_COORDINATES_Y.values())[block[1]], item_w, item_h)
             fill_backpack(screen)
-            I.pg.draw.rect(screen, "Yellow", rect, border)
+            I.pg.draw.rect(screen, color, rect, border)
             if selected != 0:
                 I.pg.draw.rect(screen, "Yellow", selected, 2)
 

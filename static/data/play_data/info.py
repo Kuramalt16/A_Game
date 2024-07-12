@@ -25,6 +25,7 @@ TEXT = []
 HARVESTED_OBJECTS = {
     "Bush_S_2": []
 }
+CONSUMABLE = ["Light Berries"]
 
 EQUIPED = {"Hand1": 0,
            "Hand2": 0,
