@@ -157,3 +157,5 @@ NOTES = {
     "F#5": 739.99,
     "G5": 783.99
 }
+
+DROPS = {"Slime_S": ("Slime Ball", 1, 3),}   # Key: Mob that drops : value: tuple(name of item, amount of item, chance of item, write only the denominator of fraction 1/x)

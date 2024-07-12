@@ -116,6 +116,44 @@ class Song:
 
         return stereo_noise
 
+    def generate_glass_break(self, duration=0.5, sample_rate=44100, amplitude=32767 / 10):
+        """
+        Generate a sound effect representing a character dying.
+        :param duration: Duration of the sound in seconds.
+        :param sample_rate: Sample rate in Hz.
+        :param amplitude: Volume of the sound.
+        :return: A 2D numpy array representing stereo sound.
+        """
+        # Generate white noise for ambient sound
+        noise = I.np.random.uniform(-1, 1, int(sample_rate * duration))
+        t = I.np.linspace(0, duration, int(sample_rate * duration), False)
+
+        # Create an envelope for the noise
+        noise_envelope = I.np.exp(-20 * t)
+        noise *= noise_envelope
+
+        # Generate a high-pitched gasp
+        gasp_freq = 1000
+        gasp = 0.5 * I.np.sin(2 * I.np.pi * gasp_freq * t)
+        gasp_envelope = I.np.exp(-10 * t)
+        gasp *= gasp_envelope
+
+        # Generate a low-frequency thud
+        thud_freq = 50
+        thud = 0.3 * I.np.sin(2 * I.np.pi * thud_freq * t)
+        thud_envelope = I.np.exp(-30 * t)
+        thud *= thud_envelope
+
+        # Combine the sounds
+        dying_sound = noise + gasp + thud
+
+        # Convert to stereo by duplicating the single channel
+        stereo_dying_sound = I.np.zeros((len(dying_sound), 2), dtype=I.np.int16)
+        stereo_dying_sound[:, 0] = (amplitude * dying_sound).astype(I.np.int16)  # Left channel
+        stereo_dying_sound[:, 1] = (amplitude * dying_sound).astype(I.np.int16)  # Right channel
+
+        return stereo_dying_sound
+
     def play_effect(self, effect):
         self.effect_time = I.pg.time.get_ticks()
         self.channel1.stop()

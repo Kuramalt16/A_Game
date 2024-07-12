@@ -94,7 +94,11 @@ PLAYING_PATH = {
     "Dead": "static/images/Playing/Dead/Dead_",
     "Portal": "static/images/Playing/Portal/Portal_",
     "Sign": "static/images/Playing/Sign.png",
+}
+ITEM_PATHS = {
     "Light Berries": 'static/images/Items/Light Berries.png',
+    "Slime Ball": 'static/images/Items/Slime Ball.png',
+
 }
 DECOR_PATH = {
     "Grass":    'static/images/Background/Grass.png',

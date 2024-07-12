@@ -55,6 +55,27 @@ def Start(screen, clock):
         (I.A.NOTES["E3"], 500),
         (I.A.NOTES["C4"], 500),
 
+        (I.A.NOTES["E2"], 500),
+        (I.A.NOTES["G3"], 500),
+        (I.A.NOTES["D3"], 500),
+        (I.A.NOTES["A3"], 500),
+
+        (I.A.NOTES["E2"], 500),
+        (I.A.NOTES["G3"], 500),
+        (I.A.NOTES["D3"], 500),
+        (I.A.NOTES["A3"], 500),
+
+        (I.A.NOTES["E2"], 500),
+        (I.A.NOTES["G3"], 500),
+        (I.A.NOTES["D3"], 500),
+        (I.A.NOTES["A3"], 500),
+
+        (I.A.NOTES["E2"], 500),
+        (I.A.NOTES["G3"], 500),
+        (I.A.NOTES["D3"], 500),
+        (I.A.NOTES["A3"], 500),
+
+
     ]
     song = I.Songs.Song("Background", music)
 
@@ -75,7 +96,7 @@ def Start(screen, clock):
             elif event.type == I.pg.KEYUP:
                 if event.key == pressed:
                     if event.key == I.pg.K_c:
-                        disp_text = interract(collide, disp_text, data)
+                        disp_text = interract(collide, disp_text, data, gifs)
                     elif event.key == I.pg.K_x:
                         combat_rect = 0
                     pressed = 0
@@ -95,7 +116,7 @@ def Start(screen, clock):
 
         harvest_timeout(harvestable_objects)
 
-        dx, dy, gif_time = keypress_handle(screen)
+        dx, dy, gif_time = keypress_handle(screen, data, song)
 
         collide = br.Update(screen, data, mob_gif, combat_rect, mob, gifs, song)
 
@@ -105,7 +126,7 @@ def Start(screen, clock):
 
         handle_music(song, collide)
 
-        update_display_text(screen, disp_text)
+        update_display_text(screen, disp_text, gifs, data, collide)
 
         update_char_bar(screen, data, gifs)
 
@@ -159,7 +180,7 @@ def walking(dx, dy, collide, data, last_orientation):
 
     return last_orientation
 
-def keypress_handle(screen):
+def keypress_handle(screen, data, song):
     keys = I.pg.key.get_pressed()
     dx = (keys[I.pg.K_RIGHT] - keys[I.pg.K_LEFT])
     dy = (keys[I.pg.K_DOWN] - keys[I.pg.K_UP])
@@ -172,12 +193,14 @@ def keypress_handle(screen):
         I.info.FAST = 1
     if keys[I.pg.K_v]:
         print("something")
-    if keys[I.pg.K_b]:
+    if keys[I.pg.K_b] and not data["Player"]["dead"]:
+        song.channel0.pause()
         br.BackPack(screen)
+        song.channel0.unpause()
 
     return dx, dy, gif_time
 
-def interract(collide, disp_text, data):
+def interract(collide, disp_text, data, gifs):
     if collide:
         if collide[0] in I.info.HARVESTABLE.keys() and not data["Player"]["dead"]:
             if any((collide[1], collide[2]) == (t[0], t[1]) for t in I.info.HARVESTED_OBJECTS.get(collide[0], [])):
@@ -185,10 +208,7 @@ def interract(collide, disp_text, data):
             else:
                 item = I.info.HARVESTABLE[collide[0]]
                 amount = random.randrange(1, 5)
-                if I.info.BACKPACK_CONTENT.get(item) == []:
-                    I.info.BACKPACK_CONTENT[item] = amount
-                else:
-                    I.info.BACKPACK_CONTENT[item] = I.info.BACKPACK_CONTENT.get(item, 0) + amount
+                br.add_to_backpack(item, amount)
 
                 #  Handle registering items that were taken, used in not allowing collection of too many items from single bush
                 if I.info.HARVESTED_OBJECTS.get(collide[0]) == []:
@@ -203,6 +223,14 @@ def interract(collide, disp_text, data):
         elif collide[0] == "Door":
             print("Search for door")
             print(collide)
+        elif collide[0] == "Portal":
+            disp_text.append("Reviving.,,3000")
+        elif collide[0] == "Grave":
+            disp_text.append("Was Purgatory Fun?,,3000")
+            data["Player"]["dead"] = False
+            data["Player"]["hp"] = (data["Player"]["hp"][1], data["Player"]["hp"][1])
+            gifs["ghost"].start_gif = False
+
         else:
             print("not harvestable", collide)
     # return text
@@ -221,7 +249,7 @@ def harvest_timeout(harvestable_objects):
                     I.info.HARVESTED_OBJECTS[harvastable][i][2] - 1)
 
 
-def update_display_text(screen, disp_text):
+def update_display_text(screen, disp_text, gifs, data, collide):
     if disp_text:  # Check if the dictionary is not empty
         push = S.SCREEN_HEIGHT * 0.9
         for text in disp_text:
@@ -234,7 +262,17 @@ def update_display_text(screen, disp_text):
             time = int(time) - 50
             # Check if the timer has expired
             if time < 0:
-                disp_text.remove(text)
+                if "Reviving" in text and collide[0] == "Portal":
+                    a = disp_text.index(text)
+                    disp_text[a] = lines[0] + "." + ",,3000"
+                    if "..." in disp_text[a]:
+                        disp_text.remove(lines[0] + "." + ",,3000")
+                        gifs["ghost"].start_gif = False  # stop the ghost gif
+                        data["Player"]["dead"] = False  # set to alive
+                        data["Player"]["hp"] = (data["Player"]["hp"][1], data["Player"]["hp"][1])  # return hp
+                        I.info.BACKPACK_CONTENT = {}  # remove backpack content
+                else:
+                    disp_text.remove(text)
             else:
                 a = disp_text.index(text)
                 disp_text[a] = lines[0] + ",," + str(time)

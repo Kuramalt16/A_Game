@@ -300,3 +300,32 @@ def rename_images_in_folder(folder_path):
 # Example usage
 
 # rename_images_in_folder("C:/Users/gytis/PycharmProjects/A_Game/static/images/Playing/Portal")
+
+
+
+# import pygame
+# import numpy as np
+#
+# # Initialize Pygame mixer
+# pygame.mixer.pre_init(44100, -16, 2, 512)
+# pygame.init()
+#
+# # Function to generate a sine wave for a given frequency
+#
+# # Function to generate white noise
+#
+# # Generate components of the dying sound
+# thud = generate_dying_sound()
+#
+#
+# # Concatenate the sounds
+#
+# # Create a Pygame sound object
+# sound = pygame.sndarray.make_sound(thud)
+#
+# # Play the sound
+# sound.play()
+# pygame.time.wait(1000)  # Wait for the sound to finish playing
+#
+# # Quit Pygame
+# pygame.quit()

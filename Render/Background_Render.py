@@ -98,7 +98,7 @@ def Update(screen, data, mob_gif, combat_rect, mob, gifs, song):
             if combat_rect.colliderect(rect):
                 thump = song.generate_thump_sound()
                 song.play_effect(thump)
-                mob.deal_damage(current_mob)
+                mob.deal_damage(current_mob, data["Player"])
                 gifs["Blunt"].Start_gif("Blunt", current_mob)
         if me.colliderect(rect):
             Collide = ('mob', current_mob, mob_rect.x, mob_rect.y)
@@ -114,7 +114,7 @@ def Update(screen, data, mob_gif, combat_rect, mob, gifs, song):
             frame = gifs["Blunt"].next_frame(False) # made specifically for damage displaying
             sub_image.blit(frame, (mob_x-5, mob_y))
     if data["Player"]["dead"]:
-        dead_disc = {"Portal": display_portal(sub_image, (I.info.START_POS[0] * 1.6 - data["Zoom_rect"].x , I.info.START_POS[1] + 10 * 20 - data["Zoom_rect"].y), gifs),
+        dead_disc = {"Portal": display_portal(sub_image, (I.info.START_POS[0] * 1.6 - data["Zoom_rect"].x , I.info.START_POS[1] + 10 * 16 - data["Zoom_rect"].y), gifs),
                      "Sign": display_on_subimage(sub_image, (S.SCREEN_WIDTH / 90, S.SCREEN_HEIGHT / 40), S.PLAYING_PATH["Sign"],(I.info.START_POS[0] * 1.6 - data["Zoom_rect"].x,I.info.START_POS[1] + 10 * 10 - data["Zoom_rect"].y)),
                      "Grave": display_on_subimage(sub_image, (S.SCREEN_WIDTH / 60, S.SCREEN_HEIGHT / 30), S.PLAYING_PATH["Grave"], (data["Player"]["dead"].x - data["Zoom_rect"].x + me.x, data["Player"]["dead"].y - data["Zoom_rect"].y + me.y)),
                      }
@@ -196,6 +196,13 @@ def generate_mobs(mob, background_size):
     mob.spawn_mobs(background_size, path, mob_gif_count)
     return mob.mobs
 
+def add_to_backpack(item, amount):
+    if amount != 0:
+        if I.info.BACKPACK_CONTENT.get(item) == []:
+            I.info.BACKPACK_CONTENT[item] = amount
+        else:
+            I.info.BACKPACK_CONTENT[item] = I.info.BACKPACK_CONTENT.get(item, 0) + amount
+
 def BackPack(screen):
     pressed = 0
     fill_backpack(screen)
@@ -224,11 +231,15 @@ def fill_backpack(screen):
 
     item_w = list(I.info.BACKPACK_COORDINATES_X.values())[1] - list(I.info.BACKPACK_COORDINATES_X.values())[0]
     item_h = list(I.info.BACKPACK_COORDINATES_Y.values())[1] - list(I.info.BACKPACK_COORDINATES_Y.values())[0]
-    i = 0
+    row = 0
+    collumn = 0
     for content in I.info.BACKPACK_CONTENT.keys():
-        Ff.add_image_to_screen(screen, S.PLAYING_PATH[content], [list(I.info.BACKPACK_COORDINATES_X.values())[i], list(I.info.BACKPACK_COORDINATES_Y.values())[i], item_w, item_h])
-        Ff.display_text(screen, str(I.info.BACKPACK_CONTENT[content]), 2, [list(I.info.BACKPACK_COORDINATES_X.values())[i], list(I.info.BACKPACK_COORDINATES_Y.values())[i]], "white")
-        i += 2
+        Ff.add_image_to_screen(screen, S.ITEM_PATHS[content], [list(I.info.BACKPACK_COORDINATES_X.values())[row], list(I.info.BACKPACK_COORDINATES_Y.values())[collumn], item_w, item_h])
+        Ff.display_text(screen, str(I.info.BACKPACK_CONTENT[content]), 2, [list(I.info.BACKPACK_COORDINATES_X.values())[row], list(I.info.BACKPACK_COORDINATES_Y.values())[collumn]], "white")
+        row += 2
+        if row == 14:
+            row = 0
+            collumn += 2
 
     return bag
 

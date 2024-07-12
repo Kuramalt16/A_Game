@@ -1,6 +1,6 @@
 import random
 from utils import Imports as I
-
+from Render import Background_Render as br
 class Mob:
     def __init__(self, name, hp, exp, allignment, count, damage):
         self.name = name
@@ -15,6 +15,7 @@ class Mob:
     def create_mob(self, id):
         """Create a single mob instance with unique id."""
         return {
+        "name": self.name,
         "id": id,
         "hp": (self.hp, self.hp),
         "visible": False,
@@ -23,6 +24,8 @@ class Mob:
         "previous_pos": (0, 0, 0, 0),
         "current_pos": (0, 0, 0, 0),
         "damage": self.damage,
+        "exp": self.exp,
+        "drop": I.A.DROPS[self.name]
         }
 
     def spawn_mobs(self, background_size, path, mob_gif_count):
@@ -67,12 +70,16 @@ class Mob:
         """Remove a mob from the list by id."""
         self.count -= 1
         self.mobs = [mob for mob in self.mobs if mob["id"] != mob_id]
-    def deal_damage(self, victim):
+    def deal_damage(self, victim, player):
         if I.info.EQUIPED["Hand1"] == 0 and I.info.EQUIPED["Hand2"] == 0:
             damage = 2 / 3
             victim["hp"] = victim["hp"][0] - damage, victim["hp"][1]
             if victim["hp"][0] <= 0:
                 self.remove_mob(victim["id"])
+                player["Experience"] += victim["exp"]
+                amount = victim["drop"][1] if random.randint(0, victim["drop"][2]) == 0 else 0
+                print(amount, victim["drop"][0])
+                br.add_to_backpack(victim["drop"][0], amount)
             else:
                 self.knockback(victim, 2)
 
