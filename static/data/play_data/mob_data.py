@@ -78,7 +78,6 @@ class Mob:
                 self.remove_mob(victim["id"])
                 player["Experience"] += victim["exp"]
                 amount = victim["drop"][1] if random.randint(0, victim["drop"][2]) == 0 else 0
-                print(amount, victim["drop"][0])
                 br.add_to_backpack(victim["drop"][0], amount)
             else:
                 self.knockback(victim, 2)

@@ -35,50 +35,69 @@ def Start(screen, clock):
     last_orientation = (0, 0)
     combat_rect = 0
     music = [
-        (I.A.NOTES["C3"], 500),
-        (I.A.NOTES["G3"], 500),
-        (I.A.NOTES["E3"], 500),
-        (I.A.NOTES["C4"], 500),
+        ((I.A.NOTES["C4"], I.A.NOTES["C3"]), 500),
+        ((I.A.NOTES["G4"], I.A.NOTES["C3"]), 500),
+        ((I.A.NOTES["E4"], I.A.NOTES["C3"]), 500),
+        ((I.A.NOTES["C5"], I.A.NOTES["C3"]), 500),
 
-        (I.A.NOTES["C3"], 500),
-        (I.A.NOTES["G3"], 500),
-        (I.A.NOTES["E3"], 500),
-        (I.A.NOTES["C4"], 500),
+        ((I.A.NOTES["C4"], I.A.NOTES["C3"]), 500),
+        ((I.A.NOTES["G4"], I.A.NOTES["C3"]), 500),
+        ((I.A.NOTES["E4"], I.A.NOTES["C3"]), 500),
+        ((I.A.NOTES["C5"], I.A.NOTES["C3"]), 500),
 
-        (I.A.NOTES["C3"], 500),
-        (I.A.NOTES["G3"], 500),
-        (I.A.NOTES["E3"], 500),
-        (I.A.NOTES["C4"], 500),
+        ((I.A.NOTES["C4"], I.A.NOTES["F3"]), 500),
+        ((I.A.NOTES["G4"], I.A.NOTES["F3"]), 500),
+        ((I.A.NOTES["E4"], I.A.NOTES["F3"]), 500),
+        ((I.A.NOTES["C5"], I.A.NOTES["F3"]), 500),
 
-        (I.A.NOTES["C3"], 500),
-        (I.A.NOTES["G3"], 500),
-        (I.A.NOTES["E3"], 500),
-        (I.A.NOTES["C4"], 500),
+        ((I.A.NOTES["C4"], I.A.NOTES["F3"]), 500),
+        ((I.A.NOTES["G4"], I.A.NOTES["F3"]), 500),
+        ((I.A.NOTES["E4"], I.A.NOTES["F3"]), 500),
+        ((I.A.NOTES["C5"], I.A.NOTES["F3"]), 500),
 
-        (I.A.NOTES["E2"], 500),
-        (I.A.NOTES["G3"], 500),
-        (I.A.NOTES["D3"], 500),
-        (I.A.NOTES["A3"], 500),
+        ((I.A.NOTES["C4"], I.A.NOTES["E3"]), 500),
+        ((I.A.NOTES["G4"], I.A.NOTES["E3"]), 500),
+        ((I.A.NOTES["E4"], I.A.NOTES["E3"]), 500),
+        ((I.A.NOTES["C5"], I.A.NOTES["E3"]), 500),
 
-        (I.A.NOTES["E2"], 500),
-        (I.A.NOTES["G3"], 500),
-        (I.A.NOTES["D3"], 500),
-        (I.A.NOTES["A3"], 500),
+        ((I.A.NOTES["C4"], I.A.NOTES["E3"]), 500),
+        ((I.A.NOTES["G4"], I.A.NOTES["E3"]), 500),
+        ((I.A.NOTES["E4"], I.A.NOTES["E3"]), 500),
+        ((I.A.NOTES["C5"], I.A.NOTES["E3"]), 500),
 
-        (I.A.NOTES["E2"], 500),
-        (I.A.NOTES["G3"], 500),
-        (I.A.NOTES["D3"], 500),
-        (I.A.NOTES["A3"], 500),
+        ((I.A.NOTES["C4"], I.A.NOTES["G3"]), 500),
+        ((I.A.NOTES["G4"], I.A.NOTES["G3"]), 500),
+        ((I.A.NOTES["E4"], I.A.NOTES["G3"]), 500),
+        ((I.A.NOTES["C5"], I.A.NOTES["G3"]), 500),
 
-        (I.A.NOTES["E2"], 500),
-        (I.A.NOTES["G3"], 500),
-        (I.A.NOTES["D3"], 500),
-        (I.A.NOTES["A3"], 500),
+        ((I.A.NOTES["C4"], I.A.NOTES["G3"]), 500),
+        ((I.A.NOTES["G4"], I.A.NOTES["G3"]), 500),
+        ((I.A.NOTES["E4"], I.A.NOTES["G3"]), 500),
+        ((I.A.NOTES["C5"], I.A.NOTES["G3"]), 500),
+
+        # (I.A.NOTES["E2"], 500),
+        # (I.A.NOTES["G3"], 500),
+        # (I.A.NOTES["D3"], 500),
+        # (I.A.NOTES["A3"], 500),
+        #
+        # (I.A.NOTES["E2"], 500),
+        # (I.A.NOTES["G3"], 500),
+        # (I.A.NOTES["D3"], 500),
+        # (I.A.NOTES["A3"], 500),
+        #
+        # (I.A.NOTES["E2"], 500),
+        # (I.A.NOTES["G3"], 500),
+        # (I.A.NOTES["D3"], 500),
+        # (I.A.NOTES["A3"], 500),
+        #
+        # (I.A.NOTES["E2"], 500),
+        # (I.A.NOTES["G3"], 500),
+        # (I.A.NOTES["D3"], 500),
+        # (I.A.NOTES["A3"], 500),
 
 
     ]
     song = I.Songs.Song("Background", music)
-
     c_t = 0
     harvestable_objects = I.info.HARVESTED_OBJECTS.keys()
     while S.PLAY:
@@ -293,7 +312,7 @@ def handle_combat():
     return combat_rect
 
 def handle_music(song, collide):
-    duration = song.song[song.current_note][1]
+
     start_time = song.start_time
 
     if collide[0] == "mob":
@@ -302,6 +321,7 @@ def handle_music(song, collide):
         thump = song.generate_thump_sound()
         song.play_effect(thump)
     else:
+        duration = song.music[song.current_note][1]
         if I.pg.time.get_ticks() - start_time > duration:
             song.next_note()
 
