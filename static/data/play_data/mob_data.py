@@ -77,8 +77,11 @@ class Mob:
             if victim["hp"][0] <= 0:
                 self.remove_mob(victim["id"])
                 player["Experience"] += victim["exp"]
-                amount = victim["drop"][1] if random.randint(0, victim["drop"][2]) == 0 else 0
+                amount = victim["drop"][1] if random.randint(0, victim["drop"][2]-1) == 0 else 0
                 br.add_to_backpack(victim["drop"][0], amount)
+                if amount != 0:
+                    I.info.TEXT.append("Recieved " + str(amount) + " " + str(victim["drop"][0]) + ",,5000")
+
             else:
                 self.knockback(victim, 2)
 

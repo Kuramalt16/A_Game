@@ -199,23 +199,80 @@ def generate_mobs(mob, background_size):
 
 def add_to_backpack(item, amount):
     if amount != 0:
-        if I.info.BACKPACK_CONTENT.get(item) == []:
-            I.info.BACKPACK_CONTENT[item] = amount
+        row = len(I.info.BACKPACK_CONTENT.keys()) * 2
+        collumn = 0
+        for i in range(row):
+            if row > 14:
+                row -= 14
+                collumn += 2
+        if I.info.BACKPACK_CONTENT.get(item) == None:
+            I.info.BACKPACK_CONTENT[item] = (amount, row, collumn)
         else:
-            I.info.BACKPACK_CONTENT[item] = I.info.BACKPACK_CONTENT.get(item, 0) + amount
+            value = I.info.BACKPACK_CONTENT[item]
+            I.info.BACKPACK_CONTENT[item] = (value[0] + amount, value[1], value[2])
 
 def BackPack(screen):
     pressed = 0
     fill_backpack(screen)
     running = True
+    item_w = list(I.info.BACKPACK_COORDINATES_X.values())[1] - list(I.info.BACKPACK_COORDINATES_X.values())[0]
+    item_h = list(I.info.BACKPACK_COORDINATES_Y.values())[1] - list(I.info.BACKPACK_COORDINATES_Y.values())[0]
+    block = (0, 0)
+    border = 1
+    pickup = 0
+    selected = 0
     while running:
         for event in I.pg.event.get():
             if event.type == I.pg.KEYDOWN:
                 if event.key == I.pg.K_b:
                     pressed = I.pg.K_b
+                elif event.key == I.pg.K_c:
+                    pressed = I.pg.K_c
+                    if selected == 0:
+                        selected = I.pg.Rect(list(I.info.BACKPACK_COORDINATES_X.values())[block[0]], list(I.info.BACKPACK_COORDINATES_Y.values())[block[1]], item_w, item_h)
+                        for key, value in I.info.BACKPACK_CONTENT.items():
+                            if value[1] == block[0] and value[2] == block[1]:
+                                # if the possision matches get the key
+                                pickup = key
+                    else:
+                        if pickup != 0:
+                            value = I.info.BACKPACK_CONTENT[pickup]
+                            I.info.BACKPACK_CONTENT[pickup] = (value[0], block[0], block[1]) # set the new possision value
+                        pickup = 0
+                        selected = 0
+                elif event.key == I.pg.K_UP:
+                    block = (block[0], block[1] - 2)
+                    pressed = I.pg.K_UP
+                    if block[1] < 0:
+                        block = (block[0], 26)
+                elif event.key == I.pg.K_DOWN:
+                    block = (block[0], block[1] + 2)
+                    pressed = I.pg.K_DOWN
+                    if block[1] > 26:
+                        block = (block[0], 0)
+                elif event.key == I.pg.K_LEFT:
+                    block = (block[0] - 2, block[1])
+                    pressed = I.pg.K_LEFT
+                    if block[0] < 0:
+                        block = (14, block[1])
+                elif event.key == I.pg.K_RIGHT:
+                    block = (block[0] + 2, block[1])
+                    pressed = I.pg.K_RIGHT
+                    if block[0] > 14:
+                        block = (0, block[1])
             elif event.type == I.pg.KEYUP:
-                if event.key == pressed:
-                    running = False  # exits backpackview
+                if pressed == I.pg.K_b:
+                    running = False  # exits backpack view
+                # if pressed == I.pg.K_c:
+                #     print("hi")
+
+
+            rect = I.pg.Rect(list(I.info.BACKPACK_COORDINATES_X.values())[block[0]], list(I.info.BACKPACK_COORDINATES_Y.values())[block[1]], item_w, item_h)
+            fill_backpack(screen)
+            I.pg.draw.rect(screen, "Yellow", rect, border)
+            if selected != 0:
+                I.pg.draw.rect(screen, "Yellow", selected, 2)
+
             I.pg.display.flip()
 
 def display_on_subimage(sub_image, size, path, pos):
@@ -232,15 +289,11 @@ def fill_backpack(screen):
 
     item_w = list(I.info.BACKPACK_COORDINATES_X.values())[1] - list(I.info.BACKPACK_COORDINATES_X.values())[0]
     item_h = list(I.info.BACKPACK_COORDINATES_Y.values())[1] - list(I.info.BACKPACK_COORDINATES_Y.values())[0]
-    row = 0
-    collumn = 0
     for content in I.info.BACKPACK_CONTENT.keys():
+        row = I.info.BACKPACK_CONTENT[content][1]
+        collumn = I.info.BACKPACK_CONTENT[content][2]
         Ff.add_image_to_screen(screen, S.ITEM_PATHS[content], [list(I.info.BACKPACK_COORDINATES_X.values())[row], list(I.info.BACKPACK_COORDINATES_Y.values())[collumn], item_w, item_h])
-        Ff.display_text(screen, str(I.info.BACKPACK_CONTENT[content]), 2, [list(I.info.BACKPACK_COORDINATES_X.values())[row], list(I.info.BACKPACK_COORDINATES_Y.values())[collumn]], "white")
-        row += 2
-        if row == 14:
-            row = 0
-            collumn += 2
+        Ff.display_text(screen, str(I.info.BACKPACK_CONTENT[content][0]), 2, [list(I.info.BACKPACK_COORDINATES_X.values())[row], list(I.info.BACKPACK_COORDINATES_Y.values())[collumn]], "white")
 
     return bag
 

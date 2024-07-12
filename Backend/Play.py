@@ -26,7 +26,6 @@ def Start(screen, clock):
     mob_gif = 0
     collide = [False]
     pressed = 0
-    disp_text = []
     gif_time = 300
     mob_gif_time = 75
     start_time = I.pg.time.get_ticks()
@@ -107,7 +106,7 @@ def Start(screen, clock):
             elif event.type == I.pg.KEYUP:
                 if event.key == pressed:
                     if event.key == I.pg.K_c:
-                        disp_text = interract(collide, disp_text, data, gifs)
+                        interract(collide, data, gifs)
                     elif event.key == I.pg.K_x:
                         combat_rect = 0
                     pressed = 0
@@ -137,7 +136,7 @@ def Start(screen, clock):
 
         handle_music(songs, collide, data)
 
-        update_display_text(screen, disp_text, gifs, data, collide)
+        update_display_text(screen, gifs, data, collide)
 
         update_char_bar(screen, data, gifs)
 
@@ -212,7 +211,7 @@ def keypress_handle(screen, data, song):
 
     return dx, dy, gif_time
 
-def interract(collide, disp_text, data, gifs):
+def interract(collide, data, gifs):
     if collide:
         if collide[0] in I.info.HARVESTABLE.keys() and not data["Player"]["dead"]:
             if any((collide[1], collide[2]) == (t[0], t[1]) for t in I.info.HARVESTED_OBJECTS.get(collide[0], [])):
@@ -230,15 +229,15 @@ def interract(collide, disp_text, data, gifs):
                     existing_values.append((collide[1], collide[2], 10000))
                     I.info.HARVESTED_OBJECTS[collide[0]] = existing_values
 
-                disp_text.append("Recieved " + str(amount) + " " + str(item) + ",,5000")
-                return disp_text
+                I.info.TEXT.append("Recieved " + str(amount) + " " + str(item) + ",,5000")
+                return
         elif collide[0] == "Door":
             print("Search for door")
             print(collide)
         elif collide[0] == "Portal":
-            disp_text.append("Reviving.,,3000")
+            I.info.TEXT.append("Reviving.,,3000")
         elif collide[0] == "Grave":
-            disp_text.append("Was Purgatory Fun?,,3000")
+            I.info.TEXT.append("Was Purgatory Fun?,,5000")
             data["Player"]["dead"] = False
             data["Player"]["hp"] = (data["Player"]["hp"][1], data["Player"]["hp"][1])
             gifs["ghost"].start_gif = False
@@ -246,7 +245,7 @@ def interract(collide, disp_text, data, gifs):
         else:
             print("not harvestable", collide)
     # return text
-    return disp_text
+    return
 
 def harvest_timeout(harvestable_objects):
     for harvastable in harvestable_objects:
@@ -261,10 +260,10 @@ def harvest_timeout(harvestable_objects):
                     I.info.HARVESTED_OBJECTS[harvastable][i][2] - 1)
 
 
-def update_display_text(screen, disp_text, gifs, data, collide):
-    if disp_text:  # Check if the dictionary is not empty
+def update_display_text(screen, gifs, data, collide):
+    if I.info.TEXT:  # Check if the dictionary is not empty
         push = S.SCREEN_HEIGHT * 0.9
-        for text in disp_text:
+        for text in I.info.TEXT:
             lines = text.split(",,")
             time = lines[1]
             # Display the text
@@ -275,19 +274,19 @@ def update_display_text(screen, disp_text, gifs, data, collide):
             # Check if the timer has expired
             if time < 0:
                 if "Reviving" in text and collide[0] == "Portal":
-                    a = disp_text.index(text)
-                    disp_text[a] = lines[0] + "." + ",,3000"
-                    if "..." in disp_text[a]:
-                        disp_text.remove(lines[0] + "." + ",,3000")
+                    a = I.info.TEXT.index(text)
+                    I.info.TEXT[a] = lines[0] + "." + ",,3000"
+                    if "..." in I.info.TEXT[a]:
+                        I.info.TEXT.remove(lines[0] + "." + ",,3000")
                         gifs["ghost"].start_gif = False  # stop the ghost gif
                         data["Player"]["dead"] = False  # set to alive
                         data["Player"]["hp"] = (data["Player"]["hp"][1], data["Player"]["hp"][1])  # return hp
                         I.info.BACKPACK_CONTENT = {}  # remove backpack content
                 else:
-                    disp_text.remove(text)
+                    I.info.TEXT.remove(text)
             else:
-                a = disp_text.index(text)
-                disp_text[a] = lines[0] + ",," + str(time)
+                a = I.info.TEXT.index(text)
+                I.info.TEXT[a] = lines[0] + ",," + str(time)
 
 def make_mobs_jump_around(mob):
     # CURRENTLY ONLY WORKS FOR SLIMES
