@@ -158,4 +158,60 @@ NOTES = {
     "G5": 783.99
 }
 
-DROPS = {"Slime_S": ("Slime Ball", 1, 3),}   # Key: Mob that drops : value: tuple(name of item, amount of item, chance of item, write only the denominator of fraction 1/x)
+DROPS = {
+    "Slime_S": ("Slime Ball", 1, 3),
+    "Pig": [("Meat0", 1, 3), ("Meat1", 1, 3)],
+         }   # Key: Mob that drops : value: tuple(name of item, amount of item, chance of item, write only the denominator of fraction 1/x)
+
+background_music = [
+    ((NOTES["C4"], NOTES["C3"]), 500),
+    ((NOTES["G4"], NOTES["C3"]), 500),
+    ((NOTES["E4"], NOTES["C3"]), 500),
+    ((NOTES["C5"], NOTES["C3"]), 500),
+
+    ((NOTES["C4"], NOTES["C3"]), 500),
+    ((NOTES["G4"], NOTES["C3"]), 500),
+    ((NOTES["E4"], NOTES["C3"]), 500),
+    ((NOTES["C5"], NOTES["C3"]), 500),
+
+    ((NOTES["C4"], NOTES["F3"]), 500),
+    ((NOTES["G4"], NOTES["F3"]), 500),
+    ((NOTES["E4"], NOTES["F3"]), 500),
+    ((NOTES["C5"], NOTES["F3"]), 500),
+
+    ((NOTES["C4"], NOTES["F3"]), 500),
+    ((NOTES["G4"], NOTES["F3"]), 500),
+    ((NOTES["E4"], NOTES["F3"]), 500),
+    ((NOTES["C5"], NOTES["F3"]), 500),
+
+    ((NOTES["C4"], NOTES["E3"]), 500),
+    ((NOTES["G4"], NOTES["E3"]), 500),
+    ((NOTES["E4"], NOTES["E3"]), 500),
+    ((NOTES["C5"], NOTES["E3"]), 500),
+
+    ((NOTES["C4"], NOTES["E3"]), 500),
+    ((NOTES["G4"], NOTES["E3"]), 500),
+    ((NOTES["E4"], NOTES["E3"]), 500),
+    ((NOTES["C5"], NOTES["E3"]), 500),
+
+    ((NOTES["C4"], NOTES["G3"]), 500),
+    ((NOTES["G4"], NOTES["G3"]), 500),
+    ((NOTES["E4"], NOTES["G3"]), 500),
+    ((NOTES["C5"], NOTES["G3"]), 500),
+
+    ((NOTES["C4"], NOTES["G3"]), 500),
+    ((NOTES["G4"], NOTES["G3"]), 500),
+    ((NOTES["E4"], NOTES["G3"]), 500),
+    ((NOTES["C5"], NOTES["G3"]), 500),
+]
+dead_music = [
+    ((NOTES["C4"], NOTES["C3"]), 1000),
+    ((NOTES["C4"], NOTES["C3"]), 1000),
+    ((NOTES["D4"], NOTES["C3"]), 1000),
+    ((NOTES["D4"], NOTES["C3"]), 1000),
+
+    ((NOTES["C4"], NOTES["F3"]), 1000),
+    ((NOTES["C4"], NOTES["F3"]), 1000),
+    ((NOTES["D4"], NOTES["F3"]), 1000),
+    ((NOTES["D4"], NOTES["F3"]), 1000),
+]

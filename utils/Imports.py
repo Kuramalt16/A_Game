@@ -10,6 +10,8 @@ import time as t
 from static.data.play_data import info
 from static.data.play_data import mob_data
 from static.data.play_data import gifs
+from static.items import items
+from static.Spells import Spells
 import shutil
 import threading
 import math

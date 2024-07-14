@@ -1,0 +1,4 @@
+Name=Meat0;
+Cost=10;
+Properties=CONSUMABLE(5-hp,,/10-Exhaustion);
+Aquire=DROP Pig,,1,,3;

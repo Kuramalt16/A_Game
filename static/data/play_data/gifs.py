@@ -10,6 +10,7 @@ class Gif:
         self.images = []
         self.frame_time = 0
         self.read_image()
+        self.repeat = False
 
     def read_image(self):
         for i in range(self.frame_count):
@@ -20,8 +21,9 @@ class Gif:
     def Start_gif(self, name, rect):
         self.name = name
         self.start_gif = True
+        self.current_frame = 0
         self.frame_time = I.pg.time.get_ticks()
-        self.rect = rect
+        self.rect = rect #  if not a mob, make 1
 
     def next_frame(self, repeat):
         # Check if gif time has passed:
@@ -29,13 +31,16 @@ class Gif:
             self.current_frame += 1
             self.frame_time = I.pg.time.get_ticks()
             if self.current_frame > self.frame_count:
-                self.current_frame = 0
                 if not repeat:
                     self.start_gif = False
+                self.current_frame = 0
                 return self.images[self.frame_count - 1]
             else:
                 return self.images[self.current_frame - 1]
         else:
             # if frame time hasnt passed:
-            return self.images[self.current_frame - 1]
+            if self.current_frame == 0:
+                return self.images[self.current_frame]
+            else:
+                return self.images[self.current_frame - 1]
 

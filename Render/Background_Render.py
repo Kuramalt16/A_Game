@@ -41,7 +41,10 @@ def Start(pos, mob):
     data["Player"] = read_txt_file('static/data/created_characters/' + I.info.SELECTED_CHARACTER + "/" + I.info.SELECTED_CHARACTER + ".txt")
     data["Player"] = update_character(data["Player"])
     decor_count = {"Bush_S_1": 30, "Bush_S_2": 30, "Tree_T_1": 40}
-    monster_count = {mob.name: mob.count}
+    monster_count = {}
+    for key, current_mob in mob.items():
+        monster_count[current_mob.name] = current_mob.count
+
     data["Window size"] = (B_W, B_H)  # Defines the size of the window (The rest is black)
     data["Zoom"] = (B_W / 4, B_H / 4)  # Defines how zoomed in to the picture the view is
     data["Image"] = I.pg.image.load(S.DECOR_PATH["Grass"]).convert_alpha()  # uploads the background image with transparent convert
@@ -50,22 +53,100 @@ def Start(pos, mob):
     for key in decor_count:
         data[key] = generate_decor(decor_count[key], data["Image_rect"].size, S.DECOR_PATH[key])
     for key in monster_count:
-        data[key] = generate_mobs(mob, data["Image_rect"].size)
+        data[key] = generate_mobs(mob[key], data["Image_rect"].size)
 
     data["House_1"] = place_decor_by_coordinates(600, 380, S.DECOR_PATH["House_1"], (1.5, 1.5), (1.5, 1.4))
     # image_data["Church_1"] = place_decor_by_coordinates(200, 280, S.DECOR_PATH["Church_1"], (2, 2), (2, 2))
     return data
 
-def Update(screen, data, mob_gif, combat_rect, mob, gifs, song):
-    curr_song = song["Playing"]
+def Update(screen, data, mob_dict, gifs, song, spells):
     data["Zoom_rect"].x = max(0, min(data["Zoom_rect"].x, data["Image_rect"].width - data["Zoom"][0]))
     data["Zoom_rect"].y = max(0, min(data["Zoom_rect"].y, data["Image_rect"].height - data["Zoom"][1]))
     sub_image = data["Image"].subsurface(data["Zoom_rect"]).copy()
+    me = I.pg.Rect(150, 85, S.SCREEN_WIDTH / 100, S.SCREEN_HEIGHT / 100)  # Player rect (if it gets hit with other rect. colide is set to True
+
+    collide, displayed_rects = handle_decor_visualisation(data, sub_image)
+
+    for mob in mob_dict.values():
+        for current_mob in mob.mobs:
+            mob_gif = current_mob["gif_frame"][0]
+            mob_rect = current_mob["rect"][mob_gif]
+            mob_x = mob_rect.x - data["Zoom_rect"].x
+            mob_y = mob_rect.y - data["Zoom_rect"].y
+            rect = I.pg.Rect(mob_x, mob_y, mob_rect.w, mob_rect.h)
+            update_health(rect, current_mob, sub_image)
+            sub_image.blit(current_mob["image"][mob_gif], (mob_x, mob_y))
+
+
+
+            if I.info.COMBAT_RECT != 0:
+                handle_physical_damaging_mobs(rect, song, mob, data, gifs, current_mob)
+
+            handle_damage_type_visualisation(sub_image, current_mob, gifs, (mob_x, mob_y))
+
+            if me.colliderect(rect):
+                collide = ('mob', current_mob, mob_rect.x, mob_rect.y)
+                data["Player"]["hp"] = data["Player"]["hp"][0] - current_mob["damage"][0], data["Player"]["hp"][1]
+
+            if mob_gif == S.MOB_PATH[mob.name][1] - 1 and not data["Player"]["dead"] and current_mob["allignment"] == 6:
+                target_pos = (me.x + data["Zoom_rect"].x, me.y + data["Zoom_rect"].y)
+                mob_rect.x, mob_rect.y, current_mob["visible"] = Ff.move_towards(target_pos, current_mob, current_mob["speed"] / 10 + 1, displayed_rects, data["Zoom_rect"])
+                mob.update_position(mob_rect.x, mob_rect.y, current_mob)
+            else:
+                current_mob["visible"] = False
+
+
+    collide = handle_death_visualisation(sub_image, data, gifs, collide)
+
+    handle_npc_visualisation(sub_image, data, gifs)
+
+    cast_spell_handle(sub_image, data, spells, gifs, mob_dict, song)
+
+    scaled_image = I.pg.transform.scale(sub_image, data["Window size"])
+    screen.blit(scaled_image, (0, 0))
+    if data["Player"]["dead"] and collide[0] == "mob":  # dont hit mobs when u dead
+        collide = False, 0, 0, 0
+    return collide
+
+def handle_damage_type_visualisation(sub_image, current_mob, gifs, pos):
+    for key in gifs.keys():
+        if gifs[key].start_gif and current_mob == gifs[key].rect:
+            frame = gifs[key].next_frame(False)  # made specifically for damage displaying
+            sub_image.blit(frame, (pos[0] - 5, pos[1]))
+
+
+def handle_physical_damaging_mobs(rect, song, mob, data, gifs, current_mob):
+    for key in ["Blunt", "Piercing", "Slashing"]:
+        if I.info.COMBAT_RECT.colliderect(rect) and not gifs[key].start_gif:
+            curr_song = song["Playing"]
+            effect = song[curr_song].generate_thump_sound()
+            song[curr_song].play_effect(effect)
+            gifs["Blunt"].Start_gif(key, current_mob)
+            mob.deal_damage(current_mob, data["Player"], "", gifs)
+
+def handle_death_visualisation(sub_image, data, gifs, collide):
+    if data["Player"]["dead"]:
+        me = I.pg.Rect(150, 85, S.SCREEN_WIDTH / 100, S.SCREEN_HEIGHT / 100)  # Player rect (if it gets hit with other rect. colide is set to True
+        dead_disc = {"Portal": display_gif_on_subimage(sub_image, (S.SCREEN_WIDTH / 16, S.SCREEN_HEIGHT / 10), (I.info.START_POS[0] * 1.6 - data["Zoom_rect"].x , I.info.START_POS[1] + 10 * 16 - data["Zoom_rect"].y), gifs["Portal"]),
+                     "Sign": display_on_subimage(sub_image, (S.SCREEN_WIDTH / 90, S.SCREEN_HEIGHT / 40), S.PLAYING_PATH["Sign"],(I.info.START_POS[0] * 1.6 - data["Zoom_rect"].x,I.info.START_POS[1] + 10 * 10 - data["Zoom_rect"].y)),
+                     "Grave": display_on_subimage(sub_image, (S.SCREEN_WIDTH / 60, S.SCREEN_HEIGHT / 30), S.PLAYING_PATH["Grave"], (data["Player"]["dead"].x - data["Zoom_rect"].x + me.x, data["Player"]["dead"].y - data["Zoom_rect"].y + me.y)),
+                     }
+        dead_list = list(dead_disc.values())
+        if me.collidelistall(dead_list):
+            keys = list(dead_disc.keys())
+            key = keys[me.collidelistall(dead_list)[0]]
+            collide = (key, dead_disc[key].x, dead_disc[key].y)
+    return collide
+def handle_npc_visualisation(sub_image, data, gifs):
+    npc = {"Luna": display_gif_on_subimage(sub_image, (17,18), (I.info.START_POS[0] * 1.6 - data["Zoom_rect"].x , I.info.START_POS[1] + 10 * 43 - data["Zoom_rect"].y), gifs["Luna"]),
+           "Bear": display_gif_on_subimage(sub_image, (17,18), (I.info.START_POS[0] * 1.7 - data["Zoom_rect"].x , I.info.START_POS[1] + 10 * 43 - data["Zoom_rect"].y), gifs["Bear"]),
+    }
+
+def handle_decor_visualisation(data, sub_image):
     Collide = [False]
     me = I.pg.Rect(150, 85, S.SCREEN_WIDTH / 100, S.SCREEN_HEIGHT / 100)  # Player rect (if it gets hit with other rect. colide is set to True
-    decor_options = ["House_1", "Bush_S_1", "Bush_S_2", "Tree_T_1"]
     displayed_rects = []  # List to keep track of displayed rectangles
-
+    decor_options = ["House_1", "Bush_S_1", "Bush_S_2", "Tree_T_1"]
     for option in decor_options:
         for decor in data[option].values():
             # Gets x, y position of decoration
@@ -86,52 +167,8 @@ def Update(screen, data, mob_gif, combat_rect, mob, gifs, song):
                             Collide = ("Door", door_rect.x, door_rect.y)
                     if me.colliderect(rect):
                         Collide = (option, decor["rect"].x, decor["rect"].y)
-
-    for current_mob in mob.mobs:
-        mob_rect = current_mob["rect"][mob_gif]
-        mob_x = mob_rect.x - data["Zoom_rect"].x
-        mob_y = mob_rect.y - data["Zoom_rect"].y
-        rect = I.pg.Rect(mob_x, mob_y, mob_rect.w, mob_rect.h)
-        update_health(rect, current_mob, sub_image)
-        sub_image.blit(current_mob["image"][mob_gif], (mob_x, mob_y))
-        if combat_rect != 0:
-            if combat_rect.colliderect(rect):
-                thump = song[curr_song].generate_thump_sound()
-                song[curr_song].play_effect(thump)
-                mob.deal_damage(current_mob, data["Player"])
-                gifs["Blunt"].Start_gif("Blunt", current_mob)
-        if me.colliderect(rect):
-            Collide = ('mob', current_mob, mob_rect.x, mob_rect.y)
-            data["Player"]["hp"] = data["Player"]["hp"][0] - current_mob["damage"][0], data["Player"]["hp"][1]
-        if mob_gif == S.MOB_PATH[mob.name][1] - 1 and not data["Player"]["dead"]:
-            target_pos = (me.x + data["Zoom_rect"].x, me.y + data["Zoom_rect"].y)
-
-            mob_rect.x, mob_rect.y, current_mob["visible"] = Ff.move_towards(target_pos, current_mob, 1, displayed_rects, data["Zoom_rect"])
-            mob.update_position(mob_rect.x, mob_rect.y, current_mob)
-        else:
-            current_mob["visible"] = False
-        if gifs["Blunt"].start_gif and current_mob == gifs["Blunt"].rect:
-            frame = gifs["Blunt"].next_frame(False) # made specifically for damage displaying
-            sub_image.blit(frame, (mob_x-5, mob_y))
-    if data["Player"]["dead"]:
-        dead_disc = {"Portal": display_gif_on_subimgae(sub_image, (S.SCREEN_WIDTH / 16, S.SCREEN_HEIGHT / 10), (I.info.START_POS[0] * 1.6 - data["Zoom_rect"].x , I.info.START_POS[1] + 10 * 16 - data["Zoom_rect"].y), gifs["Portal"]),
-                     "Sign": display_on_subimage(sub_image, (S.SCREEN_WIDTH / 90, S.SCREEN_HEIGHT / 40), S.PLAYING_PATH["Sign"],(I.info.START_POS[0] * 1.6 - data["Zoom_rect"].x,I.info.START_POS[1] + 10 * 10 - data["Zoom_rect"].y)),
-                     "Grave": display_on_subimage(sub_image, (S.SCREEN_WIDTH / 60, S.SCREEN_HEIGHT / 30), S.PLAYING_PATH["Grave"], (data["Player"]["dead"].x - data["Zoom_rect"].x + me.x, data["Player"]["dead"].y - data["Zoom_rect"].y + me.y)),
-                     }
-        dead_list = list(dead_disc.values())
-        if me.collidelistall(dead_list):
-            keys = list(dead_disc.keys())
-            key = keys[me.collidelistall(dead_list)[0]]
-            Collide = (key, dead_disc[key].x, dead_disc[key].y)
-    npc = {"Luna": display_gif_on_subimgae(sub_image, (17,18), (I.info.START_POS[0] * 1.6 - data["Zoom_rect"].x , I.info.START_POS[1] + 10 * 43 - data["Zoom_rect"].y), gifs["Luna"]),
-           "Bear": display_gif_on_subimgae(sub_image, (17,18), (I.info.START_POS[0] * 1.7 - data["Zoom_rect"].x , I.info.START_POS[1] + 10 * 43 - data["Zoom_rect"].y), gifs["Bear"]),
-    }
-    scaled_image = I.pg.transform.scale(sub_image, data["Window size"])
-    screen.blit(scaled_image, (0, 0))
-    if data["Player"]["dead"] and Collide[0] == "mob":  # dont hit mobs when u dead
-        Collide = False, 0, 0, 0
-    return Collide
-def display_char(dx, dy, screen, stance, combat_rect, gifs):
+    return Collide, displayed_rects
+def display_char(dx, dy, screen, gifs):
     character_path = 'static/data/created_characters/' + I.info.SELECTED_CHARACTER + "/" + I.info.SELECTED_CHARACTER
     dxdy = (dx, dy)
     orientation = {
@@ -156,7 +193,7 @@ def display_char(dx, dy, screen, stance, combat_rect, gifs):
         frame = I.pg.transform.scale(frame, (S.SCREEN_WIDTH / 18, S.SCREEN_HEIGHT / 7))
         screen.blit(frame, [S.SCREEN_WIDTH / 2 - S.SCREEN_WIDTH / 20, S.SCREEN_HEIGHT / 2 - S.SCREEN_HEIGHT / 20 * 2])
     else:
-        if combat_rect != 0:
+        if I.info.COMBAT_RECT != 0:
             if dx == 0 and dy == 0:
                 for key, value in orientation.items():
                     if value == I.info.LAST_ORIENT[0].split(".")[0]:
@@ -174,9 +211,9 @@ def display_char(dx, dy, screen, stance, combat_rect, gifs):
         orient = orientation[dxdy]
         if orient in orientation_images:
             images = orientation_images[orient]
-            if stance == 0 or stance == 2:
+            if I.info.CURRENT_STANCE == 0 or I.info.CURRENT_STANCE == 2:
                 Ff.add_image_to_screen(screen, character_path + images[0], character_center_pos)
-            elif stance == 1:
+            elif I.info.CURRENT_STANCE == 1:
                 Ff.add_image_to_screen(screen, character_path + images[1], character_center_pos)
             else:
                 Ff.add_image_to_screen(screen, character_path + images[2], character_center_pos)
@@ -213,9 +250,9 @@ def add_to_backpack(item, amount):
             value = I.info.BACKPACK_CONTENT[item]
             I.info.BACKPACK_CONTENT[item] = (value[0] + amount, value[1], value[2])
 
-def BackPack(screen):
+def BackPack(screen, items, player):
     pressed = 0
-    fill_backpack(screen)
+    fill_backpack(screen, player)
     running = True
     item_w = list(I.info.BACKPACK_COORDINATES_X.values())[1] - list(I.info.BACKPACK_COORDINATES_X.values())[0]
     item_h = list(I.info.BACKPACK_COORDINATES_Y.values())[1] - list(I.info.BACKPACK_COORDINATES_Y.values())[0]
@@ -275,38 +312,51 @@ def BackPack(screen):
                     running = False  # exits backpack view
                 elif pressed == I.pg.K_x:
                     color = "Yellow"
-                    if use != 0 and use in I.info.CONSUMABLE:
-                        value = I.info.BACKPACK_CONTENT[use]
-                        if value[0] > 1:
-                            I.info.BACKPACK_CONTENT[use] = (value[0]-1, value[1], value[2])  # set the new possision value
-                        else:
-                            del I.info.BACKPACK_CONTENT[use]
+                    if use != 0 and "CONSUMABLE" in items.item_dict[use]["Properties"]:
+                        handle_consumption(items, player, use)
                         use = 0
                     pressed = 0
-                # if pressed == I.pg.K_c:
-                #     print("hi")
-
 
             rect = I.pg.Rect(list(I.info.BACKPACK_COORDINATES_X.values())[block[0]], list(I.info.BACKPACK_COORDINATES_Y.values())[block[1]], item_w, item_h)
-            fill_backpack(screen)
+            fill_backpack(screen, player)
             I.pg.draw.rect(screen, color, rect, border)
             if selected != 0:
                 I.pg.draw.rect(screen, "Yellow", selected, 2)
 
             I.pg.display.flip()
 
+def handle_consumption(items, player, use):
+    consumable = items.item_dict[use]["Properties"][11:-1].split(",,")
+    for consume in consumable:
+        points, atribute = consume.split("-")
+        if player[atribute][0] < player[atribute][1]:
+            if "/" in points:
+                points = points[1:]
+                player[atribute] = (player[atribute][0] - int(points), player[atribute][1])
+            else:
+                player[atribute] = (player[atribute][0] + int(points), player[atribute][1])
+        elif player[atribute][0] >= player[atribute][1]:
+            if "/" in points:
+                points = points[1:]
+                player[atribute] = (player[atribute][0] - int(points), player[atribute][1])
+            else:
+                player[atribute] = (player[atribute][1], player[atribute][1])
+    value = I.info.BACKPACK_CONTENT[use]
+    if value[0] > 1:
+        I.info.BACKPACK_CONTENT[use] = (value[0] - 1, value[1], value[2])
+    else:
+        del I.info.BACKPACK_CONTENT[use]
 def display_on_subimage(sub_image, size, path, pos):
     image = I.pg.image.load(path).convert_alpha()
     image = I.pg.transform.scale(image, (size[0], size[1]))
     sub_image.blit(image, pos)
     return I.pg.Rect(pos[0], pos[1], size[0], size[1])
 
-def fill_backpack(screen):
+def fill_backpack(screen, player):
     rect = screen.get_rect()
     bag = Ff.add_image_to_screen(screen, S.PLAYING_PATH["Backpack_Empty"], [rect.center[0] * 0.5 ,rect.center[1] * 0.25, S.SCREEN_WIDTH / 2, S.SCREEN_HEIGHT * 0.75])
     if I.info.BACKPACK_COORDINATES_X == {}:
-        bag_coordinates(screen, bag)
-
+        I.info.BACKPACK_COORDINATES_X, I.info.BACKPACK_COORDINATES_Y = bag_coordinates(screen, bag)
     item_w = list(I.info.BACKPACK_COORDINATES_X.values())[1] - list(I.info.BACKPACK_COORDINATES_X.values())[0]
     item_h = list(I.info.BACKPACK_COORDINATES_Y.values())[1] - list(I.info.BACKPACK_COORDINATES_Y.values())[0]
     for content in I.info.BACKPACK_CONTENT.keys():
@@ -314,6 +364,21 @@ def fill_backpack(screen):
         collumn = I.info.BACKPACK_CONTENT[content][2]
         Ff.add_image_to_screen(screen, S.ITEM_PATHS[content], [list(I.info.BACKPACK_COORDINATES_X.values())[row], list(I.info.BACKPACK_COORDINATES_Y.values())[collumn], item_w, item_h])
         Ff.display_text(screen, str(I.info.BACKPACK_CONTENT[content][0]), 2, [list(I.info.BACKPACK_COORDINATES_X.values())[row], list(I.info.BACKPACK_COORDINATES_Y.values())[collumn]], "white")
+
+    I.pg.draw.rect(screen, "black", (bag.w * 0.626, bag.h * 0.807, bag.w * 0.115, bag.h * 0.012))
+    remainder = player["hp"][0] / player["hp"][1]
+    I.pg.draw.rect(screen, "red", (bag.w * 0.626, bag.h * 0.807, bag.w * 0.115 * remainder, bag.h * 0.012))
+    Ff.display_text(screen, "Hp", 1, (bag.w * 0.57, bag.h * 0.80), "black")
+
+    I.pg.draw.rect(screen, "black", (bag.w * 0.83, bag.h * 0.807, bag.w * 0.125, bag.h * 0.012))
+    remainder = player["mana"][0] / player["mana"][1]
+    I.pg.draw.rect(screen, "blue", (bag.w * 0.83, bag.h * 0.807, bag.w * 0.125 * remainder, bag.h * 0.012))
+    Ff.display_text(screen, "Mp", 1, (bag.w * 0.78, bag.h * 0.80), "black")
+
+    I.pg.draw.rect(screen, "black", (bag.w * 0.626, bag.h * 0.857, bag.w * 0.115, bag.h * 0.012))
+    remainder = player["Exhaustion"][0] / player["Exhaustion"][1]
+    I.pg.draw.rect(screen, "Green", (bag.w * 0.626, bag.h * 0.857, bag.w * 0.115 * remainder, bag.h * 0.012))
+    Ff.display_text(screen, "Exh", 1, (bag.w * 0.57, bag.h * 0.85), "black")
 
     return bag
 
@@ -383,8 +448,7 @@ def bag_coordinates(screen, bag):
                 if color1 == (156, 90, 60, 255):
                     kill = True
 
-    I.info.BACKPACK_COORDINATES_X = coordinates_x
-    I.info.BACKPACK_COORDINATES_Y = coordinates_y
+    return (coordinates_x, coordinates_y)
 
 
 def place_decor_by_coordinates(x, y, path, scale, rect_scale):
@@ -398,15 +462,11 @@ def place_decor_by_coordinates(x, y, path, scale, rect_scale):
     return items
 
 def update_health(rect, current_mob, sub_image):
-    health_bar = I.pg.Rect(rect.x, rect.y, rect.w, rect.h / 10)
+    health_bar = I.pg.Rect(rect.x, rect.y, rect.w, 1)
     I.pg.draw.rect(sub_image, "red", health_bar)
     health = current_mob["hp"]
     remainder = health[0] / health[1]
-    # if rect.h < 2:
-    #     rect.h = 2
-    # if current_mob["id"] == 0:
-    #     print(int(rect.h / 10 * remainder))
-    reduced_health_bar = I.pg.Rect(rect.x, rect.y, rect.w * remainder, rect.h / 10)
+    reduced_health_bar = I.pg.Rect(rect.x, rect.y, rect.w * remainder, 1)
     I.pg.draw.rect(sub_image, "green", reduced_health_bar)
 
 def update_character(player_disc):
@@ -420,13 +480,158 @@ def update_character(player_disc):
     level = player_disc["Level"]
     player_disc["hp"] = (hp_by_race[race] * level, hp_by_race[race] * level)
     player_disc["mana"] = (mana_by_race[race] * level, mana_by_race[race] * level)
+
     player_disc["dead"] = False
+
+    player_disc["Exhaustion"] = (100, 100)
 
     return player_disc
 
-def display_gif_on_subimgae(sub_image, size, pos, gif):
+def spell_book(screen, data, spells):
+    fill_spellbook(screen)
+    item_w = list(I.info.SPELLBOOK_COORDINATES_X.values())[1] - list(I.info.SPELLBOOK_COORDINATES_X.values())[0]
+    item_h = list(I.info.SPELLBOOK_COORDINATES_Y.values())[1] - list(I.info.SPELLBOOK_COORDINATES_Y.values())[0]
+    block = (0,0)
+    color = "yellow"
+    border = 1
+    pressed = 0
+    running = True
+    selected = 0
+    while running:
+        for event in I.pg.event.get():
+            if event.type == I.pg.KEYDOWN:
+                if event.key == I.pg.K_UP:
+                    block = (block[0], block[1] - 2)
+                    if block[1] < 0:
+                        block = (block[0], 16)
+                elif event.key == I.pg.K_DOWN:
+                    block = (block[0], block[1] + 2)
+                    if block[1] > 16:
+                        block = (block[0], 0)
+                elif event.key == I.pg.K_LEFT:
+                    block = (block[0] - 2, block[1])
+                    if block[0] < 0 and selected == 0:
+                        block = (28, block[1])
+                elif event.key == I.pg.K_RIGHT:
+                    block = (block[0] + 2, block[1])
+                    if block[0] > 28:
+                        block = (0, block[1])
+                elif event.key == I.pg.K_v:
+                    pressed = I.pg.K_v
+            if event.type == I.pg.KEYUP:
+                if pressed == I.pg.K_v:
+                    running = False
+                if event.key == I.pg.K_c:
+                    if selected == 0:
+                        for spell, (disc, row, collum) in I.info.SPELLBOOK_CONTENT.items():
+                            if block == (row, collum):
+                                selected = spell
+                    else:
+                        spells.selected_spell.append((selected, block[0]))
+                        selected = 0
+                pressed = 0
+        fill_spellbook(screen)
+        if selected != 0:
+            if block[0] > 8:
+                block = (8, block[1])
+            if block[0] < 0:
+                block = (0, block[1])
+            rect = I.pg.Rect(list(I.info.SPELLBOOK_COORDINATES_X.values())[block[0]], list(I.info.SPELLBOOK_COORDINATES_Y.values())[11] + list(I.info.SPELLBOOK_COORDINATES_Y.values())[0], item_w, item_h)
+        else:
+            rect = I.pg.Rect(list(I.info.SPELLBOOK_COORDINATES_X.values())[block[0]],list(I.info.SPELLBOOK_COORDINATES_Y.values())[block[1]], item_w, item_h)
+        I.pg.draw.rect(screen, color, rect, border)
+
+        if spells.selected_spell != []:
+            for spell, pos in spells.selected_spell:
+                rect = I.pg.Rect(list(I.info.SPELLBOOK_COORDINATES_X.values())[pos],list(I.info.SPELLBOOK_COORDINATES_Y.values())[11] +list(I.info.SPELLBOOK_COORDINATES_Y.values())[0], item_w, item_h)
+                Ff.add_image_to_screen(screen, S.SPELL_PATHS[spell] + "0.png", rect)
+
+
+        I.pg.display.flip()
+
+def fill_spellbook(screen):
+    rect = screen.get_rect()
+    book = Ff.add_image_to_screen(screen, S.PLAYING_PATH["Spellbook_Empty"], [rect.center[0] * 0.5, rect.center[1] * 0.25, S.SCREEN_WIDTH / 2, S.SCREEN_HEIGHT * 0.75])
+
+    if I.info.SPELLBOOK_COORDINATES_X == {}:
+        I.info.SPELLBOOK_COORDINATES_X, I.info.SPELLBOOK_COORDINATES_Y = bag_coordinates(screen, book)
+
+    item_w = list(I.info.SPELLBOOK_COORDINATES_X.values())[1] - list(I.info.SPELLBOOK_COORDINATES_X.values())[0]
+    item_h = list(I.info.SPELLBOOK_COORDINATES_Y.values())[1] - list(I.info.SPELLBOOK_COORDINATES_Y.values())[0]
+    for content in I.info.SPELLBOOK_CONTENT.keys():
+        row = I.info.SPELLBOOK_CONTENT[content][1]
+        collumn = I.info.SPELLBOOK_CONTENT[content][2]
+        Ff.add_image_to_screen(screen, S.SPELL_PATHS[content] + "0.png", [list(I.info.SPELLBOOK_COORDINATES_X.values())[row], list(I.info.SPELLBOOK_COORDINATES_Y.values())[collumn], item_w, item_h])
+def display_gif_on_subimage(sub_image, size, pos, gif):
     frame = gif.next_frame(True)
     frame = I.pg.transform.scale(frame, (size[0], size[1]))
     sub_image.blit(frame, pos)
     return I.pg.Rect(pos[0], pos[1], size[0], size[1])
+
+def cast_spell_handle(sub_image, data, spells, gifs, mob, song):
+    for spell, slot in spells.selected_spell:
+        if gifs[spell].start_gif:
+            frame = gifs[spell].next_frame(False)
+            frame = I.pg.transform.scale(frame, (20, 20))
+            if spells.direction[spell] == 0:
+                spells.init_cast[spell] = data["Zoom_rect"].copy()
+                spells.direction[spell] = I.info.LAST_ORIENT[0].split(".")[0]
+            direction_settings = {
+                "Front": {"rect": (145, 80), "dir": (0, -1), "rotate": 90, "flip": (False, True)},
+                "Back": {"rect": (145, 70), "dir": (0, 1), "rotate": 90, "flip": (False, False)},
+                "Left": {"rect": (140, 75), "dir": (1, 0), "rotate": 0, "flip": (True, False)},
+                "Right": {"rect": (150, 75), "dir": (-1, 0), "rotate": 0, "flip": (False, False)},
+            }
+            spell_direction = spells.direction[spell]
+            settings = direction_settings.get(spell_direction)
+            me = I.pg.Rect(settings["rect"][0], settings["rect"][1], S.SCREEN_WIDTH / 100, S.SCREEN_HEIGHT / 100)
+            dir = settings["dir"]
+            frame = I.pg.transform.rotate(frame, settings["rotate"])
+            frame = I.pg.transform.flip(frame, *settings["flip"])
+
+            if gifs[spell].current_frame != 0:
+                rect = I.pg.Rect(spells.init_cast[spell].x - data["Zoom_rect"].x + me.x - dir[0] * gifs[spell].current_frame * 6, spells.init_cast[spell].y - data["Zoom_rect"].y + me.y - dir[1] * gifs[spell].current_frame * 6, 20, 20)
+                sub_image.blit(frame, rect)
+                for key in mob.keys():
+                    for current_mob in mob[key].mobs:
+                        mob_rect = I.pg.Rect(current_mob["rect"][0].x - data["Zoom_rect"].x, current_mob["rect"][0].y - data["Zoom_rect"].y, current_mob["rect"][0].w, current_mob["rect"][0].h)
+                        if rect.colliderect(mob_rect):
+                            mob[key].deal_damage(current_mob, data["Player"], spells.spell_dict[spell], gifs)
+                            gifs[spell].start_gif = False # IF COMMENTED OUT, MAKES A SPELL GO THROUGH MULTIPLE ENEMIES
+                            type = spells.spell_dict[spell].split(" ")[1]
+                            gifs[type].Start_gif(type, current_mob)
+                            curr_song = song["Playing"]
+                            sound_type = {"Force": song[curr_song].generate_magic_sound(),
+                                          "Fire": song[curr_song].generate_fire_sound(),
+                                          "Cold": song[curr_song].generate_cold_sound()}
+                            song[curr_song].play_effect(sound_type[type])
+        else:
+            # RESET DIRECTION OF FIRE
+            spells.direction[spell] = 0
+            spells.init_cast[spell] = 0
+
+def handdle_sign_display(screen):
+    running = True
+    Ff.add_image_to_screen(screen, S.PLAYING_PATH["Text_bar"], (0, S.SCREEN_HEIGHT / 2, S.SCREEN_WIDTH, S.SCREEN_HEIGHT / 2))
+    text = "Hi, looks like you died. Maybe next time try dodging the blow instead of kissing it : ). \n Anyways, see that big purple portal? interact with it while standing on it and you will be revived. \n But you will loose all the items you were carrying. \n Alternatively find your grave stone and interract with it. This way you will keep all of your useless stuff. \n Don't rush to comeback. \n With love -S!"
+    a = 0
+    collumn = 100
+    row = 100
+    while running:
+        if text[a-1] == "\n":
+            collumn += 20
+            row = 100
+            text = text[a+1:]
+            a = 0
+        Ff.display_text(screen, text[0:a], 10, (row, S.SCREEN_HEIGHT / 2 + collumn),  "black")
+        I.pg.time.wait(10)
+        a += 1
+        if a > len(text):
+            while running:
+                for event in I.pg.event.get():
+                    if event.type == I.pg.KEYDOWN and event.key == I.pg.K_c:
+                        running = False
+
+        I.pg.display.flip()
+
 

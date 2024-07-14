@@ -327,6 +327,7 @@ def move_towards(target, current_mob, step_size, obstacles, zoom_rect):
         return current_x, current_y, False
     # Check if we are close enough to the target
     if distance < step_size:
+        print('reached')
         return target[0], target[1], True
 
     # Normalize direction vector
@@ -335,13 +336,11 @@ def move_towards(target, current_mob, step_size, obstacles, zoom_rect):
         direction_y /= distance
 
     # Calculate new position
+
     new_x = current_x + direction_x * step_size
     new_y = current_y + direction_y * step_size
-
     # Create new Rect for the potential new position
-
     new_rect = I.pg.Rect(new_x - zoom_rect.x, new_y - zoom_rect.y, current_mob['current_pos'].w, current_mob['current_pos'].h)
-    # I.T.Make_rect_visible(sub_screen, new_rect)
     # Check for collisions
     if not any(obstacle.colliderect(new_rect) for obstacle in obstacles):
         return new_x, new_y, True
@@ -367,73 +366,10 @@ def move_towards(target, current_mob, step_size, obstacles, zoom_rect):
         test_y = new_y + dy
         test_rect = I.pg.Rect(test_x - zoom_rect.x, test_y - zoom_rect.y, current_mob['current_pos'].w, current_mob['current_pos'].h)
         if not any(obstacle.colliderect(test_rect) for obstacle in obstacles):
-            # if abs(current_mob["previous_pos"].x - int(test_x)) > 1 and abs(current_mob["previous_pos"].y - int(test_y)) > 1:
-            # print(f"No collisions in alternate direction ({dx}, {dy}), moving around")
-            # print("x: ", current_mob["previous_pos"].x, int(test_x))
-            # print("y: ", current_mob["previous_pos"].y, int(test_y))
             return test_x, test_y, True
-            # else:
-            #     target = (current_mob["previous_pos"].x ,target[1])
-            #     return move_towards(target, current_mob, step_size, obstacles, zoom_rect, sub_screen)
-
-
-    # If stuck, remain in place
-    # print("stuck")
     return current_x, current_y, False
 
 
-# def move_towards(touching_rect, data, mob_rect, target, step_size, obstacles):
-#
-#     current = (mob_rect.x, mob_rect.y)
-#     # Calculate the direction vector from current to target
-#     direction = (target[0] - current[0], target[1] - current[1])
-#     # Calculate the distance to the target
-#     distance = I.math.sqrt(direction[0] ** 2 + direction[1] ** 2)
-#
-#     if distance > 100:
-#         return current
-#
-#     # If the distance is less than the step size, just move to the target
-#     if distance < step_size:
-#         return target
-#
-#     # Normalize the direction vector (make it a unit vector)
-#     unit_vector = (direction[0] / distance, direction[1] / distance)
-#     # Calculate the step vector
-#     step_vector = (unit_vector[0] * step_size, unit_vector[1] * step_size)
-#
-#     # Update the current position
-#     if touching_rect != 0:
-#         # Touching something, needs to not go on the object
-#         potential_positions = {
-#             # (current[0] + step_vector[0], current[1] + step_vector[1]),  # Direct move
-#             "Left":(current[0] - step_vector[0], current[1]),  # Move left
-#             "Right": (current[0] + step_vector[0], current[1]),  # Move right
-#             "Up": (current[0], current[1] - step_vector[1]),  # Move up
-#             "Down": (current[0], current[1] + step_vector[1])  # Move down
-#         }
-#
-#         # Check each potential position to see if it's valid (not colliding with any obstacle)
-#         for pos in ["Left", "Right", "Up", "Down"]:
-#             rect = I.pg.Rect(potential_positions[pos][0] - data["Zoom_rect"].x, potential_positions[pos][1] - data["Zoom_rect"].y, mob_rect.w, mob_rect.h)
-#             if check_if_mob_collides(obstacles, rect) == 0:  # doesnt collide
-#                 new_position = potential_positions[pos]
-#                 break
-#         else:
-#             # If no valid position is found, stay in place
-#             new_position = (current[0] + step_vector[0], current[1] + step_vector[1])
-#     else:
-#         # Not touching anything, proceed towards the target
-#         new_position = (current[0] + step_vector[0], current[1] + step_vector[1])
-#         rect = I.pg.Rect(new_position[0] - data["Zoom_rect"].x, new_position[1] - data["Zoom_rect"].y, mob_rect.w, mob_rect.h)
-#         if check_if_mob_collides(obstacles, rect) != 0:  # collides
-#             colliding_obstacles = [rect for rect in obstacles if rect.collidepoint((new_position[0] - data["Zoom_rect"].x, new_position[1] - data["Zoom_rect"].y))]
-#             if colliding_obstacles:
-#                 touching_rect = colliding_obstacles[0]
-#                 return move_towards(touching_rect, data, mob_rect, target, step_size, obstacles)
-#             else:
-#                 new_position = current
-#     return new_position
 
 
 def draw_pixel(screen, left, top, color):

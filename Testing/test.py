@@ -290,16 +290,18 @@ def rename_images_in_folder(folder_path):
             new_path += folders[i] + "/"
         new_path += folder_name + "/"
         file = folders[-1].split("\\")[1]
-        number = file.split("pixil-frame-")[1]
-        new_path += folder_name + "_" + number
-        os.rename(image_path, new_path)
-
+        try:
+            number = file.split("pixil-frame-")[1]
+            new_path += folder_name + "_" + number
+            os.rename(image_path, new_path)
+        except IndexError:
+            print("Completed")
         # print(new_path)
 
 
 # Example usage
 
-# rename_images_in_folder("C:/Users/gytis/PycharmProjects/A_Game/static/images/Playing/Portal")
+# rename_images_in_folder("C:/Users/gytis/PycharmProjects/A_Game/static/images/Combat/Cold")
 
 
 

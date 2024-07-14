@@ -1,0 +1,63 @@
+# Features
+
+* DESC: Create FPS Slider
+* PRIORITY: LOW
+* NEEDS:
+
+* DESC: Create Volume Slider
+* PRIORITY: LOW
+* NEEDS:
+
+* DESC: Make function to count how many characters are created if its more than 9 dont allow the "New" button to be pressed (Similarly how "Load" button is gray if there are no load files)
+* PRIORITY: LOW
+* NEEDS:
+
+* DESC: Add harvest delay to item class
+* PRIORITY: LOW
+* NEEDS:
+
+* DESC: Add respawn delay to mob class
+* PRIORITY: LOW
+* NEEDS:
+
+* DESC: redo mob class to include multiple diferent mobs
+* PRIORITY: HIGH
+* NEEDS:
+
+* DESC: redo gif class to include multiple diferent gifs
+* PRIORITY: HIGH
+* NEEDS:
+
+* DESC: Include effect to spell casting. efect of push, fire, cold. include knockback for diferent spells
+* PRIORITY: HIGH
+* NEEDS:
+
+* DESC: Add new mobs
+* PRIORITY: HIGH
+* NEEDS: willpower
+
+* DESC: Add ghost hunting mobs
+* PRIORITY: Low
+* NEEDS:
+
+* DESC: Add a spell that goes through multiple mobs. add it to class properties
+* PRIORITY: Low
+* NEEDS:  Search in Background_Render.py for: # IF COMMENTED OUT, MAKES A SPELL GO THROUGH MULTIPLE ENEMIES
+
+* DESC: Add animal handeling mastery or survival idk. bet esme kad atpazintu skirtuma tarp blogos / geros mesos (meat0 - pork, meat1 - kidney) skirtingi paruosimo budai kad neapsinuodyti.
+* PRIORITY: Low
+* NEEDS:  Mastery display. tracking of experience.
+
+* DESC: in Handle_music: create a function that chooses a sound effect when mob hits player. in mob class add an effect for the mob. (fire elemental will use fire sound)
+* PRIORITY: Low
+* NEEDS:  Mastery display. tracking of experience.
+
+* DESC: Use this sound effect to hold down the key and for how long it is held the amount of damage is increesed.
+* PRIORITY: Low
+* NEEDS:  spell for using this
+        effect = songs[curr_song].generate_charging_up_sound()
+        songs[curr_song].play_effect(effect)
+
+* DESC: if shot down with a fire spell, cooks the meat.
+* PRIORITY: Low
+* NEEDS:

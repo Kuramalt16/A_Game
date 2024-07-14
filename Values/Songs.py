@@ -161,6 +161,65 @@ class Song:
 
         return stereo_dying_sound
 
+    def generate_fire_sound(self, duration=1.0, sample_rate=44100, amplitude=32767 / 10):
+        t = I.np.linspace(0, duration, int(sample_rate * duration), False)
+        freq = 50.0  # Low frequency for a deep, explosive sound
+        fire_wave = I.np.sin(2 * I.np.pi * freq * t)
+
+        burst_duration = 0.1  # Duration of each noise burst
+        burst_intervals = int(sample_rate * burst_duration)
+        num_bursts = int(duration / burst_duration)
+
+        noise = I.np.zeros(int(sample_rate * duration))
+        for i in range(num_bursts):
+            start_idx = i * burst_intervals
+            end_idx = start_idx + burst_intervals
+            noise[start_idx:end_idx] = I.np.random.uniform(-1, 1, burst_intervals)
+
+        fire_sound = (fire_wave * 0.7 + noise * 0.3) * I.np.exp(-3 * t)  # Combine and apply decay
+        stereo_fire = I.np.zeros((len(fire_sound), 2), dtype=I.np.int16)
+        stereo_fire[:, 0] = (amplitude * fire_sound).astype(I.np.int16)
+        stereo_fire[:, 1] = (amplitude * fire_sound).astype(I.np.int16)
+        return stereo_fire
+
+    def generate_cold_sound(self, duration=0.5, sample_rate=44100, amplitude=32767 / 10):
+        t = I.np.linspace(0, duration, int(sample_rate * duration), False)
+        freq = 1200.0  # High frequency for a clear, ringing sound
+        cold_wave = I.np.sin(2 * I.np.pi * freq * t)
+        noise = I.np.random.uniform(-1, 1, int(sample_rate * duration)) * 0.1
+        cold_sound = (cold_wave + noise) * I.np.exp(-20 * t)  # Quick decay for a short, sharp sound
+        stereo_cold = I.np.zeros((len(cold_sound), 2), dtype=I.np.int16)
+        stereo_cold[:, 0] = (amplitude * cold_sound).astype(I.np.int16)
+        stereo_cold[:, 1] = (amplitude * cold_sound).astype(I.np.int16)
+        return stereo_cold
+
+    def generate_magic_sound(self, duration=1.0, sample_rate=44100, amplitude=32767 / 10):
+        t = I.np.linspace(0, duration, int(sample_rate * duration), False)
+        fire_wave = I.np.sin(2 * I.np.pi * 50 * t)
+        freq1, freq2 = 500.0, 700.0
+        wave1 = I.np.sin(2 * I.np.pi * freq1 * t)
+        wave2 = I.np.sin(2 * I.np.pi * freq2 * t)
+        magic_sound = (wave1 + wave2) * 0.5
+        magic_sound = (fire_wave * 0.7 + magic_sound * 0.3) * I.np.exp(-3 * t)  # Combine and apply decay
+        stereo_magic = I.np.zeros((len(magic_sound), 2), dtype=I.np.int16)
+        stereo_magic[:, 0] = (amplitude * magic_sound).astype(I.np.int16)
+        stereo_magic[:, 1] = (amplitude * magic_sound).astype(I.np.int16)
+        return stereo_magic
+
+    def generate_charging_up_sound(self, duration=2.0, sample_rate=44100, amplitude=32767 / 10):
+        t = I.np.linspace(0, duration, int(sample_rate * duration), False)
+        start_freq, end_freq = 200.0, 2000.0
+        freqs = I.np.linspace(start_freq, end_freq, len(t))
+        charging_wave = I.np.sin(2 * I.np.pi * freqs * t)
+
+        noise = I.np.random.uniform(-0.1, 0.1, int(sample_rate * duration))
+        charging_sound = (charging_wave + noise) * I.np.exp(-0.5 * t)
+
+        stereo_charging = I.np.zeros((len(charging_sound), 2), dtype=I.np.int16)
+        stereo_charging[:, 0] = (amplitude * charging_sound).astype(I.np.int16)
+        stereo_charging[:, 1] = (amplitude * charging_sound).astype(I.np.int16)
+        return stereo_charging
+
     def play_effect(self, effect):
         self.effect_time = I.pg.time.get_ticks()
         self.channel1.stop()

@@ -1,0 +1,4 @@
+Name=Light Berries;
+Cost=1;
+Properties=CONSUMABLE(1-hp,,1-Exhaustion);
+Aquire=HARVEST Bush_S_2,,1,,4;

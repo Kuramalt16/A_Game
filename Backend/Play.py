@@ -2,7 +2,6 @@ from Render import Background_Render as br
 from Values import Settings as S
 from utils import Imports as I, Frequent_functions as Ff
 import random
-from static.data.play_data import mob_data
 
 movement = {
     (0, 0): (0, 0),
@@ -17,124 +16,56 @@ movement = {
 }
 
 def Start(screen, clock):
-    mob = mob_data.Mob(name="Slime_S", exp=10, hp=8, allignment=0, count=20, damage=(2, "blunt"))
+    mob = {
+        "Slime_S": I.mob_data.Mob(name="Slime_S", exp=10, hp=8, allignment=0, count=20, damage=(2, "blunt"), speed=4),
+        "Pig": I.mob_data.Mob(name="Pig", exp=5, hp=6, allignment=4, count=20, damage=(1, "blunt"), speed=6),
+           }
     gifs = {"ghost": I.gifs.Gif(name="Dead", frame_count=8, initial_path=S.PLAYING_PATH["Dead"], delay=50),
-            "portal": I.gifs.Gif(name="Portal", frame_count=34, initial_path=S.PLAYING_PATH["Portal"], delay=100),
-            "Blunt": I.gifs.Gif(name="Blunt", frame_count=S.COMBAT_PATH["Blunt"][1], initial_path=S.COMBAT_PATH["Blunt"][0], delay=50),
+            "Portal": I.gifs.Gif(name="Portal", frame_count=34, initial_path=S.PLAYING_PATH["Portal"], delay=100),
+            "Blunt": I.gifs.Gif(name="Blunt", frame_count=S.COMBAT_PATH["Blunt"][1], initial_path=S.COMBAT_PATH["Blunt"][0], delay=10),
+            "Slashing": I.gifs.Gif(name="Slashing", frame_count=S.COMBAT_PATH["Slashing"][1], initial_path=S.COMBAT_PATH["Slashing"][0], delay=50),
+            "Piercing": I.gifs.Gif(name="Piercing", frame_count=S.COMBAT_PATH["Piercing"][1], initial_path=S.COMBAT_PATH["Piercing"][0], delay=10),
+            "Force": I.gifs.Gif(name="Force", frame_count=S.COMBAT_PATH["Blunt"][1], initial_path=S.COMBAT_PATH["Blunt"][0], delay=10),
+            "Fire": I.gifs.Gif(name="Fire", frame_count=S.COMBAT_PATH["Fire"][1], initial_path=S.COMBAT_PATH["Fire"][0], delay=50),
+            "Cold": I.gifs.Gif(name="Cold", frame_count=S.COMBAT_PATH["Cold"][1], initial_path=S.COMBAT_PATH["Cold"][0], delay=200),
             "Luna": I.gifs.Gif(name="Luna", frame_count=4, initial_path=S.PLAYING_PATH["Luna"], delay=50),
             "Bear": I.gifs.Gif(name="Bear", frame_count=4, initial_path=S.PLAYING_PATH["Bear"], delay=50),
+            "Magic Bolt": I.gifs.Gif(name="Magic Bolt", frame_count=10, initial_path=S.SPELL_PATHS["Magic Bolt"], delay=50),
+            "Fire Bolt": I.gifs.Gif(name="Fire Bolt", frame_count=10, initial_path=S.SPELL_PATHS["Fire Bolt"], delay=50),
+            "Cold Bolt": I.gifs.Gif(name="Cold Bolt", frame_count=10, initial_path=S.SPELL_PATHS["Cold Bolt"], delay=50),
                  }
-    stance = 0
-    mob_gif = 0
+    items = I.items.Items()
+    spells = I.Spells.Spells()
     collide = [False]
     pressed = 0
-    gif_time = 300
-    mob_gif_time = 75
-    start_time = I.pg.time.get_ticks()
-    start_time1 = I.pg.time.get_ticks()
     data = br.Start([I.info.START_POS[0], I.info.START_POS[1]], mob)
     last_orientation = (0, 0)
-    combat_rect = 0
-    music = [
-        ((I.A.NOTES["C4"], I.A.NOTES["C3"]), 500),
-        ((I.A.NOTES["G4"], I.A.NOTES["C3"]), 500),
-        ((I.A.NOTES["E4"], I.A.NOTES["C3"]), 500),
-        ((I.A.NOTES["C5"], I.A.NOTES["C3"]), 500),
 
-        ((I.A.NOTES["C4"], I.A.NOTES["C3"]), 500),
-        ((I.A.NOTES["G4"], I.A.NOTES["C3"]), 500),
-        ((I.A.NOTES["E4"], I.A.NOTES["C3"]), 500),
-        ((I.A.NOTES["C5"], I.A.NOTES["C3"]), 500),
-
-        ((I.A.NOTES["C4"], I.A.NOTES["F3"]), 500),
-        ((I.A.NOTES["G4"], I.A.NOTES["F3"]), 500),
-        ((I.A.NOTES["E4"], I.A.NOTES["F3"]), 500),
-        ((I.A.NOTES["C5"], I.A.NOTES["F3"]), 500),
-
-        ((I.A.NOTES["C4"], I.A.NOTES["F3"]), 500),
-        ((I.A.NOTES["G4"], I.A.NOTES["F3"]), 500),
-        ((I.A.NOTES["E4"], I.A.NOTES["F3"]), 500),
-        ((I.A.NOTES["C5"], I.A.NOTES["F3"]), 500),
-
-        ((I.A.NOTES["C4"], I.A.NOTES["E3"]), 500),
-        ((I.A.NOTES["G4"], I.A.NOTES["E3"]), 500),
-        ((I.A.NOTES["E4"], I.A.NOTES["E3"]), 500),
-        ((I.A.NOTES["C5"], I.A.NOTES["E3"]), 500),
-
-        ((I.A.NOTES["C4"], I.A.NOTES["E3"]), 500),
-        ((I.A.NOTES["G4"], I.A.NOTES["E3"]), 500),
-        ((I.A.NOTES["E4"], I.A.NOTES["E3"]), 500),
-        ((I.A.NOTES["C5"], I.A.NOTES["E3"]), 500),
-
-        ((I.A.NOTES["C4"], I.A.NOTES["G3"]), 500),
-        ((I.A.NOTES["G4"], I.A.NOTES["G3"]), 500),
-        ((I.A.NOTES["E4"], I.A.NOTES["G3"]), 500),
-        ((I.A.NOTES["C5"], I.A.NOTES["G3"]), 500),
-
-        ((I.A.NOTES["C4"], I.A.NOTES["G3"]), 500),
-        ((I.A.NOTES["G4"], I.A.NOTES["G3"]), 500),
-        ((I.A.NOTES["E4"], I.A.NOTES["G3"]), 500),
-        ((I.A.NOTES["C5"], I.A.NOTES["G3"]), 500),
-    ]
-    dead_music = [
-        ((I.A.NOTES["C4"], I.A.NOTES["C3"]), 1000),
-        ((I.A.NOTES["C4"], I.A.NOTES["C3"]), 1000),
-        ((I.A.NOTES["D4"], I.A.NOTES["C3"]), 1000),
-        ((I.A.NOTES["D4"], I.A.NOTES["C3"]), 1000),
-
-        ((I.A.NOTES["C4"], I.A.NOTES["F3"]), 1000),
-        ((I.A.NOTES["C4"], I.A.NOTES["F3"]), 1000),
-        ((I.A.NOTES["D4"], I.A.NOTES["F3"]), 1000),
-        ((I.A.NOTES["D4"], I.A.NOTES["F3"]), 1000),
-    ]
-    songs = {"Background": I.Songs.Song("Background", music),
-             "Ghost": I.Songs.Song("Ghost", dead_music),
+    songs = {"Background": I.Songs.Song("Background", I.A.background_music),
+             "Ghost": I.Songs.Song("Ghost", I.A.dead_music),
              "Playing": "Background"
              }
-    c_t = 0
-    harvestable_objects = I.info.HARVESTED_OBJECTS.keys()
+
+    timers = handle_timers()
+
     while S.PLAY:
         for event in I.pg.event.get():
             if event.type == I.pg.QUIT:
                 S.PLAY = False
+            if event.type in timers.values():
+                handle_timer_actions(event, timers, data, mob)
             if event.type == I.pg.KEYDOWN:
-                if event.key == I.pg.K_c:
-                    pressed = I.pg.K_c
-                if event.key == I.pg.K_x:
-                    if pressed != I.pg.K_x and not data["Player"]["dead"]:
-                        combat_rect = handle_combat()
-                        c_t = I.pg.time.get_ticks()
-                    pressed = I.pg.K_x
-            elif event.type == I.pg.KEYUP:
-                if event.key == pressed:
-                    if event.key == I.pg.K_c:
-                        interract(collide, data, gifs)
-                    elif event.key == I.pg.K_x:
-                        combat_rect = 0
-                    pressed = 0
+                pressed = handle_keydown(event, data, spells, gifs)
+            if event.type == I.pg.KEYUP:
+                pressed = handle_keyup(event, pressed, gifs, songs, screen, items, data, collide)
 
-        if I.pg.time.get_ticks() - gif_time >= start_time:
-            stance += 1
-            start_time = I.pg.time.get_ticks()
-            if stance > 3:
-                stance = 0
-        if I.pg.time.get_ticks() - mob_gif_time >= start_time1:
-            mob_gif += 1
-            start_time1 = I.pg.time.get_ticks()
-            if mob_gif >= S.MOB_PATH["Slime_S"][1]:
-                mob_gif = 0
-                make_mobs_jump_around(mob)
+        collide = br.Update(screen, data, mob, gifs, songs, spells)
 
-
-        harvest_timeout(harvestable_objects)
-
-        dx, dy, gif_time = keypress_handle(screen, data, songs)
-
-        collide = br.Update(screen, data, mob_gif, combat_rect, mob, gifs, songs)
+        dx, dy, gif_time = keypress_handle(screen, data, songs, items, spells)
 
         last_orientation = walking(dx, dy, collide, data, last_orientation)
 
-        br.display_char(dx, dy, screen, stance, combat_rect, gifs)
+        br.display_char(dx, dy, screen, gifs)
 
         handle_music(songs, collide, data)
 
@@ -142,15 +73,102 @@ def Start(screen, clock):
 
         update_char_bar(screen, data, gifs)
 
-
+        display_spell_bar(screen, spells)
 
         I.pg.display.flip()
         clock.tick(I.info.TICK)
 
-        if I.pg.time.get_ticks() - c_t > 100:
-            combat_rect = 0
 
 
+def handle_keyup(event, pressed, gifs, songs, screen, items, data, collide):
+    if event.key == pressed:
+        curr_song = songs["Playing"]
+        if pressed == I.pg.K_c:
+            songs[curr_song].channel0.pause()
+            interract(collide, data, gifs, items, screen)
+            songs[curr_song].channel0.unpause()
+        elif pressed == I.pg.K_x:
+            I.info.COMBAT_RECT = 0
+        return 0
+def handle_keydown(event, data, spells, gifs):
+    key_to_slot = {
+        I.pg.K_a: 0,
+        I.pg.K_s: 2,
+        I.pg.K_d: 4,
+        I.pg.K_f: 6,
+        I.pg.K_g: 8
+    }
+    pressed = 0
+    if event.key == I.pg.K_c:
+        pressed = I.pg.K_c
+    elif event.key == I.pg.K_x:
+        if pressed != I.pg.K_x and not data["Player"]["dead"]:
+            handle_combat()
+        pressed = I.pg.K_x
+    if event.key in [I.pg.K_a, I.pg.K_s, I.pg.K_d, I.pg.K_f, I.pg.K_g]:
+        target_slot = key_to_slot[event.key]
+        for spell, slot in spells.selected_spell:
+            if slot == target_slot and not gifs[spell].start_gif:
+                gifs[spell].Start_gif(spell, 1)
+    return pressed
+def display_spell_bar(screen, spells):
+    Ff.add_image_to_screen(screen, S.PLAYING_PATH["Spell_bar"], (S.SCREEN_WIDTH * 0.8, S.SCREEN_HEIGHT * 0.9,  S.SCREEN_WIDTH / 5,  S.SCREEN_HEIGHT / 10))
+    for spell, pos in spells.selected_spell:
+        Ff.add_image_to_screen(screen, S.SPELL_PATHS[spell] + "0.png", (S.SCREEN_WIDTH * 0.803 + pos * 25, S.SCREEN_HEIGHT * 0.91,  S.SCREEN_WIDTH / 25,  S.SCREEN_HEIGHT / 10))
+def handle_mob_respawn(mob, data):
+    if mob.count[0] < mob.count[1]:
+        mob.count = (mob.count[0] + 1, mob.count[1])
+        id = mob.count[1] + 1
+        mob.mobs.append(mob.create_mob(id))
+        data[mob.name] = br.generate_mobs(mob, data["Image_rect"].size)
+
+def handle_timer_actions(event, timers, data, mob):
+    if timers["Exhaustion"] == event.type:
+        data["Player"]["Exhaustion"] = (data["Player"]["Exhaustion"][0] - 1, data["Player"]["Exhaustion"][1])
+    elif timers["Mob_respawn"] == event.type:
+        handle_mob_respawn(mob, data)
+    elif timers["Harvest"] == event.type:
+        harvest_timeout()
+    elif timers["Strike"] == event.type:
+        I.info.COMBAT_RECT = 0
+    elif timers["Walk"] == event.type:
+        I.info.CURRENT_STANCE += 1
+        if I.info.CURRENT_STANCE > 3:
+            I.info.CURRENT_STANCE = 0
+    elif timers["mob_gif"] == event.type:
+        for key in mob.keys():
+            for current_mob in mob[key].mobs:
+                current_mob["gif_frame"] = (current_mob["gif_frame"][0] + 1, current_mob["gif_frame"][1])
+                if current_mob["gif_frame"][0] == current_mob["gif_frame"][1]:
+                    mob[key].move_mobs_randomly()
+                    current_mob["gif_frame"] = (0, current_mob["gif_frame"][1])
+def handle_timers():
+    timers = {}
+    EXHAUSTION_TIM = I.pg.USEREVENT + 1
+    I.pg.time.set_timer(EXHAUSTION_TIM, 300000)
+    timers["Exhaustion"] = EXHAUSTION_TIM
+
+    Mob_Respawn = I.pg.USEREVENT + 2
+    I.pg.time.set_timer(Mob_Respawn, 600000)
+    timers["Mob_respawn"] = Mob_Respawn
+
+    Harvest_timer = I.pg.USEREVENT + 3
+    I.pg.time.set_timer(Harvest_timer, 60000)
+    timers["Harvest"] = Harvest_timer
+
+    Strike = I.pg.USEREVENT + 4
+    I.pg.time.set_timer(Strike, 100)
+    timers["Strike"] = Strike
+
+    Walk = I.pg.USEREVENT + 5
+    I.pg.time.set_timer(Walk, 300)
+    timers["Walk"] = Walk
+
+    mob_gif = I.pg.USEREVENT + 6
+    I.pg.time.set_timer(mob_gif, 100)
+    timers["mob_gif"] = mob_gif
+
+    return timers
 
 
 def update_char_bar(screen, data, gifs):
@@ -161,7 +179,7 @@ def update_char_bar(screen, data, gifs):
     if data["Player"]["hp"][0] <= 0 and not data["Player"]["dead"]:
         data["Player"]["dead"] = data["Zoom_rect"].copy()
         gifs["ghost"].Start_gif("Dead",[S.SCREEN_WIDTH / 2 - S.SCREEN_WIDTH / 20, S.SCREEN_HEIGHT / 2 - S.SCREEN_HEIGHT / 20 * 2, S.SCREEN_WIDTH / 14, S.SCREEN_HEIGHT / 7])
-        gifs["portal"].Start_gif("Portal", [I.info.START_POS[0] + 30, I.info.START_POS[1], S.SCREEN_WIDTH / 14, S.SCREEN_HEIGHT / 7])
+        gifs["Portal"].Start_gif("Portal", [I.info.START_POS[0] + 30, I.info.START_POS[1], S.SCREEN_WIDTH / 14, S.SCREEN_HEIGHT / 7])
         data["Zoom_rect"].x = I.info.START_POS[0]
         data["Zoom_rect"].y = I.info.START_POS[1]
 
@@ -192,7 +210,7 @@ def walking(dx, dy, collide, data, last_orientation):
 
     return last_orientation
 
-def keypress_handle(screen, data, song):
+def keypress_handle(screen, data, song, items, spells):
     keys = I.pg.key.get_pressed()
     dx = (keys[I.pg.K_RIGHT] - keys[I.pg.K_LEFT])
     dy = (keys[I.pg.K_DOWN] - keys[I.pg.K_UP])
@@ -204,16 +222,19 @@ def keypress_handle(screen, data, song):
         gif_time = 300
         I.info.FAST = 1
     if keys[I.pg.K_v]:
-        print("something")
+        curr_song = song["Playing"]
+        song[curr_song].channel0.pause()
+        br.spell_book(screen, data, spells)
+        song[curr_song].channel0.unpause()
     if keys[I.pg.K_b] and not data["Player"]["dead"]:
         curr_song = song["Playing"]
         song[curr_song].channel0.pause()
-        br.BackPack(screen)
+        br.BackPack(screen, items, data["Player"])
         song[curr_song].channel0.unpause()
 
     return dx, dy, gif_time
 
-def interract(collide, data, gifs):
+def interract(collide, data, gifs, items, screen):
     if collide:
         if collide[0] in I.info.HARVESTABLE.keys() and not data["Player"]["dead"]:
             if any((collide[1], collide[2]) == (t[0], t[1]) for t in I.info.HARVESTED_OBJECTS.get(collide[0], [])):
@@ -225,10 +246,10 @@ def interract(collide, data, gifs):
 
                 #  Handle registering items that were taken, used in not allowing collection of too many items from single bush
                 if I.info.HARVESTED_OBJECTS.get(collide[0]) == []:
-                    I.info.HARVESTED_OBJECTS[collide[0]] = [(collide[1], collide[2], 10000)]
+                    I.info.HARVESTED_OBJECTS[collide[0]] = [(collide[1], collide[2], 5)]
                 else:
                     existing_values = I.info.HARVESTED_OBJECTS.get(collide[0], [])
-                    existing_values.append((collide[1], collide[2], 10000))
+                    existing_values.append((collide[1], collide[2], 5))
                     I.info.HARVESTED_OBJECTS[collide[0]] = existing_values
 
                 I.info.TEXT.append("Recieved " + str(amount) + " " + str(item) + ",,5000")
@@ -243,23 +264,23 @@ def interract(collide, data, gifs):
             data["Player"]["dead"] = False
             data["Player"]["hp"] = (data["Player"]["hp"][1], data["Player"]["hp"][1])
             gifs["ghost"].start_gif = False
-
+        elif collide[0] == "Sign":
+            br.handdle_sign_display(screen)
         else:
             print("not harvestable", collide)
     # return text
     return
 
-def harvest_timeout(harvestable_objects):
-    for harvastable in harvestable_objects:
+def harvest_timeout():
+    for harvastable in  I.info.HARVESTED_OBJECTS.keys():
         if I.info.HARVESTED_OBJECTS[harvastable] != []:
             for i in range(0, len(I.info.HARVESTED_OBJECTS[harvastable])):
+                # print(i, I.info.HARVESTED_OBJECTS[harvastable])
                 if I.info.HARVESTED_OBJECTS[harvastable][i][2] == 0:
                     I.info.HARVESTED_OBJECTS[harvastable].pop(i)
                     break
                 else:
-                    I.info.HARVESTED_OBJECTS[harvastable][i] = (
-                    I.info.HARVESTED_OBJECTS[harvastable][i][0], I.info.HARVESTED_OBJECTS[harvastable][i][1],
-                    I.info.HARVESTED_OBJECTS[harvastable][i][2] - 1)
+                    I.info.HARVESTED_OBJECTS[harvastable][i] = (I.info.HARVESTED_OBJECTS[harvastable][i][0], I.info.HARVESTED_OBJECTS[harvastable][i][1], I.info.HARVESTED_OBJECTS[harvastable][i][2] - 1)
 
 
 def update_display_text(screen, gifs, data, collide):
@@ -290,11 +311,6 @@ def update_display_text(screen, gifs, data, collide):
                 a = I.info.TEXT.index(text)
                 I.info.TEXT[a] = lines[0] + ",," + str(time)
 
-def make_mobs_jump_around(mob):
-    # CURRENTLY ONLY WORKS FOR SLIMES
-    x = random.randint(-3, 3)
-    y = random.randint(-3, 3)
-    mob.move_mobs_randomly(x, y)
 
 def handle_combat():
     orientation = I.info.LAST_ORIENT[0].split(".")[0]
@@ -302,8 +318,7 @@ def handle_combat():
                         "Back": (0, -10),
                         "Left": (-10, 0),
                         "Right": (10, 0)}
-    combat_rect = I.pg.Rect(150 + attack_direction[orientation][0], 85 + attack_direction[orientation][1], S.SCREEN_WIDTH / 100, S.SCREEN_HEIGHT / 100)  # Player rect (if it gets hit with other rect. colide is set to True
-    return combat_rect
+    I.info.COMBAT_RECT = I.pg.Rect(150 + attack_direction[orientation][0], 85 + attack_direction[orientation][1], S.SCREEN_WIDTH / 100, S.SCREEN_HEIGHT / 100)  # Player rect (if it gets hit with other rect. colide is set to True
 
 def handle_music(song, collide, data):
     if data["Player"]["dead"]:
