@@ -82,25 +82,23 @@ def Update(screen, data, mob_dict, gifs, song, spells):
             if I.info.COMBAT_RECT != 0:
                 handle_physical_damaging_mobs(rect, song, mob, data, gifs, current_mob)
 
-            handle_damage_type_visualisation(sub_image, current_mob, gifs, (mob_x, mob_y))
+            handle_damage_type_visualisation(sub_image, current_mob, gifs, (mob_x, mob_y), data, mob)
 
-            if me.colliderect(rect):
+
+            if me.colliderect(rect) and current_mob["allignment"] in [6, 8, 9]:
                 collide = ('mob', current_mob, mob_rect.x, mob_rect.y)
                 data["Player"]["hp"] = data["Player"]["hp"][0] - current_mob["damage"][0], data["Player"]["hp"][1]
 
-            if mob_gif == S.MOB_PATH[mob.name][1] - 1 and not data["Player"]["dead"] and current_mob["allignment"] == 6:
-                target_pos = (me.x + data["Zoom_rect"].x, me.y + data["Zoom_rect"].y)
-                mob_rect.x, mob_rect.y, current_mob["visible"] = Ff.move_towards(target_pos, current_mob, current_mob["speed"] / 10 + 1, displayed_rects, data["Zoom_rect"])
-                mob.update_position(mob_rect.x, mob_rect.y, current_mob)
-            else:
-                current_mob["visible"] = False
+            handle_mob_speed(data, current_mob, displayed_rects, mob)
+
 
 
     collide = handle_death_visualisation(sub_image, data, gifs, collide)
 
     handle_npc_visualisation(sub_image, data, gifs)
 
-    cast_spell_handle(sub_image, data, spells, gifs, mob_dict, song)
+    if not data["Player"]["dead"]:
+        cast_spell_handle(sub_image, data, spells, gifs, mob_dict, song)
 
     scaled_image = I.pg.transform.scale(sub_image, data["Window size"])
     screen.blit(scaled_image, (0, 0))
@@ -108,11 +106,43 @@ def Update(screen, data, mob_dict, gifs, song, spells):
         collide = False, 0, 0, 0
     return collide
 
-def handle_damage_type_visualisation(sub_image, current_mob, gifs, pos):
+
+def handle_mob_speed(data, current_mob, displayed_rects, mob):
+
+    me = I.pg.Rect(150, 85, S.SCREEN_WIDTH / 100, S.SCREEN_HEIGHT / 100)  # Player rect (if it gets hit with other rect. colide is set to True
+    speed = current_mob["speed"][0]
+    current_frame = current_mob["gif_frame"][0]
+    frame_count = current_mob["gif_frame"][1]
+    if current_frame % 2 == 0:
+        if not data["Player"]["dead"] and current_mob["allignment"] == 6:
+            target_pos = (me.x + data["Zoom_rect"].x, me.y + data["Zoom_rect"].y)
+            mob_rect = current_mob["rect"][current_frame]
+            mob_rect.x, mob_rect.y, current_mob["visible"] = Ff.move_towards(target_pos, current_mob, speed, displayed_rects, data["Zoom_rect"])
+            mob.update_position(mob_rect.x, mob_rect.y, current_mob)
+        else:
+            current_mob["visible"] = False
+def handle_damage_type_visualisation(sub_image, current_mob, gifs, pos, data, mob):
     for key in gifs.keys():
         if gifs[key].start_gif and current_mob == gifs[key].rect:
-            frame = gifs[key].next_frame(False)  # made specifically for damage displaying
+            if current_mob["effect"].get(key) != None:
+                duration = current_mob["effect"][key]
+                frame = gifs[key].next_frame(duration)
+                if current_mob["effect"]["Fire"] != 0:
+                    gifs["Cold"].start_gif = False
+                    gifs["Cold"].repeat = 0
+                    mob.deal_damage(current_mob, data["Player"], "effect_" + key)
+                if current_mob["effect"]["Cold"] != 0:
+                    gifs["Fire"].start_gif = False
+                    gifs["Fire"].repeat = 0
+                    current_mob["speed"] = (0, current_mob["speed"][1])
+            else:
+                frame = gifs[key].next_frame(1)  # made specifically for damage displaying
             sub_image.blit(frame, (pos[0] - 5, pos[1]))
+        elif not gifs[key].start_gif and current_mob["effect"].get(key) != None:
+            if not gifs[key].start_gif and current_mob["effect"][key] != 0:
+                current_mob["effect"][key] = 0
+                if key == "Cold":
+                    current_mob["speed"] = (current_mob["speed"][1], current_mob["speed"][1])
 
 
 def handle_physical_damaging_mobs(rect, song, mob, data, gifs, current_mob):
@@ -122,7 +152,7 @@ def handle_physical_damaging_mobs(rect, song, mob, data, gifs, current_mob):
             effect = song[curr_song].generate_thump_sound()
             song[curr_song].play_effect(effect)
             gifs["Blunt"].Start_gif(key, current_mob)
-            mob.deal_damage(current_mob, data["Player"], "", gifs)
+            mob.deal_damage(current_mob, data["Player"], "")
 
 def handle_death_visualisation(sub_image, data, gifs, collide):
     if data["Player"]["dead"]:
@@ -189,7 +219,7 @@ def display_char(dx, dy, screen, gifs):
         "Left": ["Left.png", "Left1.png", "Left2.png"]
     }
     if gifs["ghost"].start_gif:
-        frame = gifs["ghost"].next_frame(True)
+        frame = gifs["ghost"].next_frame(-1)
         frame = I.pg.transform.scale(frame, (S.SCREEN_WIDTH / 18, S.SCREEN_HEIGHT / 7))
         screen.blit(frame, [S.SCREEN_WIDTH / 2 - S.SCREEN_WIDTH / 20, S.SCREEN_HEIGHT / 2 - S.SCREEN_HEIGHT / 20 * 2])
     else:
@@ -527,7 +557,7 @@ def spell_book(screen, data, spells):
                             if block == (row, collum):
                                 selected = spell
                     else:
-                        spells.selected_spell.append((selected, block[0]))
+                        spells.selected_spell[block[0]] = selected
                         selected = 0
                 pressed = 0
         fill_spellbook(screen)
@@ -541,9 +571,9 @@ def spell_book(screen, data, spells):
             rect = I.pg.Rect(list(I.info.SPELLBOOK_COORDINATES_X.values())[block[0]],list(I.info.SPELLBOOK_COORDINATES_Y.values())[block[1]], item_w, item_h)
         I.pg.draw.rect(screen, color, rect, border)
 
-        if spells.selected_spell != []:
-            for spell, pos in spells.selected_spell:
-                rect = I.pg.Rect(list(I.info.SPELLBOOK_COORDINATES_X.values())[pos],list(I.info.SPELLBOOK_COORDINATES_Y.values())[11] +list(I.info.SPELLBOOK_COORDINATES_Y.values())[0], item_w, item_h)
+        if spells.selected_spell != {}:
+            for pos, spell in spells.selected_spell.items():
+                rect = I.pg.Rect(list(I.info.SPELLBOOK_COORDINATES_X.values())[int(pos)],list(I.info.SPELLBOOK_COORDINATES_Y.values())[11] +list(I.info.SPELLBOOK_COORDINATES_Y.values())[0], item_w, item_h)
                 Ff.add_image_to_screen(screen, S.SPELL_PATHS[spell] + "0.png", rect)
 
 
@@ -563,15 +593,15 @@ def fill_spellbook(screen):
         collumn = I.info.SPELLBOOK_CONTENT[content][2]
         Ff.add_image_to_screen(screen, S.SPELL_PATHS[content] + "0.png", [list(I.info.SPELLBOOK_COORDINATES_X.values())[row], list(I.info.SPELLBOOK_COORDINATES_Y.values())[collumn], item_w, item_h])
 def display_gif_on_subimage(sub_image, size, pos, gif):
-    frame = gif.next_frame(True)
+    frame = gif.next_frame(-1)
     frame = I.pg.transform.scale(frame, (size[0], size[1]))
     sub_image.blit(frame, pos)
     return I.pg.Rect(pos[0], pos[1], size[0], size[1])
 
 def cast_spell_handle(sub_image, data, spells, gifs, mob, song):
-    for spell, slot in spells.selected_spell:
+    for slot, spell in spells.selected_spell.items():
         if gifs[spell].start_gif:
-            frame = gifs[spell].next_frame(False)
+            frame = gifs[spell].next_frame(1)
             frame = I.pg.transform.scale(frame, (20, 20))
             if spells.direction[spell] == 0:
                 spells.init_cast[spell] = data["Zoom_rect"].copy()
@@ -596,7 +626,7 @@ def cast_spell_handle(sub_image, data, spells, gifs, mob, song):
                     for current_mob in mob[key].mobs:
                         mob_rect = I.pg.Rect(current_mob["rect"][0].x - data["Zoom_rect"].x, current_mob["rect"][0].y - data["Zoom_rect"].y, current_mob["rect"][0].w, current_mob["rect"][0].h)
                         if rect.colliderect(mob_rect):
-                            mob[key].deal_damage(current_mob, data["Player"], spells.spell_dict[spell], gifs)
+                            mob[key].deal_damage(current_mob, data["Player"], spells.spell_dict[spell])
                             gifs[spell].start_gif = False # IF COMMENTED OUT, MAKES A SPELL GO THROUGH MULTIPLE ENEMIES
                             type = spells.spell_dict[spell].split(" ")[1]
                             gifs[type].Start_gif(type, current_mob)

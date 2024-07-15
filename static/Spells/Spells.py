@@ -3,7 +3,7 @@ class Spells:
     def __init__(self):
         self.spell_dict = {}
         self.generate_spells()
-        self.selected_spell = []
+        self.selected_spell = {}
         self.direction = {}
         self.init_cast = {}
 

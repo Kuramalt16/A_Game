@@ -61,3 +61,39 @@
 * DESC: if shot down with a fire spell, cooks the meat.
 * PRIORITY: Low
 * NEEDS:
+
+* DESC: Use SQLite for item and spell data storing
+* PRIORITY: HIGH
+* NEEDS: willpower
+
+* DESC: do allignments 9 - Chaotic evil ( attacks all unprovoked )
+* PRIORITY: HIGH
+* NEEDS: implementation where mobs can "see" other mobs.
+
+* DESC: do allignments 8 - Chaotic neutral, ( attacks and runs away )
+* PRIORITY: HIGH
+* NEEDS: function for running away from player
+
+* DESC: do allignments 7 - Chaotic good, ( helps attack others )
+* PRIORITY: HIGH
+* NEEDS: implementation where mobs can "see" you attacking others (seeing is less than 100 distance) function for efficient checking how far mobs are.
+
+* DESC: do allignments 4 - neutral good, (doesn't attack, runs away if provoked)
+* PRIORITY: HIGH
+* NEEDS: function for running away from player
+
+* DESC: do allignments 3 - lawful evil ( debufs you or steals from you unprovoked, attacks if you attack )
+* PRIORITY: HIGH
+* NEEDS: coin, str, dex, con, int, wis, cha modifyers
+
+* DESC: do allignments 2 - lawful neutral ( only hits if sees you hitting others )
+* PRIORITY: HIGH
+* NEEDS: implementation where mobs can "see" you attacking others (seeing is less than 100 distance) function for efficient checking how far mobs are.
+
+* DESC: Add timeout for attacking with spells or physical
+* PRIORITY: HIGH
+* NEEDS:
+
+* DESC: make diferent mobs have diferent visibilities
+* PRIORITY: Medium
+* NEEDS:

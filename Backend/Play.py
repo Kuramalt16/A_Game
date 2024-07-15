@@ -17,7 +17,7 @@ movement = {
 
 def Start(screen, clock):
     mob = {
-        "Slime_S": I.mob_data.Mob(name="Slime_S", exp=10, hp=8, allignment=0, count=20, damage=(2, "blunt"), speed=4),
+        "Slime_S": I.mob_data.Mob(name="Slime_S", exp=10, hp=8, allignment=5, count=20, damage=(2, "blunt"), speed=4),
         "Pig": I.mob_data.Mob(name="Pig", exp=5, hp=6, allignment=4, count=20, damage=(1, "blunt"), speed=6),
            }
     gifs = {"ghost": I.gifs.Gif(name="Dead", frame_count=8, initial_path=S.PLAYING_PATH["Dead"], delay=50),
@@ -107,13 +107,13 @@ def handle_keydown(event, data, spells, gifs):
         pressed = I.pg.K_x
     if event.key in [I.pg.K_a, I.pg.K_s, I.pg.K_d, I.pg.K_f, I.pg.K_g]:
         target_slot = key_to_slot[event.key]
-        for spell, slot in spells.selected_spell:
+        for slot, spell in spells.selected_spell.items():
             if slot == target_slot and not gifs[spell].start_gif:
                 gifs[spell].Start_gif(spell, 1)
     return pressed
 def display_spell_bar(screen, spells):
     Ff.add_image_to_screen(screen, S.PLAYING_PATH["Spell_bar"], (S.SCREEN_WIDTH * 0.8, S.SCREEN_HEIGHT * 0.9,  S.SCREEN_WIDTH / 5,  S.SCREEN_HEIGHT / 10))
-    for spell, pos in spells.selected_spell:
+    for pos, spell in spells.selected_spell.items():
         Ff.add_image_to_screen(screen, S.SPELL_PATHS[spell] + "0.png", (S.SCREEN_WIDTH * 0.803 + pos * 25, S.SCREEN_HEIGHT * 0.91,  S.SCREEN_WIDTH / 25,  S.SCREEN_HEIGHT / 10))
 def handle_mob_respawn(mob, data):
     if mob.count[0] < mob.count[1]:

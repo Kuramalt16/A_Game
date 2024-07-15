@@ -317,12 +317,15 @@ def move_towards(target, current_mob, step_size, obstacles, zoom_rect):
         tuple: New (x, y) position for the mob.
     """
     # Current position
+    if step_size > 1:
+        step_size = 1
+    else:
+        step_size = 0
     current_x, current_y = current_mob['current_pos'].topleft
 
     # Calculate direction vector and distance to the target
     direction_x, direction_y = target[0] - current_x, target[1] - current_y
     distance = (direction_x ** 2 + direction_y ** 2) ** 0.5
-
     if distance > 100:
         return current_x, current_y, False
     # Check if we are close enough to the target
@@ -336,11 +339,11 @@ def move_towards(target, current_mob, step_size, obstacles, zoom_rect):
         direction_y /= distance
 
     # Calculate new position
-
-    new_x = current_x + direction_x * step_size
-    new_y = current_y + direction_y * step_size
+    new_x = (current_x + direction_x * step_size)
+    new_y = (current_y + direction_y * step_size)
     # Create new Rect for the potential new position
     new_rect = I.pg.Rect(new_x - zoom_rect.x, new_y - zoom_rect.y, current_mob['current_pos'].w, current_mob['current_pos'].h)
+
     # Check for collisions
     if not any(obstacle.colliderect(new_rect) for obstacle in obstacles):
         return new_x, new_y, True

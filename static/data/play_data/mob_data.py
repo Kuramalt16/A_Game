@@ -37,8 +37,12 @@ class Mob:
         "damage": self.damage,
         "exp": self.exp,
         "drop": I.A.DROPS[self.name],
-        "speed": self.speed,
-        "effect": "",
+        "speed": (self.speed, self.speed),
+        "effect": {
+            "Fire": 0,
+            "Cold": 0,
+            "Force": 0,
+        },
         "allignment": temp_allignment,
         "gif_frame": (0, S.MOB_PATH[self.name][1]),
         "visible": False,
@@ -94,15 +98,21 @@ class Mob:
         """Remove a mob from the list by id."""
         self.count = (self.count[0] - 1, self.count[1])
         self.mobs = [mob for mob in self.mobs if mob["id"] != mob_id]
-    def deal_damage(self, victim, player, weapon, gifs):
+    def deal_damage(self, victim, player, weapon):
         if weapon == "":
             damage = 2 / 3
             knockback = 1
             type = "Blunt"
+        elif "effect" in weapon:
+            damage = 0.1
+            knockback = 0
+            type = weapon.split("_")[1]  # get's effect
         else:
-            damage, type, route, mana_cost, knockback = weapon.split(" ")
+            damage, type, route, mana_cost, knockback, level = weapon.split(" ")
             damage = random.randint(int(damage.split("d")[0]),int(damage.split("d")[1]))
 
+        if victim["allignment"] == 5:
+            victim["allignment"] = 6
         victim["hp"] = victim["hp"][0] - damage, victim["hp"][1]
         if victim["hp"][0] <= 0:
             self.remove_mob(victim["id"])
@@ -118,18 +128,29 @@ class Mob:
                 br.add_to_backpack(victim["drop"][choose][0], amount)
                 if amount != 0:
                     I.info.TEXT.append("Recieved " + str(amount) + " " + str(victim["drop"][choose][0][:-1]) + ",,5000")
-            gifs[type].start_gif = False
-        else:
+            # gifs[type].start_gif = False
+
+        elif "effect" not in weapon:
             self.knockback(victim, int(knockback))
             self.effect(victim, type)
 
     def effect(self, victim, type):
         if type == "Cold":
-            print("Cold")
+            duration = random.randint(1,3)
+            if victim["effect"].get(type) == None:
+                victim["effect"][type] = duration
+            else:
+                victim["effect"][type] += duration
+
         elif type == "Force":
-            print("Force")
+            victim["effect"][type] = 1
+
         elif type == "Fire":
-            print("Fire")
+            duration = random.randint(1, 2)
+            if victim["effect"].get(type) == None:
+                victim["effect"][type] = duration
+            else:
+                victim["effect"][type] += duration
 
 
     def update_position(self, new_x, new_y, mob):

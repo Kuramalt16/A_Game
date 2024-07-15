@@ -10,7 +10,7 @@ class Gif:
         self.images = []
         self.frame_time = 0
         self.read_image()
-        self.repeat = False
+        self.repeat = 0
 
     def read_image(self):
         for i in range(self.frame_count):
@@ -31,8 +31,10 @@ class Gif:
             self.current_frame += 1
             self.frame_time = I.pg.time.get_ticks()
             if self.current_frame > self.frame_count:
-                if not repeat:
+                if repeat == self.repeat:
                     self.start_gif = False
+                    self.repeat = 0
+                self.repeat += 1
                 self.current_frame = 0
                 return self.images[self.frame_count - 1]
             else:
