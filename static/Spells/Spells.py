@@ -6,6 +6,7 @@ class Spells:
         self.selected_spell = {}
         self.direction = {}
         self.init_cast = {}
+        self.spell_cooloff = {}
 
     def generate_spells(self):
         I.info.SPELLBOOK_CONTENT.keys()

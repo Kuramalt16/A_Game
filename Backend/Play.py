@@ -53,7 +53,7 @@ def Start(screen, clock):
             if event.type == I.pg.QUIT:
                 S.PLAY = False
             if event.type in timers.values():
-                handle_timer_actions(event, timers, data, mob)
+                handle_timer_actions(event, timers, data, mob, spells)
             if event.type == I.pg.KEYDOWN:
                 pressed = handle_keydown(event, data, spells, gifs)
             if event.type == I.pg.KEYUP:
@@ -108,8 +108,17 @@ def handle_keydown(event, data, spells, gifs):
     if event.key in [I.pg.K_a, I.pg.K_s, I.pg.K_d, I.pg.K_f, I.pg.K_g]:
         target_slot = key_to_slot[event.key]
         for slot, spell in spells.selected_spell.items():
-            if slot == target_slot and not gifs[spell].start_gif:
-                gifs[spell].Start_gif(spell, 1)
+            if spells.spell_cooloff.get(spell) == None:
+                if slot == target_slot and not gifs[spell].start_gif and data["Player"]["mana"][0] >= int(spells.spell_dict[spell].split(" ")[3]):
+                    gifs[spell].Start_gif(spell, 1)
+                    data["Player"]["mana"] = (data["Player"]["mana"][0] - int(spells.spell_dict[spell].split(" ")[3]), data["Player"]["mana"][1])
+            elif spells.spell_cooloff[spell] == 0:
+                if slot == target_slot and not gifs[spell].start_gif and data["Player"]["mana"][0] >= int(spells.spell_dict[spell].split(" ")[3]):
+                    gifs[spell].Start_gif(spell, 1)
+                    data["Player"]["mana"] = (data["Player"]["mana"][0] - int(spells.spell_dict[spell].split(" ")[3]), data["Player"]["mana"][1])
+
+
+
     return pressed
 def display_spell_bar(screen, spells):
     Ff.add_image_to_screen(screen, S.PLAYING_PATH["Spell_bar"], (S.SCREEN_WIDTH * 0.8, S.SCREEN_HEIGHT * 0.9,  S.SCREEN_WIDTH / 5,  S.SCREEN_HEIGHT / 10))
@@ -122,7 +131,7 @@ def handle_mob_respawn(mob, data):
         mob.mobs.append(mob.create_mob(id))
         data[mob.name] = br.generate_mobs(mob, data["Image_rect"].size)
 
-def handle_timer_actions(event, timers, data, mob):
+def handle_timer_actions(event, timers, data, mob, spells):
     if timers["Exhaustion"] == event.type:
         data["Player"]["Exhaustion"] = (data["Player"]["Exhaustion"][0] - 1, data["Player"]["Exhaustion"][1])
     elif timers["Mob_respawn"] == event.type:
@@ -142,6 +151,10 @@ def handle_timer_actions(event, timers, data, mob):
                 if current_mob["gif_frame"][0] == current_mob["gif_frame"][1]:
                     mob[key].move_mobs_randomly()
                     current_mob["gif_frame"] = (0, current_mob["gif_frame"][1])
+    elif timers["spell_cooloff"] == event.type:
+        for key in spells.spell_cooloff.keys():
+            if spells.spell_cooloff[key] != 0:
+                spells.spell_cooloff[key] -= 1
 def handle_timers():
     timers = {}
     EXHAUSTION_TIM = I.pg.USEREVENT + 1
@@ -167,6 +180,10 @@ def handle_timers():
     mob_gif = I.pg.USEREVENT + 6
     I.pg.time.set_timer(mob_gif, 100)
     timers["mob_gif"] = mob_gif
+
+    spell_cooloff = I.pg.USEREVENT + 7
+    I.pg.time.set_timer(spell_cooloff, 100)
+    timers["spell_cooloff"] = spell_cooloff
 
     return timers
 

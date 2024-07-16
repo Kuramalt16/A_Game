@@ -600,45 +600,47 @@ def display_gif_on_subimage(sub_image, size, pos, gif):
 
 def cast_spell_handle(sub_image, data, spells, gifs, mob, song):
     for slot, spell in spells.selected_spell.items():
-        if gifs[spell].start_gif:
-            frame = gifs[spell].next_frame(1)
-            frame = I.pg.transform.scale(frame, (20, 20))
-            if spells.direction[spell] == 0:
-                spells.init_cast[spell] = data["Zoom_rect"].copy()
-                spells.direction[spell] = I.info.LAST_ORIENT[0].split(".")[0]
-            direction_settings = {
-                "Front": {"rect": (145, 80), "dir": (0, -1), "rotate": 90, "flip": (False, True)},
-                "Back": {"rect": (145, 70), "dir": (0, 1), "rotate": 90, "flip": (False, False)},
-                "Left": {"rect": (140, 75), "dir": (1, 0), "rotate": 0, "flip": (True, False)},
-                "Right": {"rect": (150, 75), "dir": (-1, 0), "rotate": 0, "flip": (False, False)},
-            }
-            spell_direction = spells.direction[spell]
-            settings = direction_settings.get(spell_direction)
-            me = I.pg.Rect(settings["rect"][0], settings["rect"][1], S.SCREEN_WIDTH / 100, S.SCREEN_HEIGHT / 100)
-            dir = settings["dir"]
-            frame = I.pg.transform.rotate(frame, settings["rotate"])
-            frame = I.pg.transform.flip(frame, *settings["flip"])
+            if gifs[spell].start_gif:
+                spells.spell_cooloff[spell] = 5
+                frame = gifs[spell].next_frame(1)
+                frame = I.pg.transform.scale(frame, (20, 20))
+                if spells.direction[spell] == 0:
+                    spells.init_cast[spell] = data["Zoom_rect"].copy()
+                    spells.direction[spell] = I.info.LAST_ORIENT[0].split(".")[0]
+                direction_settings = {
+                    "Front": {"rect": (145, 80), "dir": (0, -1), "rotate": 90, "flip": (False, True)},
+                    "Back": {"rect": (145, 70), "dir": (0, 1), "rotate": 90, "flip": (False, False)},
+                    "Left": {"rect": (140, 75), "dir": (1, 0), "rotate": 0, "flip": (True, False)},
+                    "Right": {"rect": (150, 75), "dir": (-1, 0), "rotate": 0, "flip": (False, False)},
+                }
+                spell_direction = spells.direction[spell]
+                settings = direction_settings.get(spell_direction)
+                me = I.pg.Rect(settings["rect"][0], settings["rect"][1], S.SCREEN_WIDTH / 100, S.SCREEN_HEIGHT / 100)
+                dir = settings["dir"]
+                frame = I.pg.transform.rotate(frame, settings["rotate"])
+                frame = I.pg.transform.flip(frame, *settings["flip"])
 
-            if gifs[spell].current_frame != 0:
-                rect = I.pg.Rect(spells.init_cast[spell].x - data["Zoom_rect"].x + me.x - dir[0] * gifs[spell].current_frame * 6, spells.init_cast[spell].y - data["Zoom_rect"].y + me.y - dir[1] * gifs[spell].current_frame * 6, 20, 20)
-                sub_image.blit(frame, rect)
-                for key in mob.keys():
-                    for current_mob in mob[key].mobs:
-                        mob_rect = I.pg.Rect(current_mob["rect"][0].x - data["Zoom_rect"].x, current_mob["rect"][0].y - data["Zoom_rect"].y, current_mob["rect"][0].w, current_mob["rect"][0].h)
-                        if rect.colliderect(mob_rect):
-                            mob[key].deal_damage(current_mob, data["Player"], spells.spell_dict[spell])
-                            gifs[spell].start_gif = False # IF COMMENTED OUT, MAKES A SPELL GO THROUGH MULTIPLE ENEMIES
-                            type = spells.spell_dict[spell].split(" ")[1]
-                            gifs[type].Start_gif(type, current_mob)
-                            curr_song = song["Playing"]
-                            sound_type = {"Force": song[curr_song].generate_magic_sound(),
-                                          "Fire": song[curr_song].generate_fire_sound(),
-                                          "Cold": song[curr_song].generate_cold_sound()}
-                            song[curr_song].play_effect(sound_type[type])
-        else:
-            # RESET DIRECTION OF FIRE
-            spells.direction[spell] = 0
-            spells.init_cast[spell] = 0
+                if gifs[spell].current_frame != 0:
+                    rect = I.pg.Rect(spells.init_cast[spell].x - data["Zoom_rect"].x + me.x - dir[0] * gifs[spell].current_frame * 6, spells.init_cast[spell].y - data["Zoom_rect"].y + me.y - dir[1] * gifs[spell].current_frame * 6, 20, 20)
+                    sub_image.blit(frame, rect)
+                    for key in mob.keys():
+                        for current_mob in mob[key].mobs:
+                            mob_rect = I.pg.Rect(current_mob["rect"][0].x - data["Zoom_rect"].x, current_mob["rect"][0].y - data["Zoom_rect"].y, current_mob["rect"][0].w, current_mob["rect"][0].h)
+                            if rect.colliderect(mob_rect):
+                                mob[key].deal_damage(current_mob, data["Player"], spells.spell_dict[spell])
+                                gifs[spell].start_gif = False # IF COMMENTED OUT, MAKES A SPELL GO THROUGH MULTIPLE ENEMIES
+                                type = spells.spell_dict[spell].split(" ")[1]
+                                gifs[type].Start_gif(type, current_mob)
+                                curr_song = song["Playing"]
+                                sound_type = {"Force": song[curr_song].generate_magic_sound(),
+                                              "Fire": song[curr_song].generate_fire_sound(),
+                                              "Cold": song[curr_song].generate_cold_sound()}
+                                song[curr_song].play_effect(sound_type[type])
+
+            else:
+                # RESET DIRECTION OF FIRE
+                spells.direction[spell] = 0
+                spells.init_cast[spell] = 0
 
 def handdle_sign_display(screen):
     running = True

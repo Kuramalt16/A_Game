@@ -97,3 +97,19 @@
 * DESC: make diferent mobs have diferent visibilities
 * PRIORITY: Medium
 * NEEDS:
+
+* DESC: make diferent spells shoot slower/faster
+* PRIORITY: Medium
+* NEEDS:
+
+* DESC: add teleportation spell
+* PRIORITY: Medium
+* NEEDS: spawnpoints
+
+* DESC: add blinker spell
+* PRIORITY: Medium
+* NEEDS: spawnpoints
+
+* DESC: add necrotic, lighting, thunder, radiant, acid, poison, psychic bolts
+* PRIORITY: Medium
+* NEEDS: spawnpoints
