@@ -407,3 +407,32 @@ def check_if_mob_collides(obstacles, mob):
         return 0
     else:
         return a
+
+def read_data_from_db(table, columns='*', conditions=None):
+    """
+    Read data from the specified table in the database.
+
+    Args:
+        table (str): The table name.
+        columns (str or list): Columns to retrieve. Default is '*' (all columns).
+        conditions (str): SQL conditions for filtering the results. Default is None (no conditions).
+
+    Returns:
+        list: A list of tuples containing the rows retrieved from the database.
+    """
+    conn = I.sqlite3.connect("C:/Users/gytis/PycharmProjects/A_Game/static/data/A_Game.db")
+    cursor = conn.cursor()
+
+    if isinstance(columns, list):
+        columns = ', '.join(columns)
+
+    query = f"SELECT {columns} FROM {table}"
+    if conditions:
+        query += f" WHERE {conditions}"
+
+    cursor.execute(query)
+    rows = cursor.fetchall()
+
+    cursor.close()
+    conn.close()
+    return rows

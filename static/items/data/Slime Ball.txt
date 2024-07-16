@@ -1,4 +1,0 @@
-Name=Slime Ball;
-Cost=1;
-Properties=;
-Aquire=DROP Slime_S,,1,,3;

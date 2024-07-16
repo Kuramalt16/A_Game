@@ -18,7 +18,7 @@ def Character_Selection(screen):
             if event.type == I.pg.MOUSEBUTTONDOWN and not S.BUSY:
                 for key, value in buttons.items():
                     if value.collidepoint(pos[0], pos[1]) and I.pg.mouse.get_pressed()[0]:
-                        if key == "New":
+                        if key == "New" and cr.number_of_chars() < 9:
                             Ff.button_click_render(screen, value, 1, "Empty")
                             Ff.display_text(screen, key, 30, (buttons[key + "_text"].left, buttons[key + "_text"].top), "black")
                             I.pg.display.flip()

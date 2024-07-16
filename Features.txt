@@ -8,10 +8,6 @@
 * PRIORITY: LOW
 * NEEDS:
 
-* DESC: Make function to count how many characters are created if its more than 9 dont allow the "New" button to be pressed (Similarly how "Load" button is gray if there are no load files)
-* PRIORITY: LOW
-* NEEDS:
-
 * DESC: Add harvest delay to item class
 * PRIORITY: LOW
 * NEEDS:
@@ -25,10 +21,6 @@
 * NEEDS:
 
 * DESC: redo gif class to include multiple diferent gifs
-* PRIORITY: HIGH
-* NEEDS:
-
-* DESC: Include effect to spell casting. efect of push, fire, cold. include knockback for diferent spells
 * PRIORITY: HIGH
 * NEEDS:
 
@@ -61,10 +53,6 @@
 * DESC: if shot down with a fire spell, cooks the meat.
 * PRIORITY: Low
 * NEEDS:
-
-* DESC: Use SQLite for item and spell data storing
-* PRIORITY: HIGH
-* NEEDS: willpower
 
 * DESC: do allignments 9 - Chaotic evil ( attacks all unprovoked )
 * PRIORITY: HIGH
@@ -113,3 +101,15 @@
 * DESC: add necrotic, lighting, thunder, radiant, acid, poison, psychic bolts
 * PRIORITY: Medium
 * NEEDS: spawnpoints
+
+* DESC: make fire spell burn flammable objects
+* PRIORITY: Medium
+* NEEDS: spawnpoints
+
+* DESC: make screen stop in a single spot but let the character move
+* PRIORITY: Medium
+* NEEDS: willpower
+
+* DESC: make levelup a thing. when level up a window appears that a level up has been reached. all hp, mana is restored.
+* PRIORITY: Medium
+* NEEDS: skilltree, music, window

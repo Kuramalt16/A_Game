@@ -87,6 +87,7 @@ def Update(screen, data, mob_dict, gifs, song, spells):
 
             if me.colliderect(rect) and current_mob["allignment"] in [6, 8, 9]:
                 collide = ('mob', current_mob, mob_rect.x, mob_rect.y)
+                data["Player"]["Last_hit"] = I.pg.time.get_ticks()
                 data["Player"]["hp"] = data["Player"]["hp"][0] - current_mob["damage"][0], data["Player"]["hp"][1]
 
             handle_mob_speed(data, current_mob, displayed_rects, mob)
@@ -515,6 +516,8 @@ def update_character(player_disc):
 
     player_disc["Exhaustion"] = (100, 100)
 
+    player_disc["Last_hit"] = I.pg.time.get_ticks()
+
     return player_disc
 
 def spell_book(screen, data, spells):
@@ -553,7 +556,7 @@ def spell_book(screen, data, spells):
                     running = False
                 if event.key == I.pg.K_c:
                     if selected == 0:
-                        for spell, (disc, row, collum) in I.info.SPELLBOOK_CONTENT.items():
+                        for spell, (row, collum) in I.info.SPELLBOOK_CONTENT.items():
                             if block == (row, collum):
                                 selected = spell
                     else:
@@ -589,8 +592,7 @@ def fill_spellbook(screen):
     item_w = list(I.info.SPELLBOOK_COORDINATES_X.values())[1] - list(I.info.SPELLBOOK_COORDINATES_X.values())[0]
     item_h = list(I.info.SPELLBOOK_COORDINATES_Y.values())[1] - list(I.info.SPELLBOOK_COORDINATES_Y.values())[0]
     for content in I.info.SPELLBOOK_CONTENT.keys():
-        row = I.info.SPELLBOOK_CONTENT[content][1]
-        collumn = I.info.SPELLBOOK_CONTENT[content][2]
+        row, collumn = I.info.SPELLBOOK_CONTENT[content]
         Ff.add_image_to_screen(screen, S.SPELL_PATHS[content] + "0.png", [list(I.info.SPELLBOOK_COORDINATES_X.values())[row], list(I.info.SPELLBOOK_COORDINATES_Y.values())[collumn], item_w, item_h])
 def display_gif_on_subimage(sub_image, size, pos, gif):
     frame = gif.next_frame(-1)
@@ -629,7 +631,7 @@ def cast_spell_handle(sub_image, data, spells, gifs, mob, song):
                             if rect.colliderect(mob_rect):
                                 mob[key].deal_damage(current_mob, data["Player"], spells.spell_dict[spell])
                                 gifs[spell].start_gif = False # IF COMMENTED OUT, MAKES A SPELL GO THROUGH MULTIPLE ENEMIES
-                                type = spells.spell_dict[spell].split(" ")[1]
+                                type = spells.spell_dict[spell]["type"]
                                 gifs[type].Start_gif(type, current_mob)
                                 curr_song = song["Playing"]
                                 sound_type = {"Force": song[curr_song].generate_magic_sound(),

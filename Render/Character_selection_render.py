@@ -29,7 +29,11 @@ def Char_Select(screen):
     buttons = {}
     frame_main_menu = Ff.add_image_to_screen(screen, path + 'Frame_main_menu.png', [S_LEFT, S_TOP, S_F_WIDTH, S_F_HEIGHT])
     buttons["New"] = Ff.add_image_to_screen(screen, path + 'Empty.png', [B_LEFT, B_TOP1, BUTTON_WIDTH, BUTTON_HEIGHT])
-    buttons["New_text"] = Ff.display_text(screen, "New", 30, (B_LEFT + BUTTON_WIDTH / 2.5, B_TOP1 + BUTTON_HEIGHT / 4), "black")
+    if number_of_chars() > 9:
+        color = "grey"
+    else:
+        color = "black"
+    buttons["New_text"] = Ff.display_text(screen, "New", 30, (B_LEFT + BUTTON_WIDTH / 2.5, B_TOP1 + BUTTON_HEIGHT / 4), color)
     buttons["New"] = buttons["New"].union(buttons["New_text"])
 
     buttons["Load"] = Ff.add_image_to_screen(screen, path + 'Empty.png',[B_LEFT, B_TOP2, BUTTON_WIDTH, BUTTON_HEIGHT])
@@ -45,6 +49,15 @@ def Char_Select(screen):
     buttons["Main Menu"] = buttons["Main Menu"].union(buttons["Main Menu_text"])
     I.pg.display.flip()
     return buttons
+
+def number_of_chars():
+    entries = os.listdir("static/data/created_characters/")
+
+    # Filter out only directories
+    folders = [entry for entry in entries if os.path.isdir(os.path.join("static/data/created_characters/", entry))]
+
+    # Return the count of directories
+    return len(folders)
 
 def load_exists():
     return os.path.exists("static/data/created_characters/")

@@ -108,8 +108,10 @@ class Mob:
             knockback = 0
             type = weapon.split("_")[1]  # get's effect
         else:
-            damage, type, route, mana_cost, knockback, level = weapon.split(" ")
+            damage = weapon["damage"]
             damage = random.randint(int(damage.split("d")[0]),int(damage.split("d")[1]))
+            knockback = weapon["knockback"]
+            type = weapon["type"]
 
         if victim["allignment"] == 5:
             victim["allignment"] = 6

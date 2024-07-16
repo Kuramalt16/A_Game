@@ -331,3 +331,81 @@ def rename_images_in_folder(folder_path):
 #
 # # Quit Pygame
 # pygame.quit()
+
+def create_table_if_not_exists(cursor, table_name, columns):
+    """
+    Create a table if it does not exist.
+
+    Args:
+        cursor (sqlite3.Cursor): SQLite cursor object.
+        table_name (str): Name of the table to create.
+        columns (list of tuples): Column definitions in the format (name, type).
+    """
+    columns_sql = ', '.join([f"{name} {type}" for name, type in columns])
+    create_table_sql = f"CREATE TABLE IF NOT EXISTS {table_name} ({columns_sql})"
+    cursor.execute(create_table_sql)
+
+def upload_data_to_db(table, data):
+    import sqlite3
+    """
+    Upload data to the specified table in the database. If an entry with the same name exists, update it.
+    Otherwise, insert a new entry.
+
+    Args:
+        table (str): The table name.
+        data (list): The data to insert/update in the table.
+    """
+    conn = sqlite3.connect("C:/Users/gytis/PycharmProjects/A_Game/static/data/A_Game.db")
+    cursor = conn.cursor()
+
+    tables = {
+        "items": [("name", "TEXT"), ("cost", "INTEGER"), ("properties", "TEXT"), ("aquire", "TEXT")],
+        "spells": [("name", "TEXT"), ("damage", "TEXT"), ("type", "TEXT"), ("direction", "TEXT"),
+                   ("mana", "INTEGER"), ("knockback", "INTEGER"), ("level", "INTEGER"), ("recharge", "INTEGER"),
+                   ("description", "TEXT")]
+    }
+
+    if table not in tables:
+        raise ValueError(f"Unknown table: {table}")
+
+    # Create table if it doesn't exist
+    create_table_if_not_exists(cursor, table, tables[table])
+
+    # Check if an entry with the same name exists
+    cursor.execute(f"SELECT * FROM {table} WHERE name = ?", (data[0],))
+    existing_entry = cursor.fetchone()
+
+    if existing_entry:
+        # If entry exists, update it
+        set_clause = ', '.join([f"{column[0]} = ?" for column in tables[table]])
+        update_sql = f"UPDATE {table} SET {set_clause} WHERE name = ?"
+        cursor.execute(update_sql, (*data, data[0]))
+    else:
+        # If entry does not exist, insert a new entry
+        placeholders = ', '.join(['?' for _ in data])
+        insert_sql = f"INSERT INTO {table} VALUES ({placeholders})"
+        cursor.execute(insert_sql, data)
+
+    conn.commit()
+    cursor.close()
+    conn.close()
+
+
+# Upload_data_to_db(
+#     "items",
+#     [("name", "TEXT"), ("cost", "INTEGER"), ("properties", "TEXT"), ("aquire", "TEXT")],
+#     ["Light Berries", 1, "CONSUMABLE(1-hp,,1-Exhaustion)", "HARVEST Bush_S_2,,1,,4,,5"])
+
+
+# NAME # DAMAGE # TYPE # DIRECTION # MANA # KNOCKBACK # LEVEL # RECHARGE ( 1 = 100ms ) # DESCRIPTION
+# Upload_data_to_db(
+#     "spells",
+#     ["Magic Bolt", "'1d4'", "Force", "LINE", 3, 3, 1, 3, "A blast of raw magical force"])
+#
+# Upload_data_to_db(
+#     "spells",
+#     ["Fire Bolt", "'1d4'", "Fire", "LINE", 5, 1, 2, 5, "A blast of fire that burns everything to cinders"])
+#
+# upload_data_to_db(
+#     "spells",
+#     ["Cold Bolt", '"1d4"', "Cold", "LINE", 6, 0, 3, 10, "A blast of ice that freezes the target"])

@@ -107,15 +107,9 @@ SPELL_PATHS = {
 }
 ITEM_PATHS = {
     "Light Berries": 'static/images/Items/Light Berries.png',
-    "Light Berries Data": 'static/items/data/Light Berries.txt',
-
     "Slime Ball": 'static/images/Items/Slime Ball.png',
-    "Slime Ball Data": 'static/items/data/Slime Ball.txt',
-
     "Meat0": 'static/images/Items/Meat0.png',
-    "Meat0 Data": 'static/items/data/Meat0.txt',
     "Meat1": 'static/images/Items/Meat1.png',
-    "Meat1 Data": 'static/items/data/Meat1.txt',
 }
 DECOR_PATH = {
     "Grass":    'static/images/Background/Grass.png',

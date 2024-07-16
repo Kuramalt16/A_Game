@@ -1,15 +1,19 @@
 from Values import Settings as S
+from utils import Frequent_functions as Ff, Imports as I
 class Items:
     def __init__(self):
         self.item_dict = {}
         self.add_items()
 
     def add_items(self):
-        for name, path in S.ITEM_PATHS.items():
-            if ".txt" in path:
-                with open(path, 'r') as file:
-                    lines = file.readlines()
-                    self.item_dict[name[:-5]] = {"Cost": lines[1].split("=")[1][:-2],
-                                            "Properties": lines[2].split("=")[1][:-2],
-                                            "Aquire": lines[3].split("=")[1][:-2]}
+        db_data = Ff.read_data_from_db("items", ["name", "cost", "properties", "aquire"])
+        for data in db_data:
+            print(data[3])
+            print(data[2])
+            self.item_dict[data[0]] = {"Cost": data[1],
+                                    "Properties": data[2],
+                                    "Aquire": data[3]}
+            if "HARVEST" in data[3]:
+                harvestable = data[3][8:].split(",,")[0]
+                I.info.HARVESTABLE[harvestable] = data[0]
 

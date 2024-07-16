@@ -109,13 +109,13 @@ def handle_keydown(event, data, spells, gifs):
         target_slot = key_to_slot[event.key]
         for slot, spell in spells.selected_spell.items():
             if spells.spell_cooloff.get(spell) == None:
-                if slot == target_slot and not gifs[spell].start_gif and data["Player"]["mana"][0] >= int(spells.spell_dict[spell].split(" ")[3]):
+                if slot == target_slot and not gifs[spell].start_gif and data["Player"]["mana"][0] >= int(spells.spell_dict[spell]["mana"]):
                     gifs[spell].Start_gif(spell, 1)
-                    data["Player"]["mana"] = (data["Player"]["mana"][0] - int(spells.spell_dict[spell].split(" ")[3]), data["Player"]["mana"][1])
+                    data["Player"]["mana"] = (data["Player"]["mana"][0] - int(spells.spell_dict[spell]["mana"]), data["Player"]["mana"][1])
             elif spells.spell_cooloff[spell] == 0:
-                if slot == target_slot and not gifs[spell].start_gif and data["Player"]["mana"][0] >= int(spells.spell_dict[spell].split(" ")[3]):
+                if slot == target_slot and not gifs[spell].start_gif and data["Player"]["mana"][0] >= int(spells.spell_dict[spell]["mana"]):
                     gifs[spell].Start_gif(spell, 1)
-                    data["Player"]["mana"] = (data["Player"]["mana"][0] - int(spells.spell_dict[spell].split(" ")[3]), data["Player"]["mana"][1])
+                    data["Player"]["mana"] = (data["Player"]["mana"][0] - int(spells.spell_dict[spell]["mana"]), data["Player"]["mana"][1])
 
 
 
@@ -155,6 +155,13 @@ def handle_timer_actions(event, timers, data, mob, spells):
         for key in spells.spell_cooloff.keys():
             if spells.spell_cooloff[key] != 0:
                 spells.spell_cooloff[key] -= 1
+
+    elif timers["healing"] == event.type and I.pg.time.get_ticks() - data["Player"]["Last_hit"] > 20000 and data["Player"]["Exhaustion"][0] >= 90:
+        if data["Player"]["hp"][0] < data["Player"]["hp"][1]:
+            data["Player"]["hp"] = (data["Player"]["hp"][0] + 1, data["Player"]["hp"][1])
+        if data["Player"]["mana"][0] < data["Player"]["mana"][1]:
+            data["Player"]["mana"] = (data["Player"]["mana"][0] + 1, data["Player"]["mana"][1])
+
 def handle_timers():
     timers = {}
     EXHAUSTION_TIM = I.pg.USEREVENT + 1
@@ -184,6 +191,10 @@ def handle_timers():
     spell_cooloff = I.pg.USEREVENT + 7
     I.pg.time.set_timer(spell_cooloff, 100)
     timers["spell_cooloff"] = spell_cooloff
+
+    healing = I.pg.USEREVENT + 8
+    I.pg.time.set_timer(healing, 1000)
+    timers["healing"] = healing
 
     return timers
 
@@ -253,6 +264,7 @@ def keypress_handle(screen, data, song, items, spells):
 
 def interract(collide, data, gifs, items, screen):
     if collide:
+        print(collide[0])
         if collide[0] in I.info.HARVESTABLE.keys() and not data["Player"]["dead"]:
             if any((collide[1], collide[2]) == (t[0], t[1]) for t in I.info.HARVESTED_OBJECTS.get(collide[0], [])):
                 pass
@@ -260,13 +272,15 @@ def interract(collide, data, gifs, items, screen):
                 item = I.info.HARVESTABLE[collide[0]]
                 amount = random.randrange(1, 5)
                 br.add_to_backpack(item, amount)
-
+                duration = int(items.item_dict[item]["Aquire"].split(",,")[3]) - 4
+                print(duration)
                 #  Handle registering items that were taken, used in not allowing collection of too many items from single bush
                 if I.info.HARVESTED_OBJECTS.get(collide[0]) == []:
-                    I.info.HARVESTED_OBJECTS[collide[0]] = [(collide[1], collide[2], 5)]
+                    I.info.HARVESTED_OBJECTS[collide[0]] = [(collide[1], collide[2], duration)]
                 else:
                     existing_values = I.info.HARVESTED_OBJECTS.get(collide[0], [])
-                    existing_values.append((collide[1], collide[2], 5))
+
+                    existing_values.append((collide[1], collide[2], duration))
                     I.info.HARVESTED_OBJECTS[collide[0]] = existing_values
 
                 I.info.TEXT.append("Recieved " + str(amount) + " " + str(item) + ",,5000")
@@ -289,15 +303,14 @@ def interract(collide, data, gifs, items, screen):
     return
 
 def harvest_timeout():
-    for harvastable in  I.info.HARVESTED_OBJECTS.keys():
+    for harvastable in I.info.HARVESTED_OBJECTS.keys():
         if I.info.HARVESTED_OBJECTS[harvastable] != []:
             for i in range(0, len(I.info.HARVESTED_OBJECTS[harvastable])):
                 # print(i, I.info.HARVESTED_OBJECTS[harvastable])
+                if I.info.HARVESTED_OBJECTS[harvastable][i][2] != 0:
+                    I.info.HARVESTED_OBJECTS[harvastable][i] = (I.info.HARVESTED_OBJECTS[harvastable][i][0], I.info.HARVESTED_OBJECTS[harvastable][i][1], I.info.HARVESTED_OBJECTS[harvastable][i][2] - 1)
                 if I.info.HARVESTED_OBJECTS[harvastable][i][2] == 0:
                     I.info.HARVESTED_OBJECTS[harvastable].pop(i)
-                    break
-                else:
-                    I.info.HARVESTED_OBJECTS[harvastable][i] = (I.info.HARVESTED_OBJECTS[harvastable][i][0], I.info.HARVESTED_OBJECTS[harvastable][i][1], I.info.HARVESTED_OBJECTS[harvastable][i][2] - 1)
 
 
 def update_display_text(screen, gifs, data, collide):
