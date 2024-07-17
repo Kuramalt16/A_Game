@@ -169,14 +169,12 @@ def handle_timer_actions(event, timers, data, mob, spells, decorations):
         if decorations.effected_decor != {}:
             dict_to_burn = []
             for old_index, effect in decorations.effected_decor.items():
-                # print(index)
                 if effect in ["Fire"]:
                     rect = decorations.displayed_rects[old_index]
                     for option in decorations.decor_dict.keys():
                         for index in decorations.decor_dict[option].keys():
                             if isinstance(index, int):
                                 new_rect = I.pg.Rect(decorations.decor_dict[option][index]["rect"].x - data["Zoom_rect"].x, decorations.decor_dict[option][index]["rect"].y - data["Zoom_rect"].y, decorations.decor_dict[option][index]["rect"].w, decorations.decor_dict[option][index]["rect"].h)
-                                # print(new_rect, rect, index, option)
                                 if new_rect == rect:
                                     # found the index for the decorations.decor_dict.
                                     if "True" in decorations.decor_dict[option]["flamable"]:
@@ -187,12 +185,10 @@ def handle_timer_actions(event, timers, data, mob, spells, decorations):
                                             duration = int(decorations.decor_dict[option][index]["effect"].split(",,")[1])
                                             duration -= 1
                                             decorations.decor_dict[option][index]["effect"] = "Fire,," + str(duration)
-                                        print(decorations.decor_dict[option][index]["effect"])
                                         if duration == 0:
                                             dict_to_burn.append((option, index, old_index))
             if dict_to_burn != []:
                 for option, index, old_index in dict_to_burn:
-                    print(decorations.decor_dict)
                     del decorations.decor_dict[option][index]
                     del decorations.effected_decor[old_index]
 def handle_timers():
@@ -337,7 +333,6 @@ def harvest_timeout():
     for harvastable in I.info.HARVESTED_OBJECTS.keys():
         if I.info.HARVESTED_OBJECTS[harvastable] != []:
             for i in range(0, len(I.info.HARVESTED_OBJECTS[harvastable])):
-                # print(i, I.info.HARVESTED_OBJECTS[harvastable])
                 if I.info.HARVESTED_OBJECTS[harvastable][i][2] != 0:
                     I.info.HARVESTED_OBJECTS[harvastable][i] = (I.info.HARVESTED_OBJECTS[harvastable][i][0], I.info.HARVESTED_OBJECTS[harvastable][i][1], I.info.HARVESTED_OBJECTS[harvastable][i][2] - 1)
                 if I.info.HARVESTED_OBJECTS[harvastable][i][2] == 0:

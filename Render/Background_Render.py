@@ -122,13 +122,19 @@ def handle_mob_speed(data, current_mob, decorations, mob):
     current_frame = current_mob["gif_frame"][0]
     frame_count = current_mob["gif_frame"][1]
     if current_frame % 2 == 0:
-        if not data["Player"]["dead"] and current_mob["allignment"] == 6:
-            target_pos = (me.x + data["Zoom_rect"].x, me.y + data["Zoom_rect"].y)
-            mob_rect = current_mob["rect"][current_frame]
+        target_pos = (me.x + data["Zoom_rect"].x, me.y + data["Zoom_rect"].y)
+        mob_rect = current_mob["rect"][current_frame]
+        if not data["Player"]["dead"] and current_mob["allignment"] in [6, 8]:
             mob_rect.x, mob_rect.y, current_mob["visible"] = Ff.move_towards(target_pos, current_mob, speed, decorations.displayed_rects, data["Zoom_rect"])
+            mob.update_position(mob_rect.x, mob_rect.y, current_mob)
+            if current_mob["allignment"] == 8:
+                current_mob["allignment"] = 4
+        elif not data["Player"]["dead"] and current_mob["allignment"] == 4 and current_mob["hp"][0] < current_mob["hp"][1]:
+            mob_rect.x, mob_rect.y, current_mob["visible"] = Ff.move_away_from(target_pos, current_mob, speed, decorations.displayed_rects, data["Zoom_rect"])
             mob.update_position(mob_rect.x, mob_rect.y, current_mob)
         else:
             current_mob["visible"] = False
+
 def handle_damage_type_visualisation(sub_image, current_mob, gifs, pos, data, mob, decorations):
     for key in gifs.keys():
         if gifs[key].start_gif and current_mob == gifs[key].rect:

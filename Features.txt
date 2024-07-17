@@ -66,10 +66,6 @@
 * PRIORITY: HIGH
 * NEEDS: implementation where mobs can "see" you attacking others (seeing is less than 100 distance) function for efficient checking how far mobs are.
 
-* DESC: do allignments 4 - neutral good, (doesn't attack, runs away if provoked)
-* PRIORITY: HIGH
-* NEEDS: function for running away from player
-
 * DESC: do allignments 3 - lawful evil ( debufs you or steals from you unprovoked, attacks if you attack )
 * PRIORITY: HIGH
 * NEEDS: coin, str, dex, con, int, wis, cha modifyers
@@ -115,6 +111,10 @@
 * NEEDS: skilltree, music, window
 
 * DESC: make effect last on more than one mob
+* PRIORITY: Medium
+* NEEDS: willpower
+
+* DESC: display embers, ashes instead of deleting objects
 * PRIORITY: Medium
 * NEEDS: willpower
 

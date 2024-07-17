@@ -13,7 +13,11 @@
 * DESC: once hit with physical attack it hits several times instead of once. fix it
 * PRIORITY: LOW
 
+* DESC: spell effects on mobs dont go away anymore. fix it
+* PRIORITY: LOW
 
+* DESC: walking into a rect and then having collide is fucked. do a lil fuckup so when you letgo of the key you are transported back by one pixel. but while you press and hold you dont move. combination of key press down/up and of constant holding.
+* PRIORITY: LOW
 
 
 # Optimization

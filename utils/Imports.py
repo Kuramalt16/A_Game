@@ -20,3 +20,4 @@ import heapq
 import numpy as np
 from static.data.Character_byte_data import CharacterData
 import sqlite3
+import random

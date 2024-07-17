@@ -13,7 +13,7 @@ CURRENT_STANCE = 0
 LAST_ORIENT = ["Front.png", "_Walk.png", "_Walk1.png"]
 
 HARVESTABLE = {}
-ENTERABLE = ["House_1", "Church_1"]
+ENTERABLE = [] # Place holder for places that can be entered
 
 BACKPACK_CONTENT = {}
 BACKPACK_COORDINATES_X = {}
@@ -26,18 +26,6 @@ SPELLBOOK_COORDINATES_Y = {}
 
 TEXT = [] # place holder for displayable text on the screen
 
-HARVESTED_OBJECTS = {
-    # "Bush_S_2": []
-}
-# CONSUMABLE = ["Light Berries"]
-
-# EQUIPED = {"Hand1": 0,
-#            "Hand2": 0,
-#            "Legs": 0,
-#            "Arms": 0,
-#            "Feet": 0,
-#            "Head": 0,
-#            }
-# Mob_possition = 0
+HARVESTED_OBJECTS = {} # Place holder for harvested decoration lists which contain rects
 
 COMBAT_RECT = 0

@@ -372,6 +372,73 @@ def move_towards(target, current_mob, step_size, obstacles, zoom_rect):
             return test_x, test_y, True
     return current_x, current_y, False
 
+def move_away_from(target, current_mob, step_size, obstacles, zoom_rect):
+    """
+    Move the mob away from the target position while avoiding obstacles.
+
+    Args:
+        target (tuple): Target position (x, y).
+        mob_rect (Rect): The Rect object for the mob.
+        step_size (float): The step size for each movement.
+        obstacles (list): List of Rect objects representing obstacles.
+        zoom_rect (Rect): The Rect object for the zoomed area of the screen.
+
+    Returns:
+        tuple: New (x, y) position for the mob.
+    """
+    if step_size > 1:
+        step_size = 1
+    else:
+        step_size = 0
+    # Current position
+    current_x, current_y = current_mob['current_pos'].topleft
+
+    # Calculate direction vector and distance to the target
+    direction_x, direction_y = current_x - target[0], current_y - target[1]
+    distance = (direction_x ** 2 + direction_y ** 2) ** 0.5
+
+    if distance > 100:
+        return current_x, current_y, False
+
+    # Normalize direction vector
+    if distance > 0:
+        direction_x /= distance
+        direction_y /= distance
+
+    # Calculate new position
+    new_x = current_x + direction_x * step_size
+    new_y = current_y + direction_y * step_size
+
+    # Create new Rect for the potential new position
+    new_rect = I.pg.Rect(new_x - zoom_rect.x, new_y - zoom_rect.y, current_mob['current_pos'].w, current_mob['current_pos'].h)
+
+    # Check for collisions
+    if not any(obstacle.colliderect(new_rect) for obstacle in obstacles):
+        return new_x, new_y, True
+
+    if abs(direction_x) > abs(direction_y):  # Moving mostly horizontally
+        # Move Up, Down, and diagonals
+        alternate_moves = [
+            (0, step_size), (0, -step_size),  # Up, Down
+            (step_size, step_size), (step_size, -step_size),  # Down-Right, Up-Right
+            (-step_size, step_size), (-step_size, -step_size)  # Down-Left, Up-Left
+        ]
+    else:  # Moving mostly vertically
+        # Move Left, Right, and diagonals
+        alternate_moves = [
+            (step_size, 0), (-step_size, 0),  # Right, Left
+            (step_size, step_size), (step_size, -step_size),  # Down-Right, Up-Right
+            (-step_size, step_size), (-step_size, -step_size)  # Down-Left, Up-Left
+        ]
+
+    # Attempt to move around obstacles
+    for dx, dy in alternate_moves:
+        test_x = new_x + dx
+        test_y = new_y + dy
+        test_rect = I.pg.Rect(test_x - zoom_rect.x, test_y - zoom_rect.y, current_mob['current_pos'].w, current_mob['current_pos'].h)
+        if not any(obstacle.colliderect(test_rect) for obstacle in obstacles):
+            return test_x, test_y, True
+    return current_x, current_y, False
 
 
 
