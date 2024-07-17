@@ -96,20 +96,28 @@
 
 * DESC: add blinker spell
 * PRIORITY: Medium
-* NEEDS: spawnpoints
+* NEEDS: willpower
 
 * DESC: add necrotic, lighting, thunder, radiant, acid, poison, psychic bolts
 * PRIORITY: Medium
-* NEEDS: spawnpoints
+* NEEDS: willpower
 
 * DESC: make fire spell burn flammable objects
 * PRIORITY: Medium
-* NEEDS: spawnpoints
+* NEEDS: decoration sqlite database.
 
-* DESC: make screen stop in a single spot but let the character move
+* DESC: make screen stop in a single spot but let the character move at the edges
 * PRIORITY: Medium
 * NEEDS: willpower
 
 * DESC: make levelup a thing. when level up a window appears that a level up has been reached. all hp, mana is restored.
 * PRIORITY: Medium
 * NEEDS: skilltree, music, window
+
+* DESC: make effect last on more than one mob
+* PRIORITY: Medium
+* NEEDS: willpower
+
+* DESC: display embers, ashes instead of deleting objects
+* PRIORITY: Medium
+* NEEDS: willpower

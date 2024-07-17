@@ -109,7 +109,7 @@ class Mob:
             type = weapon.split("_")[1]  # get's effect
         else:
             damage = weapon["damage"]
-            damage = random.randint(int(damage.split("d")[0]),int(damage.split("d")[1]))
+            damage = random.randint(int(damage.split("d")[0]), int(damage.split("d")[1]))
             knockback = weapon["knockback"]
             type = weapon["type"]
 

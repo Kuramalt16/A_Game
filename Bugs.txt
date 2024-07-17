@@ -10,6 +10,12 @@
 * DESC: after casting spell sometimes it's double casted only happens when spell is cast for the first time.
 * PRIORITY: LOW
 
+* DESC: once hit with physical attack it hits several times instead of once. fix it
+* PRIORITY: LOW
+
+
+
+
 # Optimization
 
 * Decreased Character selection processing time from 600 ms to 200 ms ( by adding ranges where to search for color pixels)

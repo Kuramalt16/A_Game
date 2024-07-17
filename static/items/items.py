@@ -8,8 +8,6 @@ class Items:
     def add_items(self):
         db_data = Ff.read_data_from_db("items", ["name", "cost", "properties", "aquire"])
         for data in db_data:
-            print(data[3])
-            print(data[2])
             self.item_dict[data[0]] = {"Cost": data[1],
                                     "Properties": data[2],
                                     "Aquire": data[3]}

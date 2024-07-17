@@ -362,7 +362,8 @@ def upload_data_to_db(table, data):
         "items": [("name", "TEXT"), ("cost", "INTEGER"), ("properties", "TEXT"), ("aquire", "TEXT")],
         "spells": [("name", "TEXT"), ("damage", "TEXT"), ("type", "TEXT"), ("direction", "TEXT"),
                    ("mana", "INTEGER"), ("knockback", "INTEGER"), ("level", "INTEGER"), ("recharge", "INTEGER"),
-                   ("description", "TEXT")]
+                   ("description", "TEXT")],
+        "decor": [("name", "TEXT"), ("harvestable", "TEXT"), ("flamable", "TEXT")]
     }
 
     if table not in tables:
@@ -409,3 +410,20 @@ def upload_data_to_db(table, data):
 # upload_data_to_db(
 #     "spells",
 #     ["Cold Bolt", '"1d4"', "Cold", "LINE", 6, 0, 3, 10, "A blast of ice that freezes the target"])
+
+# upload_data_to_db(
+#     "decor",
+#     ["Bush_S_1", '', "True,,10"])
+#
+# upload_data_to_db(
+#     "decor",
+#     ["Bush_S_2", 'HARVESTABLE:Light Berries', "True,,10"])
+#
+# upload_data_to_db(
+#     "decor",
+#     ["Tree_T_1", '', "True,,5"])
+#
+# upload_data_to_db(
+#     "decor",
+#     ["House_1", 'ENTERABLE:Door,,ENTERABLE:Window', "True,,100"])
+

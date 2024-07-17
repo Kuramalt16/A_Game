@@ -18,7 +18,8 @@ movement = {
 def Start(screen, clock):
     mob = {
         "Slime_S": I.mob_data.Mob(name="Slime_S", exp=10, hp=8, allignment=5, count=20, damage=(2, "blunt"), speed=4),
-        "Pig": I.mob_data.Mob(name="Pig", exp=5, hp=6, allignment=4, count=20, damage=(1, "blunt"), speed=6),
+        # "Pig": I.mob_data.Mob(name="Pig", exp=5, hp=6, allignment=4, count=20, damage=(1, "blunt"), speed=6),
+        "Pig": I.mob_data.Mob(name="Pig", exp=5, hp=100, allignment=4, count=20, damage=(1, "blunt"), speed=6),
            }
     gifs = {"ghost": I.gifs.Gif(name="Dead", frame_count=8, initial_path=S.PLAYING_PATH["Dead"], delay=50),
             "Portal": I.gifs.Gif(name="Portal", frame_count=34, initial_path=S.PLAYING_PATH["Portal"], delay=100),
@@ -36,9 +37,10 @@ def Start(screen, clock):
                  }
     items = I.items.Items()
     spells = I.Spells.Spells()
+    decorations = I.decor.Decorations()
     collide = [False]
     pressed = 0
-    data = br.Start([I.info.START_POS[0], I.info.START_POS[1]], mob)
+    data = br.Start(mob, decorations)
     last_orientation = (0, 0)
 
     songs = {"Background": I.Songs.Song("Background", I.A.background_music),
@@ -53,13 +55,14 @@ def Start(screen, clock):
             if event.type == I.pg.QUIT:
                 S.PLAY = False
             if event.type in timers.values():
-                handle_timer_actions(event, timers, data, mob, spells)
+                handle_timer_actions(event, timers, data, mob, spells, decorations)
             if event.type == I.pg.KEYDOWN:
                 pressed = handle_keydown(event, data, spells, gifs)
             if event.type == I.pg.KEYUP:
                 pressed = handle_keyup(event, pressed, gifs, songs, screen, items, data, collide)
 
-        collide = br.Update(screen, data, mob, gifs, songs, spells)
+        collide = br.Update(screen, data, mob, gifs, songs, spells, decorations)
+
 
         dx, dy, gif_time = keypress_handle(screen, data, songs, items, spells)
 
@@ -108,14 +111,18 @@ def handle_keydown(event, data, spells, gifs):
     if event.key in [I.pg.K_a, I.pg.K_s, I.pg.K_d, I.pg.K_f, I.pg.K_g]:
         target_slot = key_to_slot[event.key]
         for slot, spell in spells.selected_spell.items():
-            if spells.spell_cooloff.get(spell) == None:
-                if slot == target_slot and not gifs[spell].start_gif and data["Player"]["mana"][0] >= int(spells.spell_dict[spell]["mana"]):
+            is_spell_ready = spells.spell_cooloff.get(spell) in [None, 0]
+            is_target_slot = slot == target_slot
+            has_enough_mana = data["Player"]["mana"][0] >= int(spells.spell_dict[spell]["mana"])
+            is_gif_not_started = not gifs[spell].start_gif
+
+            if is_spell_ready and is_target_slot:
+                if is_gif_not_started and has_enough_mana:
                     gifs[spell].Start_gif(spell, 1)
-                    data["Player"]["mana"] = (data["Player"]["mana"][0] - int(spells.spell_dict[spell]["mana"]), data["Player"]["mana"][1])
-            elif spells.spell_cooloff[spell] == 0:
-                if slot == target_slot and not gifs[spell].start_gif and data["Player"]["mana"][0] >= int(spells.spell_dict[spell]["mana"]):
-                    gifs[spell].Start_gif(spell, 1)
-                    data["Player"]["mana"] = (data["Player"]["mana"][0] - int(spells.spell_dict[spell]["mana"]), data["Player"]["mana"][1])
+                    data["Player"]["mana"] = (
+                    data["Player"]["mana"][0] - int(spells.spell_dict[spell]["mana"]), data["Player"]["mana"][1])
+                else:
+                    I.info.TEXT.append("Not enough MANA,,3000")
 
 
 
@@ -131,37 +138,63 @@ def handle_mob_respawn(mob, data):
         mob.mobs.append(mob.create_mob(id))
         data[mob.name] = br.generate_mobs(mob, data["Image_rect"].size)
 
-def handle_timer_actions(event, timers, data, mob, spells):
+def handle_timer_actions(event, timers, data, mob, spells, decorations):
     if timers["Exhaustion"] == event.type:
         data["Player"]["Exhaustion"] = (data["Player"]["Exhaustion"][0] - 1, data["Player"]["Exhaustion"][1])
     elif timers["Mob_respawn"] == event.type:
         handle_mob_respawn(mob, data)
     elif timers["Harvest"] == event.type:
         harvest_timeout()
-    elif timers["Strike"] == event.type:
-        I.info.COMBAT_RECT = 0
     elif timers["Walk"] == event.type:
         I.info.CURRENT_STANCE += 1
         if I.info.CURRENT_STANCE > 3:
             I.info.CURRENT_STANCE = 0
     elif timers["mob_gif"] == event.type:
+        I.info.COMBAT_RECT = 0
         for key in mob.keys():
             for current_mob in mob[key].mobs:
                 current_mob["gif_frame"] = (current_mob["gif_frame"][0] + 1, current_mob["gif_frame"][1])
                 if current_mob["gif_frame"][0] == current_mob["gif_frame"][1]:
                     mob[key].move_mobs_randomly()
                     current_mob["gif_frame"] = (0, current_mob["gif_frame"][1])
-    elif timers["spell_cooloff"] == event.type:
         for key in spells.spell_cooloff.keys():
             if spells.spell_cooloff[key] != 0:
                 spells.spell_cooloff[key] -= 1
-
-    elif timers["healing"] == event.type and I.pg.time.get_ticks() - data["Player"]["Last_hit"] > 20000 and data["Player"]["Exhaustion"][0] >= 90:
-        if data["Player"]["hp"][0] < data["Player"]["hp"][1]:
-            data["Player"]["hp"] = (data["Player"]["hp"][0] + 1, data["Player"]["hp"][1])
-        if data["Player"]["mana"][0] < data["Player"]["mana"][1]:
-            data["Player"]["mana"] = (data["Player"]["mana"][0] + 1, data["Player"]["mana"][1])
-
+    elif timers["healing"] == event.type:
+        if I.pg.time.get_ticks() - data["Player"]["Last_hit"] > 20000 and data["Player"]["Exhaustion"][0] >= 90:
+            if data["Player"]["hp"][0] < data["Player"]["hp"][1]:
+                data["Player"]["hp"] = (data["Player"]["hp"][0] + 1, data["Player"]["hp"][1])
+            if data["Player"]["mana"][0] < data["Player"]["mana"][1]:
+                data["Player"]["mana"] = (data["Player"]["mana"][0] + 1, data["Player"]["mana"][1])
+        if decorations.effected_decor != {}:
+            dict_to_burn = []
+            for old_index, effect in decorations.effected_decor.items():
+                # print(index)
+                if effect in ["Fire"]:
+                    rect = decorations.displayed_rects[old_index]
+                    for option in decorations.decor_dict.keys():
+                        for index in decorations.decor_dict[option].keys():
+                            if isinstance(index, int):
+                                new_rect = I.pg.Rect(decorations.decor_dict[option][index]["rect"].x - data["Zoom_rect"].x, decorations.decor_dict[option][index]["rect"].y - data["Zoom_rect"].y, decorations.decor_dict[option][index]["rect"].w, decorations.decor_dict[option][index]["rect"].h)
+                                # print(new_rect, rect, index, option)
+                                if new_rect == rect:
+                                    # found the index for the decorations.decor_dict.
+                                    if "True" in decorations.decor_dict[option]["flamable"]:
+                                        duration = decorations.decor_dict[option]["flamable"].split(",,")[1]
+                                        if decorations.decor_dict[option][index]["effect"] == "":
+                                            decorations.decor_dict[option][index]["effect"] = "Fire,," + str(duration)
+                                        else:
+                                            duration = int(decorations.decor_dict[option][index]["effect"].split(",,")[1])
+                                            duration -= 1
+                                            decorations.decor_dict[option][index]["effect"] = "Fire,," + str(duration)
+                                        print(decorations.decor_dict[option][index]["effect"])
+                                        if duration == 0:
+                                            dict_to_burn.append((option, index, old_index))
+            if dict_to_burn != []:
+                for option, index, old_index in dict_to_burn:
+                    print(decorations.decor_dict)
+                    del decorations.decor_dict[option][index]
+                    del decorations.effected_decor[old_index]
 def handle_timers():
     timers = {}
     EXHAUSTION_TIM = I.pg.USEREVENT + 1
@@ -176,9 +209,9 @@ def handle_timers():
     I.pg.time.set_timer(Harvest_timer, 60000)
     timers["Harvest"] = Harvest_timer
 
-    Strike = I.pg.USEREVENT + 4
-    I.pg.time.set_timer(Strike, 100)
-    timers["Strike"] = Strike
+    # Strike = I.pg.USEREVENT + 4 FUSED WITH MOB_GIF CUZ SAME TIME, WORKS WONDERFULLY
+    # I.pg.time.set_timer(Strike, 100)
+    # timers["Strike"] = Strike
 
     Walk = I.pg.USEREVENT + 5
     I.pg.time.set_timer(Walk, 300)
@@ -188,9 +221,9 @@ def handle_timers():
     I.pg.time.set_timer(mob_gif, 100)
     timers["mob_gif"] = mob_gif
 
-    spell_cooloff = I.pg.USEREVENT + 7
-    I.pg.time.set_timer(spell_cooloff, 100)
-    timers["spell_cooloff"] = spell_cooloff
+    # spell_cooloff = I.pg.USEREVENT + 7 FUSED WITH MOB_GIF CUZ SAME TIME, WORKS WONDERFULLY
+    # I.pg.time.set_timer(spell_cooloff, 100)
+    # timers["spell_cooloff"] = spell_cooloff
 
     healing = I.pg.USEREVENT + 8
     I.pg.time.set_timer(healing, 1000)
@@ -264,7 +297,6 @@ def keypress_handle(screen, data, song, items, spells):
 
 def interract(collide, data, gifs, items, screen):
     if collide:
-        print(collide[0])
         if collide[0] in I.info.HARVESTABLE.keys() and not data["Player"]["dead"]:
             if any((collide[1], collide[2]) == (t[0], t[1]) for t in I.info.HARVESTED_OBJECTS.get(collide[0], [])):
                 pass
@@ -273,7 +305,6 @@ def interract(collide, data, gifs, items, screen):
                 amount = random.randrange(1, 5)
                 br.add_to_backpack(item, amount)
                 duration = int(items.item_dict[item]["Aquire"].split(",,")[3]) - 4
-                print(duration)
                 #  Handle registering items that were taken, used in not allowing collection of too many items from single bush
                 if I.info.HARVESTED_OBJECTS.get(collide[0]) == []:
                     I.info.HARVESTED_OBJECTS[collide[0]] = [(collide[1], collide[2], duration)]
