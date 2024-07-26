@@ -116,8 +116,12 @@ DECOR_PATH = {
     "Bush_S_1": 'static/images/Background/Bushes/Bush_S_1.png',
     "Bush_S_2": 'static/images/Background/Bushes/Bush_S_2.png',
     "Tree_T_1": 'static/images/Background/Trees/Tree_T_1.png',
+    "Tree_M_1": 'static/images/Background/Trees/Tree_M_1.png',
+    "Tree_M_2": 'static/images/Background/Trees/Tree_M_2.png',
     "House_1":  'static/images/Background/House/House_1.png',
+    "Wooden_tiles":  'static/images/Background/House/Wooden_tiles.png',
     "Church_1":  'static/images/Background/House/Church_1.png',
+
 }
 MOB_PATH = {
     "Slime_S": ('static/images/Mobs/Ooze/Slime_S/', 10),

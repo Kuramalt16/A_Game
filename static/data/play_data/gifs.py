@@ -27,6 +27,8 @@ class Gif:
 
     def next_frame(self, repeat):
         # Check if gif time has passed:
+        if repeat == -1:
+            self.repeat = 1
         if I.pg.time.get_ticks() - self.frame_time > self.delay:
             self.current_frame += 1
             self.frame_time = I.pg.time.get_ticks()

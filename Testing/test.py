@@ -425,5 +425,8 @@ def upload_data_to_db(table, data):
 #
 # upload_data_to_db(
 #     "decor",
-#     ["House_1", 'ENTERABLE:Door,,ENTERABLE:Window', "True,,100"])
-
+#     ["Tree_M_1", 'AXE:Dark Wood', "True,,11"])
+#
+# upload_data_to_db(
+#     "decor",
+#     ["Tree_M_2", 'AXE:Light Wood,,HARVESTABLE:Apple', "True,,10"])

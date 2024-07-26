@@ -19,15 +19,27 @@ class Decorations:
                 if ",," in data[1]:
                     enter_through = data[1].split(",,")[0]
                 I.info.ENTERABLE.append(data[0])
+            # elif "AXE:" in data[1]:
+            #     I.info.AXE_ =
     def generate_decor(self, name, num_of_items, background_size, path):
         for i in range(num_of_items):
-            x = random.randint(0, background_size[0] - 100)
-            y = random.randint(0, background_size[1] - 100)
+            x = random.randint(100, background_size[0] - 200)
+            y = random.randint(100, background_size[1] - 200)
             image = I.pg.image.load(path).convert_alpha()
             rect = image.get_rect(topleft=(x, y))
             self.decor_dict[name][i] = {"name": name, "id": i, "image": image, "rect": rect, "effect": ""}
 
-    def place_decor_by_coordinates(self, name,  x, y, path, scale, rect_scale):
+    def place_decor_by_coordinates(self,  x, y, path, scale, rect_scale):
+        image = I.pg.image.load(path).convert_alpha()
+        rect = image.get_rect(topleft=(x, y))
+        image = I.pg.transform.scale(image, (rect.w * scale[0], rect.h * scale[1]))
+        rect.w = rect.w * rect_scale[0]
+        rect.h = rect.h * rect_scale[1]
+        return image, rect
+
+
+
+    def place_batches_decor_by_coordinates(self, name,  x, y, path, scale, rect_scale):
         image = I.pg.image.load(path).convert_alpha()
         rect = image.get_rect(topleft=(x, y))
         image = I.pg.transform.scale(image, (rect.w * scale[0], rect.h * scale[1]))

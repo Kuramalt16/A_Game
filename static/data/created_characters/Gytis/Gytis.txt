@@ -23,7 +23,7 @@ Last Save: 2024/07/07 21:07
 
 
 Level: 1
-Experience: 0
+Experience: 15
 
 Alignment: Unaligned
 

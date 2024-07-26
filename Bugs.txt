@@ -7,18 +7,14 @@
 * DESC: after minimizing and then increasing the screen slider goes black, due to not using flip
 * PRIORITY: LOW
 
-* DESC: after casting spell sometimes it's double casted only happens when spell is cast for the first time.
+* DESC: spell effects on mobs dont go away sometimes. atkartoti reikia bug.
 * PRIORITY: LOW
 
-* DESC: once hit with physical attack it hits several times instead of once. fix it
+* DESC: house gets deleted and not placed.
 * PRIORITY: LOW
 
-* DESC: spell effects on mobs dont go away anymore. fix it
+* DESC: sometimes walking offscreen fucksup and doesnt let the screen to move
 * PRIORITY: LOW
-
-* DESC: walking into a rect and then having collide is fucked. do a lil fuckup so when you letgo of the key you are transported back by one pixel. but while you press and hold you dont move. combination of key press down/up and of constant holding.
-* PRIORITY: LOW
-
 
 # Optimization
 

@@ -2,35 +2,35 @@
 
 * DESC: Create FPS Slider
 * PRIORITY: LOW
-* NEEDS:
+* NEEDS: willpower
 
 * DESC: Create Volume Slider
 * PRIORITY: LOW
-* NEEDS:
+* NEEDS: willpower
 
 * DESC: Add harvest delay to item class
 * PRIORITY: LOW
-* NEEDS:
+* NEEDS: a reason
 
 * DESC: Add respawn delay to mob class
 * PRIORITY: LOW
-* NEEDS:
+* NEEDS: willpower
 
 * DESC: redo mob class to include multiple diferent mobs
 * PRIORITY: HIGH
-* NEEDS:
+* NEEDS: willpower
 
 * DESC: redo gif class to include multiple diferent gifs
 * PRIORITY: HIGH
-* NEEDS:
+* NEEDS: willpower
 
 * DESC: Add new mobs
 * PRIORITY: HIGH
-* NEEDS: willpower
+* NEEDS: willpower i added pigs
 
 * DESC: Add ghost hunting mobs
 * PRIORITY: Low
-* NEEDS:
+* NEEDS: willpower
 
 * DESC: Add a spell that goes through multiple mobs. add it to class properties
 * PRIORITY: Low
@@ -120,4 +120,44 @@
 
 * DESC: display embers, ashes instead of deleting objects
 * PRIORITY: Medium
+* NEEDS: ashes
+
+* DESC: Create window to pause the game once esc is pressed (with settings, save and exit)
+* PRIORITY: LOW
+* NEEDS: willpower
+
+* DESC: enter into a house
+* PRIORITY: LOW
+* NEEDS: house interior drawing
+
+* DESC: Folowers
+* PRIORITY: LOW
+* NEEDS: meska walking, luna walking
+
+* DESC: tools
+* PRIORITY: LOW
+* NEEDS: drawing
+
+* DESC: add character to the backpack
+* PRIORITY: LOW
+* NEEDS: drawing
+
+* DESC: experience bar to the backpack
+* PRIORITY: LOW
+* NEEDS: willpower
+
+* DESC: add levels (mastery) experience bars to a seperate window let's say the letter "N" controlls it.
+* PRIORITY: LOW
+* NEEDS: drawing
+
+* DESC: add map view
+* PRIORITY: LOW
+* NEEDS: drawing, willpower
+
+* DESC: when decorations are randomly placed. SAVE the locations of them to sqlite and next time instead of generating random, place already existing generated, (will help with maping and going from one place to another)
+* PRIORITY: High
+* NEEDS: willpower, sqlite table for maps. in there should save a count of how many decorations, what kind of decorations and their placements.
+
+* DESC: percise locations to all decorations this is required for when a person enters and exits an inn the decor changes cuz its random. this shouldnt happen in villages. (better fix: define what can be in a village and what cant be, for instance this village is called Rusty Village or sth like that. add to db and make a list of what and how many decorations can be placed. also would be nice to know where).
+* PRIORITY: MEDIUM
 * NEEDS: willpower

@@ -50,6 +50,7 @@ class Mob:
         "image": [],  # Placeholder for the Pygame image list
         "previous_pos": (0, 0, 0, 0),
         "current_pos": (0, 0, 0, 0),
+        "flip": False
 
         }
 
@@ -65,17 +66,45 @@ class Mob:
             mob["current_pos"] = mob["rect"][mob_gif_count-1]
             mob["previous_pos"] = mob["rect"][mob_gif_count-1]
 
-    def move_mobs_randomly(self):
-        """Move all mobs by the given offsets."""
+    def move_mobs_randomly(self, decorations, data):
+        """Move all mobs by random offsets, avoiding and escaping collisions."""
         for mob in self.mobs:
             if not mob["visible"]:
-                # speed = mob["speed"]
-                x = random.randint(-1, 1)
-                y = random.randint(-1, 1)
-                for rect_id in range(len(mob["rect"])):
-                    mob["rect"][rect_id].x += x
-                    mob["rect"][rect_id].y += y
+                # Randomly generate movement offsets
+                x_offset = random.randint(-1, 1)
+                y_offset = random.randint(-1, 1)
 
+                new_rect = mob["rect"][0].copy()
+                new_rect.x += x_offset - data["Zoom_rect"].x
+                new_rect.y += y_offset - data["Zoom_rect"].y
+
+                if not any(new_rect.colliderect(displayed_rect) for displayed_rect in decorations.displayed_rects):
+                    self._update_mob_position(mob, x_offset, y_offset)
+                else:
+                    self._escape_collision(mob, decorations, data)
+
+    def _update_mob_position(self, mob, x_offset, y_offset):
+        """Update the mob's position by the given offsets."""
+        for rect in mob["rect"]:
+            rect.x += x_offset
+            rect.y += y_offset
+
+        if x_offset != 0:
+            mob["flip"] = x_offset < 0
+
+        mob["current_pos"] = mob["rect"][0].copy()
+
+    def _escape_collision(self, mob, decorations, data):
+        """Move the mob out of any collisions."""
+        escape_directions = [(1, 0), (-1, 0), (0, 1), (0, -1)]
+        for x_offset, y_offset in escape_directions:
+            new_rect = mob["rect"][0].copy()
+            new_rect.x += x_offset - data["Zoom_rect"].x
+            new_rect.y += y_offset - data["Zoom_rect"].y
+
+            if not any(new_rect.colliderect(displayed_rect) for displayed_rect in decorations.displayed_rects):
+                self._update_mob_position(mob, x_offset, y_offset)
+                return
     def update_visibility(self, screen, rect, id):
         screen_rect = screen.get_rect()
         if rect.colliderect(screen_rect):
@@ -104,7 +133,7 @@ class Mob:
             knockback = 1
             type = "Blunt"
         elif "effect" in weapon:
-            damage = 0.1
+            damage = 0.05
             knockback = 0
             type = weapon.split("_")[1]  # get's effect
         else:
