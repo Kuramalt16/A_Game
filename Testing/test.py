@@ -430,3 +430,6 @@ def upload_data_to_db(table, data):
 # upload_data_to_db(
 #     "decor",
 #     ["Tree_M_2", 'AXE:Light Wood,,HARVESTABLE:Apple', "True,,10"])
+
+
+#  pyinstaller --onefile --icon=.\static\images\Icon.ico .\A_Game.py
