@@ -1,2 +1,1 @@
-# A_Game
- a game
+Before running install the font in /static/dialog/Font/

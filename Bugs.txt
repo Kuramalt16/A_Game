@@ -16,6 +16,15 @@
 * DESC: sspell casting inside the house is a lil fucked, need longer cast range and smaller spells.
 * PRIORITY: LOW
 
+* DESC: decreese the amount of characters written in character creation name and age. kad nepie6tu už ekrano.
+* PRIORITY: LOW
+
+* DESC: clearify characters age. not players age. in char creation 
+* PRIORITY: LOW
+
+* DESC: in character selection arrow keys rect is too big.
+* PRIORITY: LOW
+
 # Optimization
 
 * Decreased Character selection processing time from 600 ms to 200 ms ( by adding ranges where to search for color pixels)

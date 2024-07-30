@@ -487,7 +487,7 @@ def read_data_from_db(table, columns='*', conditions=None):
     Returns:
         list: A list of tuples containing the rows retrieved from the database.
     """
-    conn = I.sqlite3.connect("C:/Users/gytis/PycharmProjects/A_Game/static/data/A_Game.db")
+    conn = I.sqlite3.connect("./static/data/A_Game.db")
     cursor = conn.cursor()
 
     if isinstance(columns, list):
