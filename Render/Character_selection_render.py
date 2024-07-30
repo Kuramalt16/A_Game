@@ -16,9 +16,9 @@ BUTTON_WIDTH = S.SCREEN_WIDTH - (2 * B_LEFT)
 BUTTON_HEIGHT = S.SCREEN_HEIGHT / 10
 
 L_ARR_L = S_LEFT + S_F_WIDTH / 4 - S_F_WIDTH / 10
-R_ARR_L = S_LEFT + S_F_WIDTH / 4 * 3
-ARR_H = S_F_HEIGHT / 10
-ARR_W = S_F_WIDTH / 10
+R_ARR_L = S_LEFT + S_F_WIDTH * 0.8
+ARR_H = S_F_HEIGHT / 12
+ARR_W = S_F_WIDTH / 20
 
 body_sizes = [S_LEFT + S_F_WIDTH / 4, S_TOP + S_F_HEIGHT / 6, S_F_WIDTH / 2, S_F_HEIGHT / 2]
 
@@ -82,7 +82,8 @@ def Character_creation(screen, option, extra):
         Ff.display_text(screen, extra, 30, (S.SCREEN_WIDTH / 2.2, S.SCREEN_HEIGHT / 2), "black")
     elif option == "Age":
         if extra.isdigit():
-            Ff.display_text(screen, "HIT ENTER AFTER COMPLETION", 16,(S.SCREEN_WIDTH / 3, S.SCREEN_HEIGHT / 4), "black")
+            Ff.display_text(screen, "HIT ENTER AFTER ENTERING", 16,(S.SCREEN_WIDTH / 3, S.SCREEN_HEIGHT / 4), "black")
+            Ff.display_text(screen, "CHARACTER'S AGE", 16,(S.SCREEN_WIDTH / 3, S.SCREEN_HEIGHT / 3), "black")
             buttons["ENTER"] = Ff.add_image_to_screen(screen, path + 'Empty.png',[frame_main_menu.left + frame_main_menu.w * 0.25,frame_main_menu.top + frame_main_menu.h * 0.7, S_F_WIDTH / 2,S_F_HEIGHT / 10])
             Ff.display_text(screen, "ENTER", 30, (buttons["ENTER"].left + buttons["ENTER"].left / 10, buttons["ENTER"].top * 1.025), "black")
         else:
@@ -173,6 +174,7 @@ def Character_creation(screen, option, extra):
 def generate_arrow_buttons(option, buttons, screen):
     if option == "Clothes":
         buttons["Hair_Left"] = Ff.add_image_to_screen(screen, path + "Left_arrow.png",[L_ARR_L, body_sizes[1] * 0.8, ARR_W, ARR_H])
+        # buttons["Hair_Left"] = Ff.add_image_to_screen_dif_rect(screen, path + "Left_arrow.png",[L_ARR_L, body_sizes[1] * 0.8, ARR_W, ARR_H], (ARR_W * 0.8, ARR_H * 0.8))
         buttons["Hair_Right"] = Ff.add_image_to_screen(screen, path + "Right_arrow.png",[R_ARR_L, body_sizes[1] * 0.8, ARR_W, ARR_H])
         buttons["Shir_Left"] = Ff.add_image_to_screen(screen, path + "Left_arrow.png",[L_ARR_L, body_sizes[1] * 1.4, ARR_W, ARR_H])
         buttons["Shir_Right"] = Ff.add_image_to_screen(screen, path + "Right_arrow.png",[R_ARR_L, body_sizes[1] * 1.4, ARR_W, ARR_H])

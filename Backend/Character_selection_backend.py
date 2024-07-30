@@ -88,7 +88,18 @@ def Create_Character(screen):
                 elif event.type == I.pg.MOUSEBUTTONUP:
                     save, cancel, arrow_value = handle_mouse_button_up(screen, character, trait, pos, clicked_button, text_buffer, arrow_value, d)
                 elif event.type == I.pg.TEXTINPUT and trait in ["Name", "Age"]:
-                    text_buffer += event.text
+                    length = 0
+                    for text in text_buffer:
+                        if text in "wmxQRO":
+                            length += 2
+                        elif text in "il":
+                            length += 0.3
+                        elif text in "ft":
+                            length += 0.5
+                        else:
+                            length += 1
+                    if length < 10:
+                        text_buffer += event.text
                     character[trait] = cr.Character_creation(screen, trait, text_buffer)
                 elif event.type == I.pg.KEYDOWN and trait in ["Name", "Age"]:
                     text_buffer, save = handle_keydown(event, text_buffer, trait, character, screen)
@@ -229,7 +240,6 @@ def handle_mouse_button_up(screen, character, trait, pos, clicked_button, text_b
                     # character[trait] = cr.Character_creation(screen, trait, arrow_value[name])
                 else:
                     # single color change
-                    print("else", key)
                     if arrow_value[name] > len(I.A.color_mappings.get(name, {}).values()) - 1:
                         arrow_value[name] = 0
                     elif arrow_value[name] < 0:

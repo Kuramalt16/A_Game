@@ -246,9 +246,9 @@ def update_char_bar(screen, data, gifs):
         data["Player"]["dead"].x += I.info.OFFSCREEN[0] / 4
         data["Player"]["dead"].y += I.info.OFFSCREEN[1] / 4
         gifs["ghost"].Start_gif("Dead",[S.SCREEN_WIDTH / 2 - S.SCREEN_WIDTH / 20, S.SCREEN_HEIGHT / 2 - S.SCREEN_HEIGHT / 20 * 2, S.SCREEN_WIDTH / 14, S.SCREEN_HEIGHT / 7])
-        gifs["Portal"].Start_gif("Portal", [I.info.START_POS[0] + 30, I.info.START_POS[1], S.SCREEN_WIDTH / 14, S.SCREEN_HEIGHT / 7])
-        data["Zoom_rect"].x = I.info.START_POS[0]
-        data["Zoom_rect"].y = I.info.START_POS[1]
+        gifs["Portal"].Start_gif("Portal", [I.info.SPAWN_POINT[0] + 30, I.info.SPAWN_POINT[1], S.SCREEN_WIDTH / 14, S.SCREEN_HEIGHT / 7])
+        data["Zoom_rect"].x = I.info.SPAWN_POINT[0]
+        data["Zoom_rect"].y = I.info.SPAWN_POINT[1]
         I.info.OFFSCREEN = (0, 0)
 
     I.pg.draw.rect(screen, "black", (rect.w * 0.1, rect.h * 0.82, rect.w * 0.8, rect.h * 0.08))
@@ -273,7 +273,7 @@ def walking(dx, dy, collide, data, last_orientation):
 
 def regular_walking(data, dx, dy):
     if I.info.CURRENT_ROOM["Type"] in ["Village"]:
-        if I.info.OFFSCREEN[0] == 0:
+        if I.info.OFFSCREEN[0] in [0, 3, -3]:
             # if no collisions walk properly. move screen in x axis
             data["Zoom_rect"].x += movement[(dx, dy)][0] * I.info.FAST
             data["Zoom_rect"].y += 0
@@ -282,7 +282,7 @@ def regular_walking(data, dx, dy):
             data["Zoom_rect"].x += 0
             data["Zoom_rect"].y += 0
             last_orientation = movement[(dx, dy)]
-        if I.info.OFFSCREEN[1] == 0:
+        if I.info.OFFSCREEN[1] in [0, 3, -3]:
             # if no collisions walk properly. move screen in y axis
             data["Zoom_rect"].x += 0
             data["Zoom_rect"].y += movement[(dx, dy)][1] * I.info.FAST
@@ -359,7 +359,7 @@ def interract(collide, data, gifs, items, screen, songs, spells, clock):
             br.render_door_open(screen)
             I.info.CURRENT_ROOM = {"name": "House_S", "Spells": True, "Backpack": True, "Running": True, "Mobs": False, "Type": "House"}
             br.update_character_stats('static/data/created_characters/' + I.info.SELECTED_CHARACTER + "/" + I.info.SELECTED_CHARACTER + ".txt", data["Player"], spells.selected_spell)
-            I.info.START_POS = (1, 100)
+            I.info.ENTRY_POS = (1, 100)
             Start(screen, clock)
         elif collide[0] == "Portal":
             I.info.TEXT.append("Reviving.,,3000")

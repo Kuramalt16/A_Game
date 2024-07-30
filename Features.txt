@@ -165,3 +165,7 @@
 * DESC: add rooms to sqlite
 * PRIORITY: MEDIUM
 * NEEDS: willpower
+
+* DESC: add healthbars to mobs only after hiting them
+* PRIORITY: MEDIUM
+* NEEDS: willpower

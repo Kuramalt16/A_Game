@@ -59,7 +59,7 @@ def Start(mob, decorations, spells):
         data["Image"] = I.pg.image.load(S.DECOR_PATH["Wooden_tiles"]).convert_alpha()  # uploads the background image with transparent convert
 
     data["Image_rect"] = data["Image"].get_rect()  # Gets the rect of image
-    data["Zoom_rect"] = I.pg.Rect(I.info.START_POS[0], I.info.START_POS[1], *data["Zoom"])  # creates a rect based on zoomed in picture (basicly makes a window)
+    data["Zoom_rect"] = I.pg.Rect(I.info.ENTRY_POS[0], I.info.ENTRY_POS[1], *data["Zoom"])  # creates a rect based on zoomed in picture (basicly makes a window)
 
     if I.info.CURRENT_ROOM["Type"] == "Village":
         house_image, house_rect = decorations.place_decor_by_coordinates(600, 380, S.DECOR_PATH["House_1"], (1.5, 1.5), (1.5, 1.4))
@@ -92,7 +92,7 @@ def Update(screen, data, mob_dict, gifs, song, spells, decorations, clock):
         me = I.pg.Rect(S.SCREEN_WIDTH / 2 - S.SCREEN_WIDTH / 20 + I.info.OFFSCREEN[0], S.SCREEN_HEIGHT / 2 - S.SCREEN_HEIGHT / 10 + I.info.OFFSCREEN[1], S.SCREEN_WIDTH / 20, S.SCREEN_HEIGHT / 10)
         I.T.Make_rect_visible(screen, me, "white")
         if me.colliderect(door):
-            I.info.START_POS = [510, 370]
+            I.info.ENTRY_POS = [510, 370]
             I.info.CURRENT_ROOM = {"name": "Village_1", "Spells": True, "Backpack": True, "Running": True, "Mobs": True, "Type": "Village"}
             update_character_stats('static/data/created_characters/' + I.info.SELECTED_CHARACTER + "/" + I.info.SELECTED_CHARACTER + ".txt", data["Player"], spells.selected_spell)
             Play.Start(screen, clock)
@@ -240,8 +240,8 @@ def handle_death_visualisation(sub_image, data, gifs, collide):
     if data["Player"]["dead"]:
 
         me = I.pg.Rect(150, 85, S.SCREEN_WIDTH / 100, S.SCREEN_HEIGHT / 100)  # Player rect (if it gets hit with other rect. colide is set to True
-        dead_disc = {"Portal": display_gif_on_subimage(sub_image, (S.SCREEN_WIDTH / 16, S.SCREEN_HEIGHT / 10), (I.info.START_POS[0] * 1.6 - data["Zoom_rect"].x , I.info.START_POS[1] + 10 * 16 - data["Zoom_rect"].y), gifs["Portal"]),
-                     "Sign": display_on_subimage(sub_image, (S.SCREEN_WIDTH / 90, S.SCREEN_HEIGHT / 40), S.PLAYING_PATH["Sign"],(I.info.START_POS[0] * 1.6 - data["Zoom_rect"].x, I.info.START_POS[1] + 10 * 10 - data["Zoom_rect"].y)),
+        dead_disc = {"Portal": display_gif_on_subimage(sub_image, (S.SCREEN_WIDTH / 16, S.SCREEN_HEIGHT / 10), (I.info.SPAWN_POINT[0] * 1.6 - data["Zoom_rect"].x , I.info.SPAWN_POINT[1] + 10 * 16 - data["Zoom_rect"].y), gifs["Portal"]),
+                     "Sign": display_on_subimage(sub_image, (S.SCREEN_WIDTH / 90, S.SCREEN_HEIGHT / 40), S.PLAYING_PATH["Sign"],(I.info.SPAWN_POINT[0] * 1.6 - data["Zoom_rect"].x, I.info.SPAWN_POINT[1] + 10 * 10 - data["Zoom_rect"].y)),
                      "Grave": display_on_subimage(sub_image, (S.SCREEN_WIDTH / 60, S.SCREEN_HEIGHT / 30), S.PLAYING_PATH["Grave"], (data["Player"]["dead"].x - data["Zoom_rect"].x + me.x, data["Player"]["dead"].y - data["Zoom_rect"].y + me.y)),
                      }
         dead_list = list(dead_disc.values())
@@ -251,8 +251,8 @@ def handle_death_visualisation(sub_image, data, gifs, collide):
             collide = (key, dead_disc[key].x, dead_disc[key].y)
     return collide
 def handle_npc_visualisation(sub_image, data, gifs):
-    npc = {"Luna": display_gif_on_subimage(sub_image, (17,18), (I.info.START_POS[0] * 1.6 - data["Zoom_rect"].x , I.info.START_POS[1] + 10 * 43 - data["Zoom_rect"].y), gifs["Luna"]),
-           "Bear": display_gif_on_subimage(sub_image, (17,18), (I.info.START_POS[0] * 1.7 - data["Zoom_rect"].x , I.info.START_POS[1] + 10 * 43 - data["Zoom_rect"].y), gifs["Bear"]),
+    npc = {"Luna": display_gif_on_subimage(sub_image, (17,18), (330 * 1.6 - data["Zoom_rect"].x , 1 + 10 * 43 - data["Zoom_rect"].y), gifs["Luna"]),
+           "Bear": display_gif_on_subimage(sub_image, (17,18), (330 * 1.7 - data["Zoom_rect"].x , 1 + 10 * 43 - data["Zoom_rect"].y), gifs["Bear"]),
     }
 
 def handle_decor_visualisation(decorations, sub_image, data):
@@ -681,7 +681,8 @@ def update_character(player_disc, spells):
     spell_str = player_disc["Spells"]
     spell_list = spell_str.split(",,")
     for slot_spell in spell_list:
-        if slot_spell != '':
+        if slot_spell != '' and slot_spell != "Empty":
+            print(slot_spell)
             slot, spell = slot_spell.split("-")
             spells.selected_spell[int(slot)] = spell
 
@@ -806,7 +807,7 @@ def cast_spell_handle(sub_image, data, spells, gifs, mob, song, decorations):
                 if I.info.CURRENT_ROOM["Type"] in ["Village"]:
                     size = (20, 20)
                 else:
-                    size = (100, 100)
+                    size = (80, 80)
                 frame = I.pg.transform.scale(frame, size)
 
                 if spells.direction[spell] == 0:
@@ -833,7 +834,7 @@ def cast_spell_handle(sub_image, data, spells, gifs, mob, song, decorations):
                     if I.info.CURRENT_ROOM["Type"] == "Village":
                         rect = I.pg.Rect(spells.init_cast[spell].x - data["Zoom_rect"].x + I.info.Player_rect.x - dir[0] * gifs[spell].current_frame * 6, spells.init_cast[spell].y - data["Zoom_rect"].y + I.info.Player_rect.y - dir[1] * gifs[spell].current_frame * 6, size[0], size[1])
                     else:
-                        rect = I.pg.Rect(spells.init_cast[spell].x - dir[0] * gifs[spell].current_frame * 12, spells.init_cast[spell].y - dir[1] * gifs[spell].current_frame * 12, size[0], size[1])
+                        rect = I.pg.Rect(spells.init_cast[spell].x - dir[0] * gifs[spell].current_frame * 12*2, spells.init_cast[spell].y - dir[1] * gifs[spell].current_frame * 12*2, size[0], size[1])
                     sub_image.blit(frame, rect)
                     if I.info.CURRENT_ROOM["Type"] == "Village":
                         if rect.collidelist(decorations.displayed_rects) != -1: # if hits any decor

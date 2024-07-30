@@ -1,0 +1,34 @@
+Name: asd
+
+Gender: Boy
+Age: 1
+Race: Human
+
+Eyes: (33, 150, 243, 255)
+Skin: (255, 205, 210, 255)
+Skin2: (239, 154, 154, 255)
+
+Hair: Hair_0
+Shir: Shir_0
+Pant: Pant_4
+Shoe: Shoe_0
+
+Color_Hair: (237, 28, 36, 255)
+Color_Shir: (238, 28, 36, 255)
+Color_Pant: (240, 28, 36, 255)
+Color_Shoe: (239, 28, 36, 255)
+
+Last Save: 2024/07/30 23:42
+
+
+
+Level: 1
+Experience: 0
+
+Alignment: Unaligned
+
+Class: Not trained
+
+Backpack: Empty
+
+Spells: 0-Magic Bolt,,

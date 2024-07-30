@@ -11,6 +11,18 @@ def add_image_to_screen(screen, path, pos):
     rect = rect.move(pos[0], pos[1])
     return rect
 
+def add_image_to_screen_dif_rect(screen, path, pos, wh):
+    image = I.pg.image.load(path).convert_alpha()
+    image = I.pg.transform.scale(image, (pos[2], pos[3]))
+    rect = image.get_rect()
+    I.pg.Surface.blit(screen, image, (pos[0], pos[1]))
+    # rect = rect.move(pos[0], pos[1])
+    rect = I.pg.Rect(pos[0], pos[1], wh[0], wh[1])
+    return rect
+
+def resize_rect(rect, width, height):
+    rect = I.pg.Rect(rect.left, rect.top, width, height)
+    return rect
 
 def toggle_bool(var):
     if var:

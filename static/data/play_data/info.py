@@ -7,7 +7,9 @@ TICK = 50
 
 FAST = 0
 
-START_POS = [330, 1]
+SPAWN_POINT = [330, 1]
+
+ENTRY_POS = [330, 1]
 # START_POS = (141, 70)
 CURRENT_STANCE = 0
 LAST_ORIENT = ["Front.png", "_Walk.png", "_Walk1.png"]

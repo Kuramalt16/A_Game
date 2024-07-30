@@ -10,19 +10,7 @@
 * DESC: spell effects on mobs dont go away sometimes. atkartoti reikia bug.
 * PRIORITY: LOW
 
-* DESC: sometimes walking offscreen fucksup and doesnt let the screen to move
-* PRIORITY: LOW
-
-* DESC: sspell casting inside the house is a lil fucked, need longer cast range and smaller spells.
-* PRIORITY: LOW
-
-* DESC: decreese the amount of characters written in character creation name and age. kad nepie6tu už ekrano.
-* PRIORITY: LOW
-
-* DESC: clearify characters age. not players age. in char creation 
-* PRIORITY: LOW
-
-* DESC: in character selection arrow keys rect is too big.
+* DESC: freeze effects on tree dont go away sometimes. atkartoti reikia bug.
 * PRIORITY: LOW
 
 # Optimization
