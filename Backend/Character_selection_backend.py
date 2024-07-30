@@ -130,7 +130,9 @@ def take_pictures(value, screen, side):
                        "Level: " + "1" + "\n" +
                        "Experience: " + "0" + "\n\n" +
                        "Alignment: " + "Unaligned" + "\n\n" +
-                       "Class: " + "Not trained"
+                       "Class: " + "Not trained" + "\n\n" +
+                       "Backpack: " + "Empty" + "\n\n" +
+                       "Spells: " + "Empty"
                        )
 
 def Save_Character(character, screen):

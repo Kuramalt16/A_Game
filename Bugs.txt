@@ -10,10 +10,10 @@
 * DESC: spell effects on mobs dont go away sometimes. atkartoti reikia bug.
 * PRIORITY: LOW
 
-* DESC: house gets deleted and not placed.
+* DESC: sometimes walking offscreen fucksup and doesnt let the screen to move
 * PRIORITY: LOW
 
-* DESC: sometimes walking offscreen fucksup and doesnt let the screen to move
+* DESC: sspell casting inside the house is a lil fucked, need longer cast range and smaller spells.
 * PRIORITY: LOW
 
 # Optimization

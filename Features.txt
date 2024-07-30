@@ -161,3 +161,7 @@
 * DESC: percise locations to all decorations this is required for when a person enters and exits an inn the decor changes cuz its random. this shouldnt happen in villages. (better fix: define what can be in a village and what cant be, for instance this village is called Rusty Village or sth like that. add to db and make a list of what and how many decorations can be placed. also would be nice to know where).
 * PRIORITY: MEDIUM
 * NEEDS: willpower
+
+* DESC: add rooms to sqlite
+* PRIORITY: MEDIUM
+* NEEDS: willpower

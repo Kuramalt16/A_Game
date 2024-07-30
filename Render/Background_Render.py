@@ -37,10 +37,10 @@ def read_txt_file(path):
                 data_dict[key] = value
 
     return data_dict
-def Start(mob, decorations):
+def Start(mob, decorations, spells):
     data = {}
     data["Player"] = read_txt_file('static/data/created_characters/' + I.info.SELECTED_CHARACTER + "/" + I.info.SELECTED_CHARACTER + ".txt")
-    data["Player"] = update_character(data["Player"])
+    data["Player"] = update_character(data["Player"], spells)
     if I.info.CURRENT_ROOM["Mobs"]:
         monster_count = {}
         for key, current_mob in mob.items():
@@ -94,7 +94,7 @@ def Update(screen, data, mob_dict, gifs, song, spells, decorations, clock):
         if me.colliderect(door):
             I.info.START_POS = [510, 370]
             I.info.CURRENT_ROOM = {"name": "Village_1", "Spells": True, "Backpack": True, "Running": True, "Mobs": True, "Type": "Village"}
-            update_character_stats('static/data/created_characters/' + I.info.SELECTED_CHARACTER + "/" + I.info.SELECTED_CHARACTER + ".txt", data["Player"])
+            update_character_stats('static/data/created_characters/' + I.info.SELECTED_CHARACTER + "/" + I.info.SELECTED_CHARACTER + ".txt", data["Player"], spells.selected_spell)
             Play.Start(screen, clock)
     if I.info.CURRENT_ROOM["Mobs"]:
         collide = handle_mob_visualisation(collide, sub_image, data, mob_dict, gifs, song, decorations)
@@ -677,7 +677,22 @@ def update_health(rect, current_mob, sub_image):
     reduced_health_bar = I.pg.Rect(rect.x, rect.y, rect.w * remainder, 1)
     I.pg.draw.rect(sub_image, "green", reduced_health_bar)
 
-def update_character(player_disc):
+def update_character(player_disc, spells):
+    spell_str = player_disc["Spells"]
+    spell_list = spell_str.split(",,")
+    for slot_spell in spell_list:
+        if slot_spell != '':
+            slot, spell = slot_spell.split("-")
+            spells.selected_spell[int(slot)] = spell
+
+    backpack_str = player_disc["Backpack"]
+    backpack_str_list = backpack_str.split(",,")
+    for backpack_data in backpack_str_list:
+        if backpack_data != {} and backpack_data != "Empty" and backpack_data != '':
+            back_list = backpack_data.split("-")
+            item, amount, posx, posy = back_list[0], back_list[1], back_list[2], back_list[3]
+            I.info.BACKPACK_CONTENT[item] = (int(amount), int(posx), int(posy))
+
     hp_by_race = {"Elf": 11,
                   "Human": 10}
 
@@ -694,6 +709,7 @@ def update_character(player_disc):
     player_disc["Exhaustion"] = (100, 100)
 
     player_disc["Last_hit"] = I.pg.time.get_ticks()  # required to know when to start regenerating hp and mana
+
 
     return player_disc
 
@@ -948,7 +964,7 @@ def render_house(screen, data):
     I.T.Make_rect_visible(screen, door_rect, "white")
     return door_rect
 
-def update_character_stats(file_path, player_data):
+def update_character_stats(file_path, player_data, selected_spells):
     # Read the file content
     with open(file_path, 'r') as file:
         lines = file.readlines()
@@ -959,6 +975,20 @@ def update_character_stats(file_path, player_data):
             lines[i] = f'Level: {player_data["Level"]}\n'
         elif line.startswith('Experience:'):
             lines[i] = f'Experience: {player_data["Experience"]}\n'
+        elif line.startswith('Last Save:'):
+            time = I.datetime.now()
+            time = time.strftime("%Y/%m/%d %H:%M")
+            lines[i] = f'Last Save: {time}\n'
+        elif line.startswith('Backpack:') and I.info.BACKPACK_CONTENT != {}:
+            backpack_str = ""
+            for item, (amount, posx, posy) in I.info.BACKPACK_CONTENT.items():
+                backpack_str += item + "-" + str(amount) + "-" + str(posx) + "-" + str(posy) + ",,"
+            lines[i] = f'Backpack: {backpack_str}\n'
+        elif line.startswith('Spells:') and selected_spells != {}:
+            spell_str = ""
+            for slot, spell in selected_spells.items():
+                spell_str += str(slot) + "-" + str(spell) + ",,"
+            lines[i] = f'Spells: {spell_str}\n'
 
     # Write the updated content back to the file
     with open(file_path, 'w') as file:

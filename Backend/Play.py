@@ -41,12 +41,11 @@ def Start(screen, clock):
     if I.info.CURRENT_ROOM["Mobs"]:
         mob = {
             "Slime_S": I.mob_data.Mob(name="Slime_S", exp=10, hp=8, allignment=5, count=20, damage=(2, "blunt"), speed=4),
-            # "Pig": I.mob_data.Mob(name="Pig", exp=5, hp=6, allignment=4, count=20, damage=(1, "blunt"), speed=6),
-            "Pig": I.mob_data.Mob(name="Pig", exp=5, hp=7, allignment=4, count=20, damage=(1, "blunt"), speed=6),
+            "Pig": I.mob_data.Mob(name="Pig", exp=5, hp=6, allignment=4, count=20, damage=(1, "blunt"), speed=6),
                }
     collide = [False]
     pressed = 0
-    data = br.Start(mob, decorations)
+    data = br.Start(mob, decorations, spells)
     last_orientation = (0, 0)
     songs = {"Background": I.Songs.Song("Background", I.A.background_music),
              "Ghost": I.Songs.Song("Ghost", I.A.dead_music),
@@ -131,7 +130,6 @@ def handle_keydown(event, data, spells, gifs, last_orientation):
     if event.key in [I.pg.K_UP, I.pg.K_DOWN, I.pg.K_LEFT, I.pg.K_RIGHT]:
         # fixes getting stuck on objects
         if I.info.OFFSCREEN[0] == 0:
-            print(last_orientation, data["Zoom_rect"])
             data["Zoom_rect"].x -= last_orientation[0] * I.info.FAST
         if I.info.OFFSCREEN[1] == 0:
             data["Zoom_rect"].y -= last_orientation[1] * I.info.FAST
@@ -182,8 +180,8 @@ def handle_timer_actions(event, timers, data, mob, spells, decorations):
             if data["Player"]["hp"][0] < data["Player"]["hp"][1]:
                 data["Player"]["hp"] = (data["Player"]["hp"][0] + 1, data["Player"]["hp"][1])
             if data["Player"]["mana"][0] < data["Player"]["mana"][1]:
-                data["Player"]["mana"] = (data["Player"]["mana"][0] + 100, data["Player"]["mana"][1])
-                # data["Player"]["mana"] = (data["Player"]["mana"][0] + 1, data["Player"]["mana"][1])
+                # data["Player"]["mana"] = (data["Player"]["mana"][0] + 100, data["Player"]["mana"][1])
+                data["Player"]["mana"] = (data["Player"]["mana"][0] + 1, data["Player"]["mana"][1])
         if I.info.CURRENT_ROOM["Type"] in ["Village"]:
             if decorations.effected_decor != {}:
                 dict_to_burn = []
@@ -360,8 +358,8 @@ def interract(collide, data, gifs, items, screen, songs, spells, clock):
         elif collide[0] == "Door":
             br.render_door_open(screen)
             I.info.CURRENT_ROOM = {"name": "House_S", "Spells": True, "Backpack": True, "Running": True, "Mobs": False, "Type": "House"}
-            br.update_character_stats('static/data/created_characters/' + I.info.SELECTED_CHARACTER + "/" + I.info.SELECTED_CHARACTER + ".txt", data["Player"])
-            I.info.START_POS = (1, 1)
+            br.update_character_stats('static/data/created_characters/' + I.info.SELECTED_CHARACTER + "/" + I.info.SELECTED_CHARACTER + ".txt", data["Player"], spells.selected_spell)
+            I.info.START_POS = (1, 100)
             Start(screen, clock)
         elif collide[0] == "Portal":
             I.info.TEXT.append("Reviving.,,3000")
