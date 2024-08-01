@@ -62,13 +62,20 @@ def Start(mob, decorations, spells):
     data["Zoom_rect"] = I.pg.Rect(I.info.ENTRY_POS[0], I.info.ENTRY_POS[1], *data["Zoom"])  # creates a rect based on zoomed in picture (basicly makes a window)
 
     if I.info.CURRENT_ROOM["Type"] == "Village":
-        house_image, house_rect = decorations.place_decor_by_coordinates(600, 380, S.DECOR_PATH["House_1"], (1.5, 1.5), (1.5, 1.4))
+        path = decorations.decor_dict["House_1"]["path"]
+        house_image, house_rect = decorations.place_decor_by_coordinates(600, 380, path, (1.5, 1.5), (1.5, 1.4))
         decorations.decor_dict["House_1"][0] = {"name": "House_1", "id": 0, "image": house_image, "rect": house_rect, "effect": ""}
-
-    if I.info.CURRENT_ROOM["Type"] == "Village":
         display_border("Tree_M_1", decorations, data)
         for key in decor_count:
-            decorations.generate_decor(key, decor_count[key], data["Image_rect"].size, S.DECOR_PATH[key])
+            path = decorations.decor_dict[key]["path"]
+            decorations.generate_decor(key, decor_count[key], data["Image_rect"].size, path)
+    else:
+        for option, decor in decorations.decor_dict.items():
+            if decor["type"] in ["Furniture", "Appliance"]:
+                path = decorations.decor_dict[option]["path"]
+                path += "out.png"
+                image, rect = decorations.place_decor_by_coordinates(980, 50, path, (4, 4), (4, 1))
+                decorations.decor_dict[option][0] = {"name": option, "id": 0, "image": image, "rect": rect, "effect": ""}
 
     if I.info.CURRENT_ROOM["Mobs"]:
         for key in monster_count:
@@ -80,7 +87,6 @@ def Start(mob, decorations, spells):
 def Update(screen, data, mob_dict, gifs, song, spells, decorations, clock):
     data["Zoom_rect"].x = max(0, min(data["Zoom_rect"].x, data["Image_rect"].width - data["Zoom"][0]))
     data["Zoom_rect"].y = max(0, min(data["Zoom_rect"].y, data["Image_rect"].height - data["Zoom"][1]))
-    collide = [False]
     I.info.Player_rect = I.pg.Rect(150 + I.info.OFFSCREEN[0]/4, 85 + I.info.OFFSCREEN[1]/4, S.SCREEN_WIDTH / 100, S.SCREEN_HEIGHT / 100)  # Player rect (if it gets hit with other rect. colide is set to True
     if I.info.CURRENT_ROOM["Type"] in ["Village"]:
         sub_image = data["Image"].subsurface(data["Zoom_rect"]).copy()
@@ -89,23 +95,21 @@ def Update(screen, data, mob_dict, gifs, song, spells, decorations, clock):
     else:
         sub_image = screen
         door = render_house(screen, data)
-        me = I.pg.Rect(S.SCREEN_WIDTH / 2 - S.SCREEN_WIDTH / 20 + I.info.OFFSCREEN[0], S.SCREEN_HEIGHT / 2 - S.SCREEN_HEIGHT / 10 + I.info.OFFSCREEN[1], S.SCREEN_WIDTH / 20, S.SCREEN_HEIGHT / 10)
-        I.T.Make_rect_visible(screen, me, "white")
-        if me.colliderect(door):
-            I.info.ENTRY_POS = [510, 370]
-            I.info.CURRENT_ROOM = {"name": "Village_1", "Spells": True, "Backpack": True, "Running": True, "Mobs": True, "Type": "Village"}
-            update_character_stats('static/data/created_characters/' + I.info.SELECTED_CHARACTER + "/" + I.info.SELECTED_CHARACTER + ".txt", data["Player"], spells.selected_spell)
-            Play.Start(screen, clock)
+        collide = handle_interior_visualisation(decorations, sub_image, data, gifs)
+        house_border_rect = interior_border_rect(S.SCREEN_WIDTH * 0.1, S.SCREEN_HEIGHT * 0.05, S.SCREEN_WIDTH * 0.8, S.SCREEN_HEIGHT * 0.85)
+        # I.T.Make_rect_visible(screen, house_border_rect[0], "white")
+        # I.T.Make_rect_visible(screen, house_border_rect[1], "white")
+        # I.T.Make_rect_visible(screen, house_border_rect[2], "white")
+        # I.T.Make_rect_visible(screen, house_border_rect[3], "white")
+        me = I.pg.Rect(S.SCREEN_WIDTH / 2 - S.SCREEN_WIDTH / 25 + I.info.OFFSCREEN[0], S.SCREEN_HEIGHT / 2 - S.SCREEN_HEIGHT / 10 + I.info.OFFSCREEN[1], S.SCREEN_WIDTH / 22, S.SCREEN_HEIGHT / 8)
+        # I.T.Make_rect_visible(screen, me, "red")
+        handle_stepping_on_rect(me, door, data, screen, clock, spells, "Return")
+        collide = handle_stepping_on_rect(me, house_border_rect, data, 0, 0, collide, "Collide_list")
+
     if I.info.CURRENT_ROOM["Mobs"]:
         collide = handle_mob_visualisation(collide, sub_image, data, mob_dict, gifs, song, decorations)
-    # if I.info.CURRENT_ROOM["Type"] in ["Village"]:
-    #     collide = handle_decor_visualisation(decorations, sub_image, data)
-
 
     collide = handle_death_visualisation(sub_image, data, gifs, collide)
-
-    # if I.info.CURRENT_ROOM["Type"] in ["Village"]:
-    #     handle_npc_visualisation(sub_image, data, gifs)
 
 
     cast_spell_handle(sub_image, data, spells, gifs, mob_dict, song, decorations)
@@ -118,8 +122,21 @@ def Update(screen, data, mob_dict, gifs, song, spells, decorations, clock):
     return collide
 
 
+def handle_stepping_on_rect(me, rect, data, screen, clock, extra, action):
+    if "Return" in action:
+        spells = extra
+        if me.colliderect(rect):
+            I.info.ENTRY_POS = [510, 370]
+            I.info.CURRENT_ROOM = {"name": "Village_1", "Spells": True, "Backpack": True, "Running": True, "Mobs": True, "Type": "Village"}
+            update_character_stats('static/data/created_characters/' + I.info.SELECTED_CHARACTER + "/" + I.info.SELECTED_CHARACTER + ".txt", data["Player"], spells.selected_spell)
+            Play.Start(screen, clock)
+    if "Collide_list" in action:
+        if me.collidelistall(rect):
+            colision_id = me.collidelistall(rect) # returns list of rect id's
+            extra = ("border", rect[colision_id[0]].left, rect[colision_id[0]].top)
+        return extra
 
-# def handle_decor_abuse(gifs):
+
 def handle_mob_visualisation(collide, sub_image, data, mob_dict, gifs, song, decorations):
     for mob in mob_dict.values():
         for current_mob in mob.mobs:
@@ -133,7 +150,6 @@ def handle_mob_visualisation(collide, sub_image, data, mob_dict, gifs, song, dec
                 image = I.pg.transform.flip(current_mob["image"][mob_gif], True, False)
             else:
                 image = current_mob["image"][mob_gif]
-            # print(mob_x, mob_y)
             sub_image.blit(image, (mob_x, mob_y))
 
             handle_physical_damaging_mobs(rect, song, mob, data, gifs, current_mob)
@@ -254,7 +270,33 @@ def handle_npc_visualisation(sub_image, data, gifs):
     npc = {"Luna": display_gif_on_subimage(sub_image, (17,18), (330 * 1.6 - data["Zoom_rect"].x , 1 + 10 * 43 - data["Zoom_rect"].y), gifs["Luna"]),
            "Bear": display_gif_on_subimage(sub_image, (17,18), (330 * 1.7 - data["Zoom_rect"].x , 1 + 10 * 43 - data["Zoom_rect"].y), gifs["Bear"]),
     }
+def handle_interior_visualisation(decorations, sub_image, data, gifs):
+    me = I.pg.Rect(S.SCREEN_WIDTH / 2 - S.SCREEN_WIDTH / 20 + I.info.OFFSCREEN[0],S.SCREEN_HEIGHT / 2 - S.SCREEN_HEIGHT / 10 + I.info.OFFSCREEN[1], S.SCREEN_WIDTH / 20, S.SCREEN_HEIGHT / 10)
+    # I.T.Make_rect_visible(sub_image, me, "blue")
+    collide = [False]
+    decorations.displayed_rects = []
+    decor_options = list(decorations.decor_dict.keys())
+    for option in decor_options:
+        for id in decorations.decor_dict[option].keys():
+            if isinstance(id, str):
+                continue
 
+            decor = decorations.decor_dict[option][id]
+
+            # Gets x, y position of decoration
+            decor_x = decor["rect"].x
+            decor_y = decor["rect"].y
+
+            rect = I.pg.Rect(decor_x, decor_y, decor["rect"].w, decor["rect"].h)
+            if I.info.APPLIANCE_CLICK == "":
+                sub_image.blit(decor["image"], (decor_x, decor_y))
+            else:
+                display_gif_on_subimage(sub_image, (rect.w, rect.h * 6), (rect.x, rect.y), gifs[option])
+
+            # I.T.Make_rect_visible(sub_image, rect, "white")
+            if me.colliderect(rect):
+                collide = ("Appliance-Furnace", rect.x, rect.y)
+    return collide
 def handle_decor_visualisation(decorations, sub_image, data):
     Collide = [False]
     decorations.displayed_rects = []  # List to keep track of displayed rectangles
@@ -274,7 +316,6 @@ def handle_decor_visualisation(decorations, sub_image, data):
             # Check if current decor collides with any already displayed decor
             if not any(rect.colliderect(displayed_rect) for displayed_rect in decorations.displayed_rects):
                 # I.T.Make_rect_visible(sub_image, rect, "black")
-                # print(decor["rect"])
                 if (data["Image"].get_at((decor["rect"].x, decor["rect"].y)) == (137, 176, 46, 255) and data["Image"].get_at((decor["rect"].x + decor["rect"].w, decor["rect"].y + decor["rect"].h)) == (137, 176, 46, 255)):
                     sub_image.blit(decor["image"], (decor_x, decor_y))
                     decorations.displayed_rects.append(rect)  # Add to the list of displayed rectangles
@@ -285,7 +326,6 @@ def handle_decor_visualisation(decorations, sub_image, data):
                             Collide = ("Door", door_rect.x, door_rect.y)
                     if I.info.Player_rect.colliderect(rect):
                         Collide = (option, decor["rect"].x, decor["rect"].y)
-                        # print("collide", Collide)
 
             else:
                 # remove the decors that are touching:
@@ -388,24 +428,43 @@ def add_to_backpack(item, amount):
             value = I.info.BACKPACK_CONTENT[item]
             I.info.BACKPACK_CONTENT[item] = (value[0] + amount, value[1], value[2])
 
+def update_equiped():
+    if I.info.BACKPACK_CONTENT == {}:
+        for option in I.info.EQUIPED.keys():
+            I.info.EQUIPED[option] = 0
+    else:
+        if I.info.Temp_variable_holder != []:
+            if I.info.Temp_variable_holder[2] in ["cook", "burn"]:
+                for key in I.info.EQUIPED.keys():
+                    if I.info.EQUIPED[key] == I.info.Temp_variable_holder[0]:
+                        if I.info.BACKPACK_CONTENT.get(I.info.Temp_variable_holder[0]) == None:
+                            I.info.EQUIPED[key] = 0
+        else:
+            for item, (amount, posx, posy) in I.info.BACKPACK_CONTENT.items():
+                if posx < 0:
+                    I.info.EQUIPED[I.info.equipment[(posx, posy)]] = item
+
+
 def BackPack(screen, items, player):
-    pressed = 0
-    fill_backpack(screen, player)
-    running = True
+    pressed = 0 # key authentication
+    running = True # loop var
+    block = (0, 0) # backpack block
+    border = 1 # rect border size
+    use = 0 # place holder for items to be eaten/used
+    selected = 0 # place holder for rect of selected block
+    color = "Yellow" # color of selected rect
+    pickup = (0, 0, 0) # place holder for the name, posx, posy of selected block
+    fill_backpack(screen, player, items)
     item_w = list(I.info.BACKPACK_COORDINATES_X.values())[1] - list(I.info.BACKPACK_COORDINATES_X.values())[0]
     item_h = list(I.info.BACKPACK_COORDINATES_Y.values())[1] - list(I.info.BACKPACK_COORDINATES_Y.values())[0]
-    block = (0, 0)
     coordinates = get_equipment_coordinates(block)
-    border = 1
-    use = 0
-    selected = 0
-    color = "Yellow"
-    pickup = 0
     while running:
         for event in I.pg.event.get():
             if event.type == I.pg.KEYDOWN:
                 if event.key == I.pg.K_b:
                     pressed = I.pg.K_b
+                elif event.key == I.pg.K_ESCAPE:
+                    pressed = I.pg.K_ESCAPE
                 elif event.key == I.pg.K_x:
                     pressed = I.pg.K_x
                     color = "Green"
@@ -420,15 +479,24 @@ def BackPack(screen, items, player):
                             selected = I.pg.Rect(list(I.info.BACKPACK_COORDINATES_X.values())[block[0]], list(I.info.BACKPACK_COORDINATES_Y.values())[block[1]], item_w, item_h)
                         else:
                             selected = I.pg.Rect(coordinates[block][0], coordinates[block][1], item_w, item_h)
-                        for key, value in I.info.BACKPACK_CONTENT.items():
-                            if value[1] == block[0] and value[2] == block[1]:
-                                # if the possision matches get the key
-                                pickup = key
+                            I.info.EQUIPED[I.info.equipment[block]] = 0
+                        pickup = (find_item_by_slot(block[0], block[1]), block[0], block[1])
+
                     else:
-                        if pickup != 0:
-                            value = I.info.BACKPACK_CONTENT[pickup]
-                            I.info.BACKPACK_CONTENT[pickup] = (value[0], block[0], block[1]) # set the new possision value
-                        pickup = 0
+                        if pickup[0] != 0:
+                            update_equipment_var(block, pickup[0])
+                            value = I.info.BACKPACK_CONTENT[pickup[0]]
+                            taken_spaces = list(I.info.BACKPACK_CONTENT.values())
+                            if not any((block[0], block[1]) == (tpl[1], tpl[2]) for tpl in taken_spaces):
+                                I.info.BACKPACK_CONTENT[pickup[0]] = (value[0], block[0], block[1]) # set the new possision value
+                            else:
+                                existing_item = find_item_by_slot(block[0], block[1]) # get existing item name
+                                I.info.BACKPACK_CONTENT[existing_item] = I.info.BACKPACK_CONTENT[existing_item][0], pickup[1], pickup[2]
+                                I.info.BACKPACK_CONTENT[pickup[0]] = I.info.BACKPACK_CONTENT[pickup[0]][0], block[0], block[1]
+                                update_equipment_var((pickup[1], pickup[2]), existing_item)
+                                # if block[0] < 0:
+                                #     I.info.EQUIPED[I.info.equipment[(pickup[1], pickup[2])]] = existing_item
+                        pickup = (0, 0, 0)
                         selected = 0
                 elif event.key == I.pg.K_UP:
                     block = (block[0], block[1] - 2)
@@ -445,7 +513,7 @@ def BackPack(screen, items, player):
                     if block[0] > 14:
                         block = (0, block[1])
             elif event.type == I.pg.KEYUP:
-                if pressed == I.pg.K_b:
+                if pressed == I.pg.K_b or pressed == I.pg.K_ESCAPE:
                     running = False  # exits backpack view
                 elif pressed == I.pg.K_x:
                     color = "Yellow"
@@ -455,7 +523,7 @@ def BackPack(screen, items, player):
                     pressed = 0
                     selected = 0
 
-            fill_backpack(screen, player)
+            fill_backpack(screen, player, items)
             if block[0] < 0:
                 if block[0] < -10:
                     block = -10, block[1]
@@ -532,11 +600,18 @@ def display_on_subimage(sub_image, size, path, pos):
     sub_image.blit(image, pos)
     return I.pg.Rect(pos[0], pos[1], size[0], size[1])
 
-def fill_backpack(screen, player):
+def get_backpack_coordinates(screen):
     rect = screen.get_rect()
-    bag = Ff.add_image_to_screen(screen, S.PLAYING_PATH["Backpack_Empty"], [rect.center[0] * 0.5 ,rect.center[1] * 0.25, S.SCREEN_WIDTH / 2, S.SCREEN_HEIGHT * 0.75])
+    bag = Ff.add_image_to_screen(screen, S.PLAYING_PATH["Backpack_Empty"],
+                                 [rect.center[0] * 0.5, rect.center[1] * 0.25, S.SCREEN_WIDTH / 2,
+                                  S.SCREEN_HEIGHT * 0.75])
     if I.info.BACKPACK_COORDINATES_X == {}:
         I.info.BACKPACK_COORDINATES_X, I.info.BACKPACK_COORDINATES_Y = bag_coordinates(screen, bag)
+
+def fill_backpack(screen, player, items):
+    rect = screen.get_rect()
+    bag = Ff.add_image_to_screen(screen, S.PLAYING_PATH["Backpack_Empty"], [rect.center[0] * 0.5 ,rect.center[1] * 0.25, S.SCREEN_WIDTH / 2, S.SCREEN_HEIGHT * 0.75])
+    get_backpack_coordinates(screen)
     item_w = list(I.info.BACKPACK_COORDINATES_X.values())[1] - list(I.info.BACKPACK_COORDINATES_X.values())[0]
     item_h = list(I.info.BACKPACK_COORDINATES_Y.values())[1] - list(I.info.BACKPACK_COORDINATES_Y.values())[0]
     for content in I.info.BACKPACK_CONTENT.keys():
@@ -544,10 +619,10 @@ def fill_backpack(screen, player):
         collumn = I.info.BACKPACK_CONTENT[content][2]
         if row < 0:
             coordinates = get_equipment_coordinates((row,collumn))
-            Ff.add_image_to_screen(screen, S.ITEM_PATHS[content], [coordinates[row, collumn][0], coordinates[row, collumn][1], item_w, item_h])
+            Ff.add_image_to_screen(screen, items.item_dict[content]["path"], [coordinates[row, collumn][0], coordinates[row, collumn][1], item_w, item_h])
             Ff.display_text(screen, str(I.info.BACKPACK_CONTENT[content][0]), 2, [coordinates[row, collumn][0], coordinates[row, collumn]][1], "white")
         else:
-            Ff.add_image_to_screen(screen, S.ITEM_PATHS[content], [list(I.info.BACKPACK_COORDINATES_X.values())[row], list(I.info.BACKPACK_COORDINATES_Y.values())[collumn], item_w, item_h])
+            Ff.add_image_to_screen(screen, items.item_dict[content]["path"], [list(I.info.BACKPACK_COORDINATES_X.values())[row], list(I.info.BACKPACK_COORDINATES_Y.values())[collumn], item_w, item_h])
             Ff.display_text(screen, str(I.info.BACKPACK_CONTENT[content][0]), 2, [list(I.info.BACKPACK_COORDINATES_X.values())[row], list(I.info.BACKPACK_COORDINATES_Y.values())[collumn]], "white")
 
     I.pg.draw.rect(screen, "black", (bag.w * 0.604, bag.h * 0.807, bag.w * 0.115, bag.h * 0.012))
@@ -682,15 +757,14 @@ def update_character(player_disc, spells):
     spell_list = spell_str.split(",,")
     for slot_spell in spell_list:
         if slot_spell != '' and slot_spell != "Empty":
-            print(slot_spell)
-            slot, spell = slot_spell.split("-")
+            slot, spell = slot_spell.split("__")
             spells.selected_spell[int(slot)] = spell
 
     backpack_str = player_disc["Backpack"]
     backpack_str_list = backpack_str.split(",,")
     for backpack_data in backpack_str_list:
         if backpack_data != {} and backpack_data != "Empty" and backpack_data != '':
-            back_list = backpack_data.split("-")
+            back_list = backpack_data.split("__")
             item, amount, posx, posy = back_list[0], back_list[1], back_list[2], back_list[3]
             I.info.BACKPACK_CONTENT[item] = (int(amount), int(posx), int(posy))
 
@@ -731,6 +805,8 @@ def spell_book(screen, data, spells):
                     block = (block[0], block[1] - 2)
                     if block[1] < 0:
                         block = (block[0], 16)
+                elif event.key == I.pg.K_ESCAPE:
+                    pressed = I.pg.K_ESCAPE
                 elif event.key == I.pg.K_DOWN:
                     block = (block[0], block[1] + 2)
                     if block[1] > 16:
@@ -746,7 +822,7 @@ def spell_book(screen, data, spells):
                 elif event.key == I.pg.K_v:
                     pressed = I.pg.K_v
             if event.type == I.pg.KEYUP:
-                if pressed == I.pg.K_v:
+                if pressed == I.pg.K_v or pressed == I.pg.K_ESCAPE:
                     running = False
                 if event.key == I.pg.K_c:
                     if selected == 0:
@@ -896,7 +972,8 @@ def handdle_sign_display(screen):
 
 
 def display_border(border_image_name, decorations, data):
-    image = I.pg.image.load(S.DECOR_PATH[border_image_name]).convert_alpha()
+    path = decorations.decor_dict[border_image_name]["path"]
+    image = I.pg.image.load(path).convert_alpha()
     rect = image.get_rect()
     tree_amount = 0
     row = 0
@@ -906,21 +983,21 @@ def display_border(border_image_name, decorations, data):
         # apacioj pirma
         # virsui antra
         # apacioj antra
-        tree_image1, tree_rect1 = decorations.place_decor_by_coordinates(row, 0, S.DECOR_PATH[border_image_name], (0.8, 0.8), (1, 0.3))
-        tree_image2, tree_rect2 = decorations.place_decor_by_coordinates(row, data["Image_rect"].h - (rect.h * 0.8), S.DECOR_PATH[border_image_name], (0.8, 0.8), (1, 0.5))
+        tree_image1, tree_rect1 = decorations.place_decor_by_coordinates(row, 0, path, (0.8, 0.8), (1, 0.3))
+        tree_image2, tree_rect2 = decorations.place_decor_by_coordinates(row, data["Image_rect"].h - (rect.h * 0.8), path, (0.8, 0.8), (1, 0.5))
 
-        tree_image3, tree_rect3 = decorations.place_decor_by_coordinates(row + rect.w/4, rect.h * 0.3, S.DECOR_PATH[border_image_name], (0.8, 0.8), (0.8, 0.8))
-        tree_image4, tree_rect4 = decorations.place_decor_by_coordinates(row + rect.w/4, data["Image_rect"].h - (rect.h * 1.3), S.DECOR_PATH[border_image_name], (0.8, 0.8), (0.8, 0.5))
+        tree_image3, tree_rect3 = decorations.place_decor_by_coordinates(row + rect.w/4, rect.h * 0.3, path, (0.8, 0.8), (0.8, 0.8))
+        tree_image4, tree_rect4 = decorations.place_decor_by_coordinates(row + rect.w/4, data["Image_rect"].h - (rect.h * 1.3), path, (0.8, 0.8), (0.8, 0.5))
         if data["Image_rect"].w <= tree_rect3.x + tree_rect3.w:
             break
-        decorations.decor_dict["Tree_M_1"][tree_amount] = {"name": border_image_name, "id": tree_amount, "image": tree_image1, "rect": tree_rect1, "effect": ""}
+        decorations.decor_dict[border_image_name][tree_amount] = {"name": border_image_name, "id": tree_amount, "image": tree_image1, "rect": tree_rect1, "effect": ""}
         tree_amount += 1
-        decorations.decor_dict["Tree_M_1"][tree_amount] = {"name": border_image_name, "id": tree_amount, "image": tree_image2, "rect": tree_rect2, "effect": ""}
+        decorations.decor_dict[border_image_name][tree_amount] = {"name": border_image_name, "id": tree_amount, "image": tree_image2, "rect": tree_rect2, "effect": ""}
         tree_amount += 1
 
-        decorations.decor_dict["Tree_M_1"][tree_amount] = {"name": border_image_name, "id": tree_amount, "image": tree_image3, "rect": tree_rect3, "effect": ""}
+        decorations.decor_dict[border_image_name][tree_amount] = {"name": border_image_name, "id": tree_amount, "image": tree_image3, "rect": tree_rect3, "effect": ""}
         tree_amount += 1
-        decorations.decor_dict["Tree_M_1"][tree_amount] = {"name": border_image_name, "id": tree_amount, "image": tree_image4, "rect": tree_rect4, "effect": ""}
+        decorations.decor_dict[border_image_name][tree_amount] = {"name": border_image_name, "id": tree_amount, "image": tree_image4, "rect": tree_rect4, "effect": ""}
         tree_amount += 1
 
         row += rect.w * 0.5
@@ -933,22 +1010,22 @@ def display_border(border_image_name, decorations, data):
         # kairei antra
         # desinei antra
 
-        tree_image1, tree_rect1 = decorations.place_decor_by_coordinates(0, column, S.DECOR_PATH["Tree_M_1"], (0.8, 0.8), (0.4, 0.5))
-        tree_image2, tree_rect2 = decorations.place_decor_by_coordinates(data["Image_rect"].w - rect.w, column, S.DECOR_PATH["Tree_M_1"], (0.8, 0.8), (0.8, 0.7))
+        tree_image1, tree_rect1 = decorations.place_decor_by_coordinates(0, column, path, (0.8, 0.8), (0.4, 0.5))
+        tree_image2, tree_rect2 = decorations.place_decor_by_coordinates(data["Image_rect"].w - rect.w, column, path, (0.8, 0.8), (0.8, 0.7))
 
-        tree_image3, tree_rect3 = decorations.place_decor_by_coordinates(rect.w * 0.4, column + rect.h/4, S.DECOR_PATH["Tree_M_1"], (0.8, 0.8), (0.8, 0.7))
-        tree_image4, tree_rect4 = decorations.place_decor_by_coordinates(data["Image_rect"].w - (rect.w * 1.3), column + rect.h/4, S.DECOR_PATH["Tree_M_1"], (0.8, 0.8), (0.3, 0.7))
+        tree_image3, tree_rect3 = decorations.place_decor_by_coordinates(rect.w * 0.4, column + rect.h/4, path, (0.8, 0.8), (0.8, 0.7))
+        tree_image4, tree_rect4 = decorations.place_decor_by_coordinates(data["Image_rect"].w - (rect.w * 1.3), column + rect.h/4, path, (0.8, 0.8), (0.3, 0.7))
         if data["Image_rect"].h <= (tree_rect3.y + tree_rect3.h):
             break
 
-        decorations.decor_dict["Tree_M_1"][tree_amount] = {"image": tree_image1, "rect": tree_rect1}
+        decorations.decor_dict[border_image_name][tree_amount] = {"image": tree_image1, "rect": tree_rect1}
         tree_amount += 1
-        decorations.decor_dict["Tree_M_1"][tree_amount] = {"image": tree_image2, "rect": tree_rect2}
+        decorations.decor_dict[border_image_name][tree_amount] = {"image": tree_image2, "rect": tree_rect2}
         tree_amount += 1
 
-        decorations.decor_dict["Tree_M_1"][tree_amount] = {"image": tree_image3, "rect": tree_rect3}
+        decorations.decor_dict[border_image_name][tree_amount] = {"image": tree_image3, "rect": tree_rect3}
         tree_amount += 1
-        decorations.decor_dict["Tree_M_1"][tree_amount] = {"image": tree_image4, "rect": tree_rect4}
+        decorations.decor_dict[border_image_name][tree_amount] = {"image": tree_image4, "rect": tree_rect4}
         tree_amount += 1
 
         column += rect.w * 0.5
@@ -961,8 +1038,8 @@ def render_house(screen, data):
     screen.fill("black")
     tile_pos = (S.SCREEN_WIDTH * 0.1, S.SCREEN_HEIGHT * 0.1, S.SCREEN_WIDTH * 0.8, S.SCREEN_HEIGHT * 0.8)
     Ff.add_image_to_screen(screen, S.DECOR_PATH["Wooden_tiles"], tile_pos)
-    door_rect = I.pg.Rect(S.SCREEN_WIDTH * 0.45, S.SCREEN_HEIGHT * 0.9, S.SCREEN_WIDTH * 0.11, S.SCREEN_HEIGHT * 0.05)
-    I.T.Make_rect_visible(screen, door_rect, "white")
+    door_rect = I.pg.Rect(S.SCREEN_WIDTH * 0.45, S.SCREEN_HEIGHT * 0.875, S.SCREEN_WIDTH * 0.11, S.SCREEN_HEIGHT * 0.025)
+    I.T.Make_rect_visible(screen, door_rect, (45, 19, 4, 255))
     return door_rect
 
 def update_character_stats(file_path, player_data, selected_spells):
@@ -983,14 +1060,42 @@ def update_character_stats(file_path, player_data, selected_spells):
         elif line.startswith('Backpack:') and I.info.BACKPACK_CONTENT != {}:
             backpack_str = ""
             for item, (amount, posx, posy) in I.info.BACKPACK_CONTENT.items():
-                backpack_str += item + "-" + str(amount) + "-" + str(posx) + "-" + str(posy) + ",,"
+                backpack_str += item + "__" + str(amount) + "__" + str(posx) + "__" + str(posy) + ",,"
             lines[i] = f'Backpack: {backpack_str}\n'
         elif line.startswith('Spells:') and selected_spells != {}:
             spell_str = ""
             for slot, spell in selected_spells.items():
-                spell_str += str(slot) + "-" + str(spell) + ",,"
+                spell_str += str(slot) + "__" + str(spell) + ",,"
             lines[i] = f'Spells: {spell_str}\n'
 
     # Write the updated content back to the file
     with open(file_path, 'w') as file:
         file.writelines(lines)
+
+
+def find_open_space():
+    taken_spaces = list(I.info.BACKPACK_CONTENT.values())
+    for column in range(0, 26, 2):
+        for row in range(0, 14, 2):
+            if any((row, column) == (tpl[1], tpl[2]) for tpl in taken_spaces):
+                continue
+            return row, column
+
+def find_item_by_slot(x, y):
+    for key, value in I.info.BACKPACK_CONTENT.items():
+        if value[1] == x and value[2] == y:
+            # if the possision matches get the key
+            return key
+
+def update_equipment_var(key, value):
+    if key[0] < 0:
+        I.info.EQUIPED[I.info.equipment[key]] = value
+
+def interior_border_rect(left, top, width, height):
+    right = left + width
+    bottom = top + height
+    top_rect = I.pg.Rect(left, top, right - left, 5) # top
+    right_rect = I.pg.Rect(right,top, 5, bottom - top) # right
+    left_rect = I.pg.Rect(left, top, 5, bottom - top) # left
+    bottom_rect = I.pg.Rect(left, bottom, right - left, 5) # bottom
+    return [top_rect, right_rect, left_rect, bottom_rect]

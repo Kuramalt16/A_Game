@@ -1,16 +1,19 @@
 
 # Bugs
 
-* DESC: Change "Start Game" menu click user confirmation from "color based" to "movement based"
-* PRIORITY: LOW
-
 * DESC: after minimizing and then increasing the screen slider goes black, due to not using flip
 * PRIORITY: LOW
 
 * DESC: spell effects on mobs dont go away sometimes. atkartoti reikia bug.
 * PRIORITY: LOW
 
-* DESC: freeze effects on tree dont go away sometimes. atkartoti reikia bug.
+* DESC: Pigs walk under the portal
+* PRIORITY: LOW
+
+* DESC: fix sound playing while constantly clicking settings, cancel settings cancel.
+* PRIORITY: LOW
+
+* DESC: fix hp/mp setting to full whenever entering a house or exiting house.
 * PRIORITY: LOW
 
 # Optimization
@@ -25,3 +28,4 @@
 
 * DESC: Test killing mobs, respawn time, harvesting, harvest time.
 * PRIORITY: Test
+

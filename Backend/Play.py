@@ -1,7 +1,8 @@
-from Render import Background_Render as br
+from Render import Background_Render as br, Main_Menu_render as mr
 from Values import Settings as S
 from utils import Imports as I, Frequent_functions as Ff
 import random
+from Backend import Settings_backend as SB, Setup_pygame as SP
 
 movement = {
     (0, 0): (0, 0),
@@ -16,10 +17,9 @@ movement = {
 }
 
 def Start(screen, clock):
-    # I.info.Player_rect = I.pg.Rect(150 + I.info.OFFSCREEN[0], 85 + I.info.OFFSCREEN[1], S.SCREEN_WIDTH / 100, S.SCREEN_HEIGHT / 100)  # Player rect (if it gets hit with other rect. colide is set to True
-    # I.info.CURRENT_ROOM = {"name": "Village_1", "Spells": True, "Backpack": True, "Running": True, "Mobs": True}
+    br.get_backpack_coordinates(screen)
     mob = 0
-    decorations = 0
+    decorations = I.decor.Decorations()
     gifs = {"ghost": I.gifs.Gif(name="Dead", frame_count=8, initial_path=S.PLAYING_PATH["Dead"], delay=50),
             "Portal": I.gifs.Gif(name="Portal", frame_count=34, initial_path=S.PLAYING_PATH["Portal"], delay=100),
             "Blunt": I.gifs.Gif(name="Blunt", frame_count=S.COMBAT_PATH["Blunt"][1], initial_path=S.COMBAT_PATH["Blunt"][0], delay=10),
@@ -33,11 +33,10 @@ def Start(screen, clock):
             "Magic Bolt": I.gifs.Gif(name="Magic Bolt", frame_count=10, initial_path=S.SPELL_PATHS["Magic Bolt"], delay=50),
             "Fire Bolt": I.gifs.Gif(name="Fire Bolt", frame_count=10, initial_path=S.SPELL_PATHS["Fire Bolt"], delay=50),
             "Cold Bolt": I.gifs.Gif(name="Cold Bolt", frame_count=10, initial_path=S.SPELL_PATHS["Cold Bolt"], delay=50),
+            "Furnace": I.gifs.Gif(name="Furnace", frame_count=4, initial_path=decorations.decor_dict["Furnace"]["path"], delay=50),
                  }
     items = I.items.Items()
     spells = I.Spells.Spells()
-    if I.info.CURRENT_ROOM["Type"] == "Village":
-        decorations = I.decor.Decorations()
     if I.info.CURRENT_ROOM["Mobs"]:
         mob = {
             "Slime_S": I.mob_data.Mob(name="Slime_S", exp=10, hp=8, allignment=5, count=20, damage=(2, "blunt"), speed=4),
@@ -46,6 +45,8 @@ def Start(screen, clock):
     collide = [False]
     pressed = 0
     data = br.Start(mob, decorations, spells)
+    br.fill_backpack(screen, data["Player"], items)
+    br.update_equiped()
     last_orientation = (0, 0)
     songs = {"Background": I.Songs.Song("Background", I.A.background_music),
              "Ghost": I.Songs.Song("Ghost", I.A.dead_music),
@@ -66,6 +67,8 @@ def Start(screen, clock):
                 pressed = handle_keyup(event, pressed, gifs, songs, screen, items, data, collide, spells, clock)
 
         collide = br.Update(screen, data, mob, gifs, songs, spells, decorations, clock)
+        if S.WINDOW == "Settings":
+            handle_esc_click(screen, clock)
 
         dx, dy = keypress_handle(screen, data, songs, items, spells)
 
@@ -77,9 +80,10 @@ def Start(screen, clock):
 
         update_display_text(screen, gifs, data, collide)
 
-        update_char_bar(screen, data, gifs)
+        update_char_bar(screen, data, gifs, items)
 
         display_spell_bar(screen, spells)
+
 
         I.pg.display.flip()
         clock.tick(I.info.TICK)
@@ -95,8 +99,62 @@ def handle_keyup(event, pressed, gifs, songs, screen, items, data, collide, spel
             songs[curr_song].channel0.unpause()
         elif pressed == I.pg.K_x:
             I.info.COMBAT_RECT = 0
+        elif pressed == I.pg.K_ESCAPE:
+            handle_esc_click(screen, clock)
         return 0
 
+def handle_esc_click(screen, clock):
+    running = True
+    buttons = mr.Main_menu(screen)
+    I.pg.display.flip()
+    while running:
+        for event in I.pg.event.get():
+            if event.type == I.pg.MOUSEBUTTONDOWN:
+                pos = I.pg.mouse.get_pos()
+                for key, value in buttons.items():
+                    if value.collidepoint(pos[0], pos[1]) and I.pg.mouse.get_pressed()[0]:
+                        if key == "Main Menu":
+                            Ff.button_click_render_down(screen, value, 1, S.PATHS["Empty_button_frame"])
+                            Ff.display_text(screen, key, 30, (buttons[key + "_text"].left, buttons[key + "_text"].top * 1.005), "black")
+                            clicked_button = key
+                        elif key == "Resume Game":
+                            Ff.button_click_render_down(screen, value, 1, S.PATHS["Empty_button_frame"])
+                            Ff.display_text(screen, key, 30, (buttons[key + "_text"].left, buttons[key + "_text"].top * 1.005), "black")
+                            clicked_button = key
+                        elif key == "Settings":
+                            Ff.button_click_render_down(screen, value, 1, S.PATHS["Empty_button_frame"])
+                            Ff.display_text(screen, key, 30, (buttons[key + "_text"].left, buttons[key + "_text"].top * 1.005), "black")
+                            clicked_button = key
+                        I.pg.display.flip()
+            if event.type == I.pg.MOUSEBUTTONUP:
+                pos = I.pg.mouse.get_pos()
+                for key, value in buttons.items():
+                    if value.collidepoint(pos[0], pos[1]) and not I.pg.mouse.get_pressed()[0]:
+                        if key == "Main Menu" and clicked_button == key:
+                            Ff.button_click_render_down(screen, value, 0, S.PATHS["Empty_button_frame"])
+                            running = False
+                            S.WINDOW = ""
+                            S.START_APP = True
+                            SP.run_game(screen, clock)
+                        elif key == "Resume Game" and clicked_button == key:
+                            Ff.button_click_render_down(screen, value, 0, S.PATHS["Empty_button_frame"])
+                            running = False
+                            S.WINDOW = ""
+                        elif key == "Settings" and clicked_button == key:
+                            Ff.button_click_render_down(screen, value, 0, S.PATHS["Empty_button_frame"])
+                            SB.Settings(screen)
+                            running = False
+                            S.WINDOW = "Settings"
+                            # buttons = mr.Main_menu(screen)
+                        I.pg.display.flip()
+                    elif clicked_button == key:
+                        Ff.button_click_render_down(screen, value, 0, S.PATHS["Empty_button_frame"])
+                        Ff.display_text(screen, key, 30, (buttons[key + "_text"].left, buttons[key + "_text"].top), "black")
+                        I.pg.display.flip()
+                        clicked_button = ""
+            if event.type == I.pg.KEYUP:
+                if event.key == I.pg.K_ESCAPE:
+                    running = False
 
 def handle_keydown(event, data, spells, gifs, last_orientation):
     key_to_slot = {
@@ -107,6 +165,8 @@ def handle_keydown(event, data, spells, gifs, last_orientation):
         I.pg.K_g: 8
     }
     pressed = 0
+    if event.key == I.pg.K_ESCAPE:
+        pressed = I.pg.K_ESCAPE
     if event.key == I.pg.K_c:
         pressed = I.pg.K_c
     elif event.key == I.pg.K_x:
@@ -146,17 +206,41 @@ def display_spell_bar(screen, spells):
     for pos, spell in spells.selected_spell.items():
         Ff.add_image_to_screen(screen, S.SPELL_PATHS[spell] + "0.png", (S.SCREEN_WIDTH * 0.803 + pos * 25, S.SCREEN_HEIGHT * 0.91,  S.SCREEN_WIDTH / 25,  S.SCREEN_HEIGHT / 10))
 def handle_mob_respawn(mob, data):
-    if mob.count[0] < mob.count[1]:
-        mob.count = (mob.count[0] + 1, mob.count[1])
-        id = mob.count[1] + 1
-        mob.mobs.append(mob.create_mob(id))
-        data[mob.name] = br.generate_mobs(mob, data["Image_rect"].size)
+    if I.info.CURRENT_ROOM["type"] in ["Village"]:
+        if mob.count[0] < mob.count[1]:
+            mob.count = (mob.count[0] + 1, mob.count[1])
+            id = mob.count[1] + 1
+            mob.mobs.append(mob.create_mob(id))
+            data[mob.name] = br.generate_mobs(mob, data["Image_rect"].size)
 
 def handle_timer_actions(event, timers, data, mob, spells, decorations):
     if timers["Exhaustion"] == event.type:
         data["Player"]["Exhaustion"] = (data["Player"]["Exhaustion"][0] - 1, data["Player"]["Exhaustion"][1])
     elif timers["Mob_respawn"] == event.type:
         handle_mob_respawn(mob, data)
+    elif timers["cook"] == event.type:
+        if I.info.APPLIANCE_CLICK == "Furnace":
+            I.info.APPLIANCE_CLICK = ""
+            if I.info.Temp_variable_holder[2] == "cook":
+                # print(I.info.BACKPACK_CONTENT, I.info.Temp_variable_holder)
+                if I.info.Temp_variable_holder[0] + "_Cooked" in list(I.info.BACKPACK_CONTENT.keys()):
+                    I.info.BACKPACK_CONTENT[I.info.Temp_variable_holder[0] + "_Cooked"] = I.info.BACKPACK_CONTENT[I.info.Temp_variable_holder[0] + "_Cooked"][0] + 1, I.info.BACKPACK_CONTENT[I.info.Temp_variable_holder[0] + "_Cooked"][1], I.info.BACKPACK_CONTENT[I.info.Temp_variable_holder[0] + "_Cooked"][2]
+                else:
+                    x, y = br.find_open_space()
+                    I.info.BACKPACK_CONTENT[I.info.Temp_variable_holder[0] + "_Cooked"] = (1, x, y)
+                    # insert_item_to_backpack(I.info.Temp_variable_holder[0] + "_Cooked", 1)
+                if any(char.isdigit() for char in I.info.Temp_variable_holder[0]):
+                    I.info.Temp_variable_holder[0] = I.info.Temp_variable_holder[0][:-1]
+                I.info.TEXT.append("Cooked " + I.info.Temp_variable_holder[0] + ",,3000")
+            else:
+                if "Ashes" in list(I.info.BACKPACK_CONTENT.keys()):
+                    I.info.BACKPACK_CONTENT["Ashes"] = I.info.BACKPACK_CONTENT["Ashes"][0] + 1, I.info.BACKPACK_CONTENT["Ashes"][1], I.info.BACKPACK_CONTENT["Ashes"][2]
+                else:
+                    x, y = br.find_open_space()
+                    I.info.BACKPACK_CONTENT["Ashes"] = (1, x, y)
+                    # insert_item_to_backpack("Ashes", 1)
+                I.info.TEXT.append("Burned " + I.info.Temp_variable_holder[0] + ",,3000")
+            I.info.Temp_variable_holder = []
     elif timers["Harvest"] == event.type:
         harvest_timeout()
     elif timers["Walk"] == event.type:
@@ -211,15 +295,15 @@ def handle_timer_actions(event, timers, data, mob, spells, decorations):
 def handle_timers():
     timers = {}
     EXHAUSTION_TIM = I.pg.USEREVENT + 1
-    I.pg.time.set_timer(EXHAUSTION_TIM, 300000)
+    I.pg.time.set_timer(EXHAUSTION_TIM, 300000) # 5 min
     timers["Exhaustion"] = EXHAUSTION_TIM
 
     Mob_Respawn = I.pg.USEREVENT + 2
-    I.pg.time.set_timer(Mob_Respawn, 600000)
+    I.pg.time.set_timer(Mob_Respawn, 600000) # 10 min
     timers["Mob_respawn"] = Mob_Respawn
 
     Harvest_timer = I.pg.USEREVENT + 3
-    I.pg.time.set_timer(Harvest_timer, 60000)
+    I.pg.time.set_timer(Harvest_timer, 60000) # 1 min
     timers["Harvest"] = Harvest_timer
 
     Walk = I.pg.USEREVENT + 5
@@ -230,17 +314,20 @@ def handle_timers():
     I.pg.time.set_timer(mob_gif, 100)
     timers["mob_gif"] = mob_gif
 
+    timers["cook"] = I.pg.USEREVENT + 7
+
     healing = I.pg.USEREVENT + 8
     I.pg.time.set_timer(healing, 1000)
     timers["healing"] = healing
 
+
+
     return timers
 
-def update_char_bar(screen, data, gifs):
+def update_char_bar(screen, data, gifs, items):
     rect = Ff.add_image_to_screen(screen, S.PLAYING_PATH["Char_bar"], [0, 0, S.SCREEN_WIDTH / 8, S.SCREEN_HEIGHT / 8])
-    I.pg.draw.rect(screen, "black", (rect.w * 0.1, rect.h * 0.56, rect.w * 0.8, rect.h * 0.08))
-    remainder = data["Player"]["hp"][0] / data["Player"]["hp"][1]
-    I.pg.draw.rect(screen, "red", (rect.w * 0.1, rect.h * 0.56, rect.w * 0.8 * remainder, rect.h * 0.08))
+
+    # start gifs if player dead
     if data["Player"]["hp"][0] <= 0 and not data["Player"]["dead"]:
         data["Player"]["dead"] = data["Zoom_rect"].copy()
         data["Player"]["dead"].x += I.info.OFFSCREEN[0] / 4
@@ -251,9 +338,29 @@ def update_char_bar(screen, data, gifs):
         data["Zoom_rect"].y = I.info.SPAWN_POINT[1]
         I.info.OFFSCREEN = (0, 0)
 
+    # display Hp
+    I.pg.draw.rect(screen, "black", (rect.w * 0.1, rect.h * 0.56, rect.w * 0.8, rect.h * 0.08))
+    remainder = data["Player"]["hp"][0] / data["Player"]["hp"][1]
+    I.pg.draw.rect(screen, "red", (rect.w * 0.1, rect.h * 0.56, rect.w * 0.8 * remainder, rect.h * 0.08))
+
+    # display Mp
     I.pg.draw.rect(screen, "black", (rect.w * 0.1, rect.h * 0.82, rect.w * 0.8, rect.h * 0.08))
     remainder = data["Player"]["mana"][0] / data["Player"]["mana"][1]
     I.pg.draw.rect(screen, "blue", (rect.w * 0.1, rect.h * 0.82, rect.w * 0.8 * remainder, rect.h * 0.08))
+
+    options = ["Sword", "Axe", "Picaxe"]
+    position = {
+        "Sword": (15, 11),
+        "Axe": (66, 11),
+        "Picaxe": (118, 11),
+                }
+    item_w = list(I.info.BACKPACK_COORDINATES_X.values())[1] - list(I.info.BACKPACK_COORDINATES_X.values())[0]
+    item_h = list(I.info.BACKPACK_COORDINATES_Y.values())[1] - list(I.info.BACKPACK_COORDINATES_Y.values())[0]
+    for option in options:
+        if I.info.EQUIPED[option] != 0:
+            Ff.add_image_to_screen(screen, items.item_dict[I.info.EQUIPED[option]]["path"], [position[option][0], position[option][1], item_w, item_h])
+
+
 
 def walking(dx, dy, collide, data, last_orientation):
     if (dx, dy) in movement and not collide[0] or (dx, dy) in movement and collide[0] in ["Portal"]:
@@ -335,7 +442,7 @@ def keypress_handle(screen, data, song, items, spells):
     return dx, dy
 
 def interract(collide, data, gifs, items, screen, songs, spells, clock):
-    if collide:
+    if collide[0] != False:
         if collide[0] in I.info.HARVESTABLE.keys() and not data["Player"]["dead"]:
             if any((collide[1], collide[2]) == (t[0], t[1]) for t in I.info.HARVESTED_OBJECTS.get(collide[0], [])):
                 pass
@@ -359,7 +466,8 @@ def interract(collide, data, gifs, items, screen, songs, spells, clock):
             br.render_door_open(screen)
             I.info.CURRENT_ROOM = {"name": "House_S", "Spells": True, "Backpack": True, "Running": True, "Mobs": False, "Type": "House"}
             br.update_character_stats('static/data/created_characters/' + I.info.SELECTED_CHARACTER + "/" + I.info.SELECTED_CHARACTER + ".txt", data["Player"], spells.selected_spell)
-            I.info.ENTRY_POS = (1, 100)
+            I.info.ENTRY_POS = (1, 1)
+            I.info.OFFSCREEN = (25, 250)
             Start(screen, clock)
         elif collide[0] == "Portal":
             I.info.TEXT.append("Reviving.,,3000")
@@ -370,6 +478,21 @@ def interract(collide, data, gifs, items, screen, songs, spells, clock):
             gifs["ghost"].start_gif = False
         elif collide[0] == "Sign":
             br.handdle_sign_display(screen)
+        elif "Appliance" in collide[0]:
+            appliance_name = collide[0].split("-")[1]
+            for item in I.info.EQUIPED.values():
+                if item != 0 and I.info.Temp_variable_holder == []:
+                    I.info.APPLIANCE_CLICK = appliance_name
+                    I.pg.time.set_timer(I.pg.USEREVENT + 7, 3000)
+                    if I.info.BACKPACK_CONTENT[item][0] == 1:
+                        del I.info.BACKPACK_CONTENT[item]
+                    else:
+                        I.info.BACKPACK_CONTENT[item] = (int(I.info.BACKPACK_CONTENT[item][0]) - 1, I.info.BACKPACK_CONTENT[item][1], I.info.BACKPACK_CONTENT[item][2])
+                    if "COOK" in items.item_dict[item]["Properties"]:
+                        I.info.Temp_variable_holder = [item, 1, "cook"]
+                    else:
+                        I.info.Temp_variable_holder = [item, 1, "burn"]
+            br.update_equiped()
         else:
             print("not harvestable", collide)
             print(collide)
@@ -381,7 +504,6 @@ def harvest_timeout():
         if I.info.HARVESTED_OBJECTS[harvastable] != []:
             i = 0
             while True:
-                print(I.info.HARVESTED_OBJECTS[harvastable], i)
                 if I.info.HARVESTED_OBJECTS[harvastable][i][2] != 0:
                     I.info.HARVESTED_OBJECTS[harvastable][i] = (I.info.HARVESTED_OBJECTS[harvastable][i][0], I.info.HARVESTED_OBJECTS[harvastable][i][1], I.info.HARVESTED_OBJECTS[harvastable][i][2] - 1)
                 if I.info.HARVESTED_OBJECTS[harvastable][i][2] == 0:
@@ -439,8 +561,9 @@ def handle_music(song, collide, data):
     else:
         song["Playing"] = "Background"
     curr_song = song["Playing"]
+    song[curr_song].channel0.set_volume(S.VOLUME)
+    song[curr_song].channel1.set_volume(S.VOLUME)
     start_time = song[curr_song].start_time
-
     if collide[0] == "mob":
         bash = song[curr_song].generate_bash_sound()
         slice = song[curr_song].generate_slicing_sound()
@@ -457,3 +580,11 @@ def handle_music(song, collide, data):
 
 
 
+def insert_item_to_backpack(item, amount):
+    taken_spaces = list(I.info.BACKPACK_CONTENT.values())
+    for column in range(0, 26, 2):
+        for row in range(0, 14, 2):
+            if any((row, column) == (tpl[1], tpl[2]) for tpl in taken_spaces):
+                continue
+            I.info.BACKPACK_CONTENT[item] = (amount, row, column)
+            return

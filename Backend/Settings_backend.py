@@ -7,8 +7,9 @@ def Settings(screen):
     apply = False
     cancel = False
     clicked_button = ""
-    screen.fill("white")
-    I.pg.display.flip()
+    if I.info.SELECTED_CHARACTER == "":
+        screen.fill("white")
+        I.pg.display.flip()
     buttons = sr.Settings(screen)
     while not apply and not cancel:
         for event in I.pg.event.get():
@@ -39,19 +40,39 @@ def Settings(screen):
                                     buttons[key] = Ff.button_click_render(screen, buttons[key], 0, key)
                                     I.pg.display.update(buttons[key])
                                     break
+                        elif key == "Slider_button_Volume":
+                            button_value = key.split("_")
+                            button_value = button_value[0] + "_" + button_value[1]
+                            while True:
+                                pos = I.pg.mouse.get_pos()
+                                buttons[key] = Ff.button_click_render(screen, value, pos[0], key)
+                                I.pg.display.update(buttons[key])
+                                I.pg.event.get()
+                                if not I.pg.mouse.get_pressed()[0]:
+                                    clicked_button = key
+                                    buttons[key] = Ff.button_click_render(screen, buttons[key], 0, button_value)
+                                    I.pg.display.update(buttons[key])
+                                    break
             if event.type == I.pg.MOUSEBUTTONUP:
                 for key, value in buttons.items():
                     if value.collidepoint(pos[0], pos[1]) and not I.pg.mouse.get_pressed()[0]:
                         if key == "Apply" and clicked_button == key:
                             apply = True
                             Ff.button_click_render(screen, value, 0, key)
-                            I.pg.display.flip()
+                            if I.info.SELECTED_CHARACTER == "":
+                                screen.fill("white")
+                                I.pg.display.flip()
                         elif key == "Cancel" and clicked_button == key:
                             cancel = True
                             Ff.base_settings_load()
                             Ff.button_click_render(screen, value, 0, key)
-                            I.pg.display.flip()
+                            if I.info.SELECTED_CHARACTER == "":
+                                screen.fill("white")
+                                I.pg.display.flip()
                         elif key == "Slider_button" and clicked_button == key:
+                            Ff.button_click_render(screen, value, 0, key)
+                            I.pg.display.flip()
+                        elif key == "Slider_button_Volume" and clicked_button == key:
                             Ff.button_click_render(screen, value, 0, key)
                             I.pg.display.flip()
                     else:
@@ -84,6 +105,12 @@ def Apply_settings(buttons):
     if demo_resolution != S.RESOLUTION:
         S.SCREEN_WIDTH = round((demo_resolution * 600 + 680) / 10) * 10
         S.RESTART = True
+    data = buttons["Slider_button_Volume"].left
+    if data > sr.SLIDER_MAX:
+        data = sr.SLIDER_MAX
+    elif data < sr.SLIDER_MIN:
+        data = sr.SLIDER_MIN
+    S.VOLUME = (data - sr.SLIDER_MIN) / (sr.SLIDER_MAX - sr.SLIDER_MIN)
     save_settings()
 
 def save_settings():
@@ -94,6 +121,9 @@ def save_settings():
         if line.startswith('SCREEN_WIDTH'):
             # Update the line with the new value
             lines[i] = f'SCREEN_WIDTH = {S.SCREEN_WIDTH}\n'
+        if line.startswith('VOLUME'):
+            # Update the line with the new value
+            lines[i] = f'VOLUME = {S.VOLUME}\n'
             break
     with open("Values/Settings.py", 'w') as file:
         file.writelines(lines)

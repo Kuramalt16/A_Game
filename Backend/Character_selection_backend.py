@@ -19,20 +19,18 @@ def Character_Selection(screen):
                 for key, value in buttons.items():
                     if value.collidepoint(pos[0], pos[1]) and I.pg.mouse.get_pressed()[0]:
                         if key == "New" and cr.number_of_chars() < 9:
-                            Ff.button_click_render(screen, value, 1, "Empty")
-                            Ff.display_text(screen, key, 30, (buttons[key + "_text"].left, buttons[key + "_text"].top), "black")
-                            I.pg.display.flip()
+                            Ff.button_click_render_down(screen, value, 1, S.PATHS["Empty_button_frame"])
+                            Ff.display_text(screen, key, 30, (buttons[key + "_text"].left, buttons[key + "_text"].top * 1.01), "black")
                             clicked_button = key
                         elif key == "Load" and cr.load_exists():
-                            Ff.button_click_render(screen, value, 1, "Empty")
-                            Ff.display_text(screen, key, 30, (buttons[key + "_text"].left, buttons[key + "_text"].top), "black")
-                            I.pg.display.flip()
+                            Ff.button_click_render_down(screen, value, 1, S.PATHS["Empty_button_frame"])
+                            Ff.display_text(screen, key, 30, (buttons[key + "_text"].left, buttons[key + "_text"].top * 1.005), "black")
                             clicked_button = key
                         elif key == "Main Menu":
-                            Ff.button_click_render(screen, value, 1, "Empty")
-                            Ff.display_text(screen, key, 30, (buttons[key + "_text"].left, buttons[key + "_text"].top), "black")
-                            I.pg.display.flip()
+                            Ff.button_click_render_down(screen, value, 1, S.PATHS["Empty_button_frame"])
+                            Ff.display_text(screen, key, 30, (buttons[key + "_text"].left, buttons[key + "_text"].top * 1.005), "black")
                             clicked_button = key
+                        I.pg.display.flip()
             if event.type == I.pg.MOUSEBUTTONUP and not S.BUSY:
                 for key, value in buttons.items():
                     if value.collidepoint(pos[0], pos[1]) and not I.pg.mouse.get_pressed()[0]:

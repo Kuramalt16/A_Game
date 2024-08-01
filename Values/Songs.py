@@ -1,4 +1,5 @@
 from utils import Imports as I
+from Values import Settings as S
 class Song:
     def __init__(self, name, notes):
         self.name = name

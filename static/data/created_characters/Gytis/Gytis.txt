@@ -18,7 +18,7 @@ Color_Shir: (0, 101, 200, 255)
 Color_Pant: (0, 100, 201, 255)
 Color_Shoe: (1, 129, 128, 255)
 
-Last Save: 2024/07/30 19:25
+Last Save: 2024/07/31 22:02
 
 
 
@@ -29,6 +29,6 @@ Alignment: Unaligned
 
 Class: Not trained
 
-Backpack: Light Berries-1-2-0,,Meat0-1-0-0,,
+Backpack: Light Berries__5__-8__8,,Meat0__1__0__0,,
 
-Spells: 0-Magic Bolt,,2-Fire Bolt,,4-Cold Bolt,,
+Spells: 0_Magic Bolt,,2__Fire Bolt,,4__Cold Bolt,,

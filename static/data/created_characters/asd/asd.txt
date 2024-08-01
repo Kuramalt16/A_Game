@@ -18,17 +18,17 @@ Color_Shir: (238, 28, 36, 255)
 Color_Pant: (240, 28, 36, 255)
 Color_Shoe: (239, 28, 36, 255)
 
-Last Save: 2024/07/30 23:42
+Last Save: 2024/08/02 01:03
 
 
 
 Level: 1
-Experience: 0
+Experience: 105
 
 Alignment: Unaligned
 
 Class: Not trained
 
-Backpack: Empty
+Backpack: Light Berries__10__0__2,,Meat0_Cooked__1__0__6,,Meat1__1__4__8,,Meat0__1__6__0,,Slime Ball__1__8__0,,
 
-Spells: 0-Magic Bolt,,
+Spells: 0__Magic Bolt,,8__Cold Bolt,,2__Fire Bolt,,

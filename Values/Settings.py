@@ -13,11 +13,17 @@ RESOLUTION = (SCREEN_WIDTH - 680) * 1 / 600
 # Framerate
 FRAMERATE = 60  #Default 60
 
+# Volume
+VOLUME = 1.0
+
+
 #  back-end values
 # IMPORTANT DON'T CHANGE CONTROLS WHICH SCREEN IS LOCKED OR UNLOCKED
 START_APP = True
 MAIN_MENU = True
 BUSY = False
+
+WINDOW = "" # controls to re enter paused game (K_esc) after exiting from settings to redraw the background
 
 PLAY = False # once set to True starts the game.
 
@@ -38,6 +44,8 @@ RESTART = False
 
 # paths
 PATHS = {
+    "Small_frame": "static/images/Frame_main_menu.png",
+    "Empty_button_frame": "static/images/Empty.png",
     "Girl": 'static/images/Girl.png',
     "Boy": 'static/images/Boy.png',
     "Human_Girl": 'static/images/Race/Human/Girl/Human_Girl.png',
@@ -105,23 +113,9 @@ SPELL_PATHS = {
     "Cold Bolt": 'static/images/Spells/Ice_Bolt/Ice_Bolt_',
     "Fire Bolt": 'static/images/Spells/Fire_Bolt/Fire_Bolt_',
 }
-ITEM_PATHS = {
-    "Light Berries": 'static/images/Items/Light Berries.png',
-    "Slime Ball": 'static/images/Items/Slime Ball.png',
-    "Meat0": 'static/images/Items/Meat0.png',
-    "Meat1": 'static/images/Items/Meat1.png',
-}
 DECOR_PATH = {
     "Grass":    'static/images/Background/Grass.png',
-    "Bush_S_1": 'static/images/Background/Bushes/Bush_S_1.png',
-    "Bush_S_2": 'static/images/Background/Bushes/Bush_S_2.png',
-    "Tree_T_1": 'static/images/Background/Trees/Tree_T_1.png',
-    "Tree_M_1": 'static/images/Background/Trees/Tree_M_1.png',
-    "Tree_M_2": 'static/images/Background/Trees/Tree_M_2.png',
-    "House_1":  'static/images/Background/House/House_1.png',
     "Wooden_tiles":  'static/images/Background/House/Wooden_tiles.png',
-    "Church_1":  'static/images/Background/House/Church_1.png',
-
 }
 MOB_PATH = {
     "Slime_S": ('static/images/Mobs/Ooze/Slime_S/', 10),
@@ -137,14 +131,11 @@ COMBAT_PATH = {
 
 CHAR_SAVE_PATH = 'static/data/created_characters'
 
-
 # Gif maker
 GIF_DICT = {"Walk": "_Walk, Front, _Walk1, Front",
             "_Back_Walk": "_Back_Walk, Back, _Back_Walk1, Back",
             "_Side_Walk": "_Side_Walk, Side, _Side_Walk1, Side",
             "_Side_Walk11": "_Side_Walk11, Side1, _Side_Walk12, Side1"}
-
-
 
 # Dummy Values
 DUMMY_VALUE1 = 0

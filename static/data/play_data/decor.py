@@ -8,17 +8,31 @@ class Decorations:
         self.displayed_rects = []
 
     def create_place_holders(self):
-        db_data = Ff.read_data_from_db("decor", ["name", "harvestable", "flamable"])
+        db_data = Ff.read_data_from_db("decor", ["name", "action", "flamable", "type", "path"])
         for data in db_data:
-            self.decor_dict[data[0]] = {"harvestable": data[1],
-                                       "flamable": data[2],
-                                        }
-            if "HARVESTABLE:" in data[1]:
-                I.info.HARVESTED_OBJECTS[data[0]] = []
-            elif "ENTERABLE:" in data[1]:
-                if ",," in data[1]:
-                    enter_through = data[1].split(",,")[0]
-                I.info.ENTERABLE.append(data[0])
+            if data[3] in ["Nature", "House"]:
+                self.decor_dict[data[0]] = {"action": data[1],
+                                           "flamable": data[2],
+                                            "type": data[3],
+                                            "path": data[4]
+                                            }
+                if "HARVESTABLE:" in data[1]:
+                    I.info.HARVESTED_OBJECTS[data[0]] = []
+                elif "ENTERABLE:" in data[1]:
+                    if ",," in data[1]:
+                        enter_through = data[1].split(",,")[0]
+                    I.info.ENTERABLE.append(data[0])
+            elif data[3] in ["Furniture", "Appliance"]:
+                self.decor_dict[data[0]] = {"action": data[1],
+                                            "flamable": data[2],
+                                            "type": data[3],
+                                            "path": data[4]
+                                            }
+                if "ENTERABLE:" in data[1]:
+                    if ",," in data[1]:
+                        enter_through = data[1].split(",,")[0]
+                    I.info.ENTERABLE.append(data[0])
+
             # elif "AXE:" in data[1]:
             #     I.info.AXE_ =
     def generate_decor(self, name, num_of_items, background_size, path):

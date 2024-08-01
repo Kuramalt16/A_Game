@@ -48,14 +48,11 @@ def display_text(screen, text, size, pos_tuple, color):
 def button_click_render(screen, button, data, name):
     if data == 1:
         # Pressed down
-        button = add_image_to_screen(screen, 'static/images/' + name + "_Clicked.png",
-                                     [button.left, button.top, button.width, button.height])
+        button = add_image_to_screen(screen, 'static/images/' + name + "_Clicked.png", [button.left, button.top, button.width, button.height])
     elif data == 0:
-        button = add_image_to_screen(screen, 'static/images/' + name + ".png",
-                                     [button.left, button.top, button.width, button.height])
-    else:
-        text = display_text(screen, "A RESTART IS REQUIRED FOR THE CHANGES TO TAKE EFFECT (CANCEL IF UNWANTED)", 10,
-                            (sr.CB_LEFT, sr.CB_TOP * 2.8), "black")
+        button = add_image_to_screen(screen, 'static/images/' + name + ".png", [button.left, button.top, button.width, button.height])
+    elif name == "Slider_button":
+        text = display_text(screen, "A RESTART IS REQUIRED FOR THE CHANGES TO TAKE EFFECT (CANCEL IF UNWANTED)", 10, (sr.CB_LEFT, sr.CB_TOP * 2.8), "black")
         I.pg.display.update(text)
         interval = (sr.SLIDER_MAX - sr.SLIDER_MIN) / 10
         data = data - button.width / 2
@@ -65,13 +62,26 @@ def button_click_render(screen, button, data, name):
         elif data < sr.SLIDER_MIN:
             data = sr.SLIDER_MIN
 
-        add_image_to_screen(screen, 'static/images/Frame_main_menu.png',
-                            [sr.S_LEFT, sr.S_TOP, sr.S_F_WIDTH, sr.S_F_HEIGHT])
-        slider = add_image_to_screen(screen, 'static/images/Slider.png',
-                                     [S.SCREEN_WIDTH / 2, sr.SLIDER_TOP, sr.SLIDER_WIDTH, sr.SLIDER_HEIGHT])
+        add_image_to_screen(screen, 'static/images/Frame_main_menu.png', [sr.S_LEFT, sr.S_TOP, sr.S_F_WIDTH, sr.S_F_HEIGHT])
+        slider = add_image_to_screen(screen, 'static/images/Slider.png', [S.SCREEN_WIDTH / 2, sr.SLIDER_TOP, sr.SLIDER_WIDTH, sr.SLIDER_HEIGHT])
         I.pg.display.update(slider)
-        button = add_image_to_screen(screen, 'static/images/' + name + "_Clicked.png",
-                                     [data, button.top, button.width, button.height])
+        button = add_image_to_screen(screen, 'static/images/' + name + "_Clicked.png", [data, button.top, button.width, button.height])
+    elif name == "Slider_button_Volume":
+        # text = display_text(screen, str(S.VOLUME), 10,(sr.CB_LEFT, sr.CB_TOP * 2.8), "black")
+        # I.pg.display.update(text)
+        interval = (sr.SLIDER_MAX - sr.SLIDER_MIN) / 10
+        data = data - button.width / 2
+        data = round(data / interval) * interval
+        if data > sr.SLIDER_MAX:
+            data = sr.SLIDER_MAX
+        elif data < sr.SLIDER_MIN:
+            data = sr.SLIDER_MIN
+        button_name = name.split("_")
+        button_name = button_name[0] + "_" + button_name[1]
+        add_image_to_screen(screen, 'static/images/Frame_main_menu.png',[sr.S_LEFT, sr.S_TOP, sr.S_F_WIDTH, sr.S_F_HEIGHT])
+        slider = add_image_to_screen(screen, 'static/images/Slider.png', [S.SCREEN_WIDTH / 2, sr.SLIDER_TOP * 2, sr.SLIDER_WIDTH, sr.SLIDER_HEIGHT])
+        I.pg.display.update(slider)
+        button = add_image_to_screen(screen, 'static/images/' + button_name + "_Clicked.png",[data, button.top, button.width, button.height])
     return button
 
 

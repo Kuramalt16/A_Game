@@ -14,22 +14,37 @@ MENU_WIDTH = S.SCREEN_WIDTH - (2 * M_LEFT)
 MENU_HEIGHT = S.SCREEN_HEIGHT / 10 * 9
 
 BUTTON_WIDTH = S.SCREEN_WIDTH - (2 * B_LEFT)
-BUTTON_HEIGHT = S.SCREEN_HEIGHT / 10
+BUTTON_HEIGHT = S.SCREEN_HEIGHT / 8
 
 
 def Main_menu(screen):
-    screen.fill('white')
+    # screen.fill('white')
+    buttons = {}
     I.pg.display.flip()
-    frame_main_menu = Ff.add_image_to_screen(screen, 'static/images/Frame_main_menu.png', [M_LEFT, M_TOP, MENU_WIDTH, MENU_HEIGHT])
+    frame_main_menu = Ff.add_image_to_screen(screen, S.PATHS["Small_frame"], [M_LEFT, M_TOP, MENU_WIDTH, MENU_HEIGHT])
     I.pg.display.update(frame_main_menu)
-    b_start_game = Ff.add_image_to_screen(screen, 'static/images/Start_game.png', [B_LEFT, B_TOP1, BUTTON_WIDTH, BUTTON_HEIGHT])
-    I.pg.display.update(b_start_game)
-    b_settings = Ff.add_image_to_screen(screen, 'static/images/Settings.png', [B_LEFT, B_TOP2, BUTTON_WIDTH, BUTTON_HEIGHT])
-    I.pg.display.update(b_settings)
-    b_exit = Ff.add_image_to_screen(screen, 'static/images/Exit.png', [B_LEFT, B_TOP3, BUTTON_WIDTH, BUTTON_HEIGHT])
-    I.pg.display.update(b_exit)
+    if I.info.SELECTED_CHARACTER == "":
+        buttons["Start Game"] = Ff.add_image_to_screen(screen, S.PATHS["Empty_button_frame"], [B_LEFT, B_TOP1, BUTTON_WIDTH, BUTTON_HEIGHT])
+        buttons["Start Game_text"] = Ff.display_text(screen, "Start Game", 30, (B_LEFT + BUTTON_WIDTH / 4, B_TOP1 + BUTTON_HEIGHT / 3), "black")
+        I.pg.display.update(buttons["Start Game"])
+    else:
+        buttons["Resume Game"] = Ff.add_image_to_screen(screen, S.PATHS["Empty_button_frame"], [B_LEFT, B_TOP1, BUTTON_WIDTH, BUTTON_HEIGHT])
+        buttons["Resume Game_text"] = Ff.display_text(screen, "Resume Game", 30, (B_LEFT + BUTTON_WIDTH / 6, B_TOP1 + BUTTON_HEIGHT / 3), "black")
+        I.pg.display.update(buttons["Resume Game"])
 
-    buttons = {"Start_game": b_start_game, "Settings": b_settings, "Exit": b_exit}
+    buttons["Settings"] = Ff.add_image_to_screen(screen, S.PATHS["Empty_button_frame"], [B_LEFT, B_TOP2, BUTTON_WIDTH, BUTTON_HEIGHT])
+    buttons["Settings_text"] = Ff.display_text(screen, "Settings", 30, (B_LEFT + BUTTON_WIDTH / 3, B_TOP2 + BUTTON_HEIGHT / 3), "black")
+    I.pg.display.update(buttons["Settings"])
+
+    if I.info.SELECTED_CHARACTER == "":
+        buttons["Exit"] = Ff.add_image_to_screen(screen, S.PATHS["Empty_button_frame"], [B_LEFT, B_TOP3, BUTTON_WIDTH, BUTTON_HEIGHT])
+        buttons["Exit_text"] = Ff.display_text(screen, "Exit", 30, (B_LEFT + BUTTON_WIDTH / 2.3, B_TOP3 + BUTTON_HEIGHT / 3), "black")
+        I.pg.display.update(buttons["Exit"])
+    else:
+        buttons["Main Menu"] = Ff.add_image_to_screen(screen, S.PATHS["Empty_button_frame"],[B_LEFT, B_TOP3, BUTTON_WIDTH, BUTTON_HEIGHT])
+        buttons["Main Menu_text"] = Ff.display_text(screen, "Main Menu", 30,(B_LEFT + BUTTON_WIDTH / 3.5, B_TOP3 + BUTTON_HEIGHT / 3), "black")
+        I.pg.display.update(buttons["Main Menu"])
+
     return buttons
 
 

@@ -169,3 +169,11 @@
 * DESC: add healthbars to mobs only after hiting them
 * PRIORITY: MEDIUM
 * NEEDS: willpower
+
+* DESC: add soothing sound for house/inn
+* PRIORITY: MEDIUM
+* NEEDS: willpower
+
+* DESC: click sound for furnace and for burning. (he sound should be sth like click žžŽŽŽžž)
+* PRIORITY: MEDIUM
+* NEEDS: willpower
