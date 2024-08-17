@@ -137,11 +137,17 @@ def take_pictures(value, screen, side):
                        "\n\n" +
 
                        "Level: " + "1" + "\n" +
-                       "Experience: " + "0" + "\n\n" +
+                       "Experience: " + "0" + "\n" +
+                       "Health: " + "10" + "\n" +
+                       "Mana: " + "10" + "\n" +
+                       "Exhaustion: " + "100" + "\n\n" +
+                       "Gold: " + "0" + "\n\n" +
                        "Alignment: " + "Unaligned" + "\n\n" +
                        "Class: " + "Not trained" + "\n\n" +
-                       "Backpack: " + "Empty" + "\n\n" +
-                       "Spells: " + "Empty"
+                       "Backpack: " + "Gold__0__0__0" + "\n\n" +
+                       "Spells: " + "" + "\n\n" +
+                       "Dialog: " + "" + "\n\n" +
+                       "Quests: " + "" + "\n\n"
                        )
 
 def Save_Character(character, screen):
@@ -395,10 +401,13 @@ def show_load(screen):
                                 if key == "Back":
                                     Ff.button_click_render_down(screen, buttons[key], 0, S.PATHS[key])
                                     cancel = True
+                                    I.info.SELECTED_CHARACTER = ""
+
                                 elif key == "Delete":
                                     Ff.button_click_render_down(screen, buttons[key], 0, S.PATHS[key])
                                     Ff.display_text(screen, key, 30, (buttons["Delete"].left + buttons["Delete"].left / 7, buttons["Delete"].top * 1.025),"Red")
                                     cancel = True
+                                    I.info.SELECTED_CHARACTER = ""
                                     I.shutil.rmtree('static/data/created_characters/' + I.info.SELECTED_CHARACTER)
                                 elif key == I.info.SELECTED_CHARACTER:
                                     select = False

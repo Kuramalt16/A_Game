@@ -4,17 +4,13 @@
 * PRIORITY: LOW
 * NEEDS: willpower
 
-* DESC: Create Volume Slider
-* PRIORITY: LOW
-* NEEDS: willpower
-
 * DESC: Add harvest delay to item class
 * PRIORITY: LOW
-* NEEDS: a reason
+* NEEDS: a reason ( The reason: when entering exiting rooms the counters reset so the delay should be acounted for or maybe in some other way)
 
 * DESC: Add respawn delay to mob class
 * PRIORITY: LOW
-* NEEDS: willpower
+* NEEDS: willpower ( reason: when entering exiting houses it resets)
 
 * DESC: redo mob class to include multiple diferent mobs
 * PRIORITY: HIGH
@@ -26,7 +22,7 @@
 
 * DESC: Add new mobs
 * PRIORITY: HIGH
-* NEEDS: willpower i added pigs
+* NEEDS: willpower, i added pigs
 
 * DESC: Add ghost hunting mobs
 * PRIORITY: Low
@@ -42,7 +38,7 @@
 
 * DESC: in Handle_music: create a function that chooses a sound effect when mob hits player. in mob class add an effect for the mob. (fire elemental will use fire sound)
 * PRIORITY: Low
-* NEEDS:  Mastery display. tracking of experience.
+* NEEDS:  willpower and a reason ( when hit by a slime it should sound like a slime not like a brick)
 
 * DESC: Use this sound effect to hold down the key and for how long it is held the amount of damage is increesed.
 * PRIORITY: Low
@@ -52,7 +48,7 @@
 
 * DESC: if shot down with a fire spell, cooks the meat.
 * PRIORITY: Low
-* NEEDS:
+* NEEDS: Willpower
 
 * DESC: do allignments 9 - Chaotic evil ( attacks all unprovoked )
 * PRIORITY: HIGH
@@ -74,23 +70,19 @@
 * PRIORITY: HIGH
 * NEEDS: implementation where mobs can "see" you attacking others (seeing is less than 100 distance) function for efficient checking how far mobs are.
 
-* DESC: Add timeout for attacking with spells or physical
-* PRIORITY: HIGH
-* NEEDS:
-
 * DESC: make diferent mobs have diferent visibilities
 * PRIORITY: Medium
-* NEEDS:
+* NEEDS: needs mobs in db
 
 * DESC: make diferent spells shoot slower/faster
 * PRIORITY: Medium
-* NEEDS:
+* NEEDS: put it in db and handle it
 
 * DESC: add teleportation spell
 * PRIORITY: Medium
 * NEEDS: spawnpoints
 
-* DESC: add blinker spell
+* DESC: add blinker spell ( teleports player a few feet away, need a clever way to handle it. )
 * PRIORITY: Medium
 * NEEDS: willpower
 
@@ -98,37 +90,17 @@
 * PRIORITY: Medium
 * NEEDS: willpower
 
-* DESC: make fire spell burn flammable objects
-* PRIORITY: Medium
-* NEEDS: decoration sqlite database.
-
-* DESC: make screen stop in a single spot but let the character move at the edges
-* PRIORITY: Medium
-* NEEDS: willpower
-
 * DESC: make levelup a thing. when level up a window appears that a level up has been reached. all hp, mana is restored.
 * PRIORITY: Medium
 * NEEDS: skilltree, music, window
 
-* DESC: make effect last on more than one mob
+* DESC: make effect last on more than one mob (currently runs out on a single mob not an issue when dealing with only lv 1 players)
 * PRIORITY: Medium
 * NEEDS: willpower
 
 * DESC: display embers, ashes instead of deleting objects
 * PRIORITY: Medium
 * NEEDS: willpower
-
-* DESC: display embers, ashes instead of deleting objects
-* PRIORITY: Medium
-* NEEDS: ashes
-
-* DESC: Create window to pause the game once esc is pressed (with settings, save and exit)
-* PRIORITY: LOW
-* NEEDS: willpower
-
-* DESC: enter into a house
-* PRIORITY: LOW
-* NEEDS: house interior drawing
 
 * DESC: Folowers
 * PRIORITY: LOW
@@ -138,42 +110,98 @@
 * PRIORITY: LOW
 * NEEDS: drawing
 
-* DESC: add character to the backpack
-* PRIORITY: LOW
-* NEEDS: drawing
-
-* DESC: experience bar to the backpack
-* PRIORITY: LOW
-* NEEDS: willpower
-
-* DESC: add levels (mastery) experience bars to a seperate window let's say the letter "N" controlls it.
+* DESC: add levels (mastery) experience bars to a seperate window let's say the letter "Q" controlls it.
 * PRIORITY: LOW
 * NEEDS: drawing
 
 * DESC: add map view
 * PRIORITY: LOW
-* NEEDS: drawing, willpower
-
-* DESC: when decorations are randomly placed. SAVE the locations of them to sqlite and next time instead of generating random, place already existing generated, (will help with maping and going from one place to another)
-* PRIORITY: High
-* NEEDS: willpower, sqlite table for maps. in there should save a count of how many decorations, what kind of decorations and their placements.
-
-* DESC: percise locations to all decorations this is required for when a person enters and exits an inn the decor changes cuz its random. this shouldnt happen in villages. (better fix: define what can be in a village and what cant be, for instance this village is called Rusty Village or sth like that. add to db and make a list of what and how many decorations can be placed. also would be nice to know where).
-* PRIORITY: MEDIUM
-* NEEDS: willpower
-
-* DESC: add rooms to sqlite
-* PRIORITY: MEDIUM
-* NEEDS: willpower
-
-* DESC: add healthbars to mobs only after hiting them
-* PRIORITY: MEDIUM
-* NEEDS: willpower
+* NEEDS: drawing, willpower, more areas.
 
 * DESC: add soothing sound for house/inn
 * PRIORITY: MEDIUM
 * NEEDS: willpower
 
-* DESC: click sound for furnace and for burning. (he sound should be sth like click žžŽŽŽžž)
+* DESC: click sound for furnace and for burning. (it sound should be sth like click žžŽŽŽŽ)
 * PRIORITY: MEDIUM
 * NEEDS: willpower
+
+* DESC: Add Titles : (Alcoholic, Hero, Thief, Murderer) change in the dialog some parts when addressing the character to use {Player} and then in display text change that to the title.
+* PRIORITY: MEDIUM
+* NEEDS: willpower
+
+* DESC: Friend list and enemy list. for npc interractions, friends call by name, offer discounts, converse. enemies ignore, talk diferently, harass, attack
+* PRIORITY: MEDIUM
+* NEEDS: willpower
+
+* DESC: All doors should be secondary rects. made to open only once they are clicked. its easyer than drawing extra rects on the doors. plus it's easyer for the motion
+* PRIORITY: MEDIUM
+* NEEDS: willpower
+
+* DESC: Add chest.
+* PRIORITY: MEDIUM
+* NEEDS: willpower
+
+* DESC: Make Barrels containers
+* PRIORITY: MEDIUM
+* NEEDS: willpower
+
+* DESC: Add weapon seller
+* PRIORITY: MEDIUM
+* NEEDS: willpower
+
+* DESC: Add NPCS to db. Collumns: Type: (bartender, blacksmith, mayor, maid, story-teller), Quests: (names of quests or False), Conversations: big list of all the things a character can say.
+* PRIORITY: HIGH
+* NEEDS: willpower
+
+* DESC: Quests to db. Collums: Name, Level requirement, quest giver, type of quest, reward, what to do?
+* PRIORITY: HIGH
+* NEEDS: willpower
+
+* DESC: Give the mayor a hat and a cigar animation
+* PRIORITY: HIGH
+* NEEDS: willpower
+
+* DESC: Make Axe usable (in db properties collum its set to AXE,,WEAPON, axe needs efficiency value and weapon needs damage value and damage type
+* PRIORITY: HIGH
+* NEEDS: willpower
+
+* DESC: Make Picaxe usable (in db properties collum its set to PICAXE,,WEAPON, picaxe needs efficiency value and weapon needs damage value and damage type
+* PRIORITY: HIGH
+* NEEDS: willpower
+
+* DESC: Make Sword, Staff, Dagger usable.
+* PRIORITY: HIGH
+* NEEDS: willpower
+
+* DESC: Make Bow and arrows
+* PRIORITY: HIGH
+* NEEDS: willpower
+
+* DESC: Make a Pavement for blacksmith shop
+* PRIORITY: HIGH
+* NEEDS: willpower
+
+* DESC: Make a sound effect for walking on stone, sand, grass, wooden planks.
+* PRIORITY: HIGH
+* NEEDS: willpower
+
+* DESC: Spell effects all do the same damage. check in mob_data.deal_damage under "effect" in weapon: it is only fire damage, so its fine now, but in the future needs to be handled diferantly
+* PRIORITY: LOW
+* NEEDS: spells with effects.
+
+* DESC: add diferent knockbacks and animations for diferent type weapons (blunt, slashing, piercing)
+* PRIORITY: LOW
+* NEEDS: spells with effects.
+
+* DESC: in shop make tabs for selling. switch tabs by clicking [A] or [S]
+* PRIORITY: LOW
+* NEEDS: spells with effects.
+
+* DESC: High level spells require arrowkey codes to efficiently cast the spell
+* PRIORITY: LOW
+* NEEDS: willpower
+
+* DESC: change spell book display to an actual book with page flipping.
+* PRIORITY: LOW
+* NEEDS: Beta version

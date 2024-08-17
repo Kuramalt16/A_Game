@@ -4,7 +4,7 @@
 * DESC: after minimizing and then increasing the screen slider goes black, due to not using flip
 * PRIORITY: LOW
 
-* DESC: spell effects on mobs dont go away sometimes. atkartoti reikia bug.
+* DESC: spell effects dont show up when moving past the object (it gets transported to a lower layer, need to keep it on the top layer
 * PRIORITY: LOW
 
 * DESC: Pigs walk under the portal
@@ -13,8 +13,20 @@
 * DESC: fix sound playing while constantly clicking settings, cancel settings cancel.
 * PRIORITY: LOW
 
-* DESC: fix hp/mp setting to full whenever entering a house or exiting house.
+* DESC: in rooms db changing image size doesnt change the size. changing the rect size does. fix it.
 * PRIORITY: LOW
+
+* DESC: walking behind decor doesnt work in offset or in rooms
+* PRIORITY: MEDIUM
+
+* DESC: make steping on rect click based
+* PRIORITY: MEDIUM
+
+* DESC: false,,0 dosent stop fire effect
+* PRIORITY: MEDIUM
+
+* DESC: Fire effect completely fucked up
+* PRIORITY: MEDIUM
 
 # Optimization
 

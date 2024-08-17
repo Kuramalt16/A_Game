@@ -1,16 +1,23 @@
-from utils import Imports as I
+from Values import Settings as S
+from utils import Frequent_functions as Ff, Imports as I
 class Gif:
-    def __init__(self, name, frame_count, initial_path, delay):
+    def __init__(self, name, count, path, delay):
+        self.gif_dict = {}
         self.name = name
-        self.frame_count = frame_count
-        self.frame_paths = [initial_path + str(i) + ".png" for i in range(frame_count)]
+        self.frame_count = count
         self.delay = delay
+        self.frame_paths = [path + str(i) + ".png" for i in range(count)]
+
+        # self.read_db()
+
+
         self.start_gif = False
         self.current_frame = 0
         self.images = []
         self.frame_time = 0
         self.read_image()
         self.repeat = 1
+
 
     def read_image(self):
         for i in range(self.frame_count):
@@ -20,6 +27,7 @@ class Gif:
     # def update_frame(self):
     def Start_gif(self, name, rect):
         self.name = name
+        # self.name += 1
         self.start_gif = True
         self.current_frame = 0
         self.frame_time = I.pg.time.get_ticks()
@@ -29,6 +37,7 @@ class Gif:
         # Check if gif time has passed:
         if repeat == -1:
             self.repeat = 1
+
         if I.pg.time.get_ticks() - self.frame_time > self.delay:
             self.current_frame += 1
             self.frame_time = I.pg.time.get_ticks()
@@ -49,3 +58,12 @@ class Gif:
             else:
                 return self.images[self.current_frame - 1]
 
+def read_db(decorations):
+    db_data = Ff.read_data_from_db("gifs", ["name", "frames", "path", "delay"])
+    gif_dict = {}
+    for data in db_data:
+        path = data[2]
+        if data[2] == "Decor":
+            path = decorations.decor_dict[data[0]]["path"]
+        gif_dict[data[0]] = Gif(data[0], data[1], path, data[3])
+    return gif_dict

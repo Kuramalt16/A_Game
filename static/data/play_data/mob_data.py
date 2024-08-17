@@ -1,5 +1,5 @@
 import random
-from utils import Imports as I
+from utils import Imports as I, Frequent_functions as Ff
 from Render import Background_Render as br
 from Values import Settings as S
 class Mob:
@@ -43,6 +43,7 @@ class Mob:
             "Cold": 0,
             "Force": 0,
         },
+        "damage_type": "",
         "allignment": temp_allignment,
         "gif_frame": (0, S.MOB_PATH[self.name][1]),
         "visible": False,
@@ -127,16 +128,25 @@ class Mob:
         """Remove a mob from the list by id."""
         self.count = (self.count[0] - 1, self.count[1])
         self.mobs = [mob for mob in self.mobs if mob["id"] != mob_id]
-    def deal_damage(self, victim, player, weapon):
+    def deal_damage(self, victim, player, weapon, items, gifs):
         if weapon == "":
-            damage = 2 / 3
-            knockback = 1
-            type = "Blunt"
+            # NOT SPELL AND NOT EFFECT DAMAGE
+            if I.info.EQUIPED["Sword"] != 0:
+                damage, speed, knockback, type = Ff.get_property(I.info.EQUIPED["Sword"], items, "WEAPON")
+                damage = int(damage)
+                speed = float(speed)
+                knockback = int(knockback)
+            else:
+                damage = I.info.BASE_ATTACKING_DAMAGE
+                knockback = I.info.BASE_KNOCKBACK
+                type = "Blunt"
         elif "effect" in weapon:
+            # EFFECT DAMAGE
             damage = 0.05
             knockback = 0
             type = weapon.split("_")[1]  # get's effect
         else:
+            # SPELL DAMAGE
             damage = weapon["damage"]
             damage = random.randint(int(damage.split("d")[0]), int(damage.split("d")[1]))
             knockback = weapon["knockback"]
@@ -146,19 +156,26 @@ class Mob:
             victim["allignment"] = 6
         victim["hp"] = victim["hp"][0] - damage, victim["hp"][1]
         if victim["hp"][0] <= 0:
+            gifs[type].start_gif = False
             self.remove_mob(victim["id"])
             player["Experience"] += victim["exp"]
-            if isinstance(victim["drop"], tuple):
+            if isinstance(victim["drop"], tuple): # if victim drops not more than one item
                 amount = victim["drop"][1] if random.randint(0, victim["drop"][2]-1) == 0 else 0
-                br.add_to_backpack(victim["drop"][0], amount)
+                br.add_to_backpack(victim["drop"][0], amount, items)  # Adds mob drops 1
                 if amount != 0:
-                    I.info.TEXT.append("Recieved " + str(amount) + " " + str(victim["drop"][0]) + ",,5000")
+                    Ff.display_text_player("Recieved " + str(amount) + " " + str(victim["drop"][0]), 5000)
             else:
-                choose = random.randint(0, len(victim["drop"]) - 1)
-                amount = victim["drop"][choose][1] if random.randint(0, victim["drop"][choose][2] - 1) == 0 else 0
-                br.add_to_backpack(victim["drop"][choose][0], amount)
-                if amount != 0:
-                    I.info.TEXT.append("Recieved " + str(amount) + " " + str(victim["drop"][choose][0][:-1]) + ",,5000")
+                # choose = random.randint(0, len(victim["drop"]) - 1)
+                amount1 = victim["drop"][0][1] if random.randint(0, victim["drop"][0][2]) == 0 else 0
+                br.add_to_backpack(victim["drop"][0][0], amount1, items)  # adds mob drops 2
+                amount2 = victim["drop"][1][1] if random.randint(0, victim["drop"][1][2]) == 0 else 0
+                br.add_to_backpack(victim["drop"][1][0], amount2, items)  # adds mob drops 3
+
+                if amount1 != 0:
+                    Ff.display_text_player("Recieved " + str(amount1) + " " + str(victim["drop"][0][0][:-1]), 5000)
+                if amount2 != 0:
+                    Ff.display_text_player("Recieved " + str(amount2) + " " + str(victim["drop"][1][0][:-1]), 5000)
+
             # gifs[type].start_gif = False
 
         elif "effect" not in weapon:

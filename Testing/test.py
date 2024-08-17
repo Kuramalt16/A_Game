@@ -301,7 +301,7 @@ def rename_images_in_folder(folder_path):
 
 # Example usage
 
-# rename_images_in_folder("C:/Users/gytis/PycharmProjects/A_Game/static/images/Combat/Cold")
+# rename_images_in_folder("C:/Users/gytis/PycharmProjects/A_Game/static/images/Combat/Piercing")
 
 
 

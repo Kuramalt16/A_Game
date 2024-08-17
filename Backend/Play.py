@@ -16,65 +16,54 @@ movement = {
     (-1, 1): (-1, 1)  # Left + Down
 }
 
-def Start(screen, clock):
+def Start(screen, clock, rooms):
+
     br.get_backpack_coordinates(screen)
-    mob = 0
+
     decorations = I.decor.Decorations()
-    gifs = {"ghost": I.gifs.Gif(name="Dead", frame_count=8, initial_path=S.PLAYING_PATH["Dead"], delay=50),
-            "Portal": I.gifs.Gif(name="Portal", frame_count=34, initial_path=S.PLAYING_PATH["Portal"], delay=100),
-            "Blunt": I.gifs.Gif(name="Blunt", frame_count=S.COMBAT_PATH["Blunt"][1], initial_path=S.COMBAT_PATH["Blunt"][0], delay=10),
-            "Slashing": I.gifs.Gif(name="Slashing", frame_count=S.COMBAT_PATH["Slashing"][1], initial_path=S.COMBAT_PATH["Slashing"][0], delay=50),
-            "Piercing": I.gifs.Gif(name="Piercing", frame_count=S.COMBAT_PATH["Piercing"][1], initial_path=S.COMBAT_PATH["Piercing"][0], delay=10),
-            "Force": I.gifs.Gif(name="Force", frame_count=S.COMBAT_PATH["Blunt"][1], initial_path=S.COMBAT_PATH["Blunt"][0], delay=10),
-            "Fire": I.gifs.Gif(name="Fire", frame_count=S.COMBAT_PATH["Fire"][1], initial_path=S.COMBAT_PATH["Fire"][0], delay=50),
-            "Cold": I.gifs.Gif(name="Cold", frame_count=S.COMBAT_PATH["Cold"][1], initial_path=S.COMBAT_PATH["Cold"][0], delay=200),
-            "Luna": I.gifs.Gif(name="Luna", frame_count=4, initial_path=S.PLAYING_PATH["Luna"], delay=50),
-            "Bear": I.gifs.Gif(name="Bear", frame_count=4, initial_path=S.PLAYING_PATH["Bear"], delay=50),
-            "Magic Bolt": I.gifs.Gif(name="Magic Bolt", frame_count=10, initial_path=S.SPELL_PATHS["Magic Bolt"], delay=50),
-            "Fire Bolt": I.gifs.Gif(name="Fire Bolt", frame_count=10, initial_path=S.SPELL_PATHS["Fire Bolt"], delay=50),
-            "Cold Bolt": I.gifs.Gif(name="Cold Bolt", frame_count=10, initial_path=S.SPELL_PATHS["Cold Bolt"], delay=50),
-            "Furnace": I.gifs.Gif(name="Furnace", frame_count=4, initial_path=decorations.decor_dict["Furnace"]["path"], delay=50),
-                 }
+    gifs = I.gifs.read_db(decorations)
     items = I.items.Items()
     spells = I.Spells.Spells()
+
+    mob = 0
     if I.info.CURRENT_ROOM["Mobs"]:
         mob = {
-            "Slime_S": I.mob_data.Mob(name="Slime_S", exp=10, hp=8, allignment=5, count=20, damage=(2, "blunt"), speed=4),
-            "Pig": I.mob_data.Mob(name="Pig", exp=5, hp=6, allignment=4, count=20, damage=(1, "blunt"), speed=6),
+            "Slime_S": I.mob_data.Mob(name="Slime_S", exp=10, hp=8, allignment=5, count=10, damage=(2, "blunt"), speed=4),
+            "Pig": I.mob_data.Mob(name="Pig", exp=5, hp=6, allignment=4, count=30, damage=(1, "blunt"), speed=6),
                }
+
     collide = [False]
     pressed = 0
-    data = br.Start(mob, decorations, spells)
+
+    npc = I.dialog.read_db()
+
+    data = br.Start(mob, decorations, spells, rooms, npc, items)
+
     br.fill_backpack(screen, data["Player"], items)
     br.update_equiped()
-    last_orientation = (0, 0)
+
+    I.info.LAST_ORIENTAION = (0, 0)
     songs = {"Background": I.Songs.Song("Background", I.A.background_music),
              "Ghost": I.Songs.Song("Ghost", I.A.dead_music),
              "Playing": "Background"
              }
 
     timers = handle_timers()
-
     while S.PLAY:
         for event in I.pg.event.get():
             if event.type == I.pg.QUIT:
                 S.PLAY = False
             if event.type in timers.values():
-                handle_timer_actions(event, timers, data, mob, spells, decorations)
+                handle_timer_actions(event, timers, data, mob, spells, decorations, rooms, npc)
             if event.type == I.pg.KEYDOWN:
-                pressed = handle_keydown(event, data, spells, gifs, last_orientation)
+                pressed = handle_keydown(event, data, spells, gifs, items)
             if event.type == I.pg.KEYUP:
-                pressed = handle_keyup(event, pressed, gifs, songs, screen, items, data, collide, spells, clock)
+                pressed = handle_keyup(event, pressed, gifs, songs, screen, items, data, collide, spells, clock, rooms, npc, decorations)
 
-        collide = br.Update(screen, data, mob, gifs, songs, spells, decorations, clock)
+        collide = br.New_Update(data, decorations, gifs, rooms, clock, screen, spells, npc, mob, songs, items)
+
         if S.WINDOW == "Settings":
             handle_esc_click(screen, clock)
-
-        dx, dy = keypress_handle(screen, data, songs, items, spells)
-
-        last_orientation = walking(dx, dy, collide, data, last_orientation)
-
-        br.display_char(dx, dy, screen, gifs, data)
 
         handle_music(songs, collide, data)
 
@@ -82,23 +71,22 @@ def Start(screen, clock):
 
         update_char_bar(screen, data, gifs, items)
 
-        display_spell_bar(screen, spells)
-
+        display_spell_bar(screen, spells, gifs)
 
         I.pg.display.flip()
         clock.tick(I.info.TICK)
 
 
 
-def handle_keyup(event, pressed, gifs, songs, screen, items, data, collide, spells, clock):
+def handle_keyup(event, pressed, gifs, songs, screen, items, data, collide, spells, clock, rooms, npc, decorations):
     if event.key == pressed:
         curr_song = songs["Playing"]
         if pressed == I.pg.K_c:
             songs[curr_song].channel0.pause()
-            interract(collide, data, gifs, items, screen, songs, spells, clock)
+            interract(collide, data, gifs, items, screen, songs, spells, clock, rooms, npc, decorations)
             songs[curr_song].channel0.unpause()
         elif pressed == I.pg.K_x:
-            I.info.COMBAT_RECT = 0
+            I.info.COMBAT_RECT = (0, I.info.COMBAT_RECT[1])
         elif pressed == I.pg.K_ESCAPE:
             handle_esc_click(screen, clock)
         return 0
@@ -156,7 +144,7 @@ def handle_esc_click(screen, clock):
                 if event.key == I.pg.K_ESCAPE:
                     running = False
 
-def handle_keydown(event, data, spells, gifs, last_orientation):
+def handle_keydown(event, data, spells, gifs, items):
     key_to_slot = {
         I.pg.K_a: 0,
         I.pg.K_s: 2,
@@ -170,8 +158,10 @@ def handle_keydown(event, data, spells, gifs, last_orientation):
     if event.key == I.pg.K_c:
         pressed = I.pg.K_c
     elif event.key == I.pg.K_x:
-        if pressed != I.pg.K_x and not data["Player"]["dead"]:
-            handle_combat()
+        if pressed != I.pg.K_x and not data["Player"]["dead"] and I.info.COMBAT_RECT[1] == 0:
+            handle_combat(items)
+            I.pg.time.set_timer(I.pg.USEREVENT + 4, int(I.info.COMBAT_RECT[1]))
+
         pressed = I.pg.K_x
     if event.key in [I.pg.K_a, I.pg.K_s, I.pg.K_d, I.pg.K_f, I.pg.K_g]:
         target_slot = key_to_slot[event.key]
@@ -186,39 +176,44 @@ def handle_keydown(event, data, spells, gifs, last_orientation):
                     gifs[spell].Start_gif(spell, 1)
                     data["Player"]["mana"] = (data["Player"]["mana"][0] - int(spells.spell_dict[spell]["mana"]), data["Player"]["mana"][1])
                 else:
-                    I.info.TEXT.append("Not enough MANA,,3000")
+                    Ff.display_text_player("Not enough MANA", 3000)
     if event.key in [I.pg.K_UP, I.pg.K_DOWN, I.pg.K_LEFT, I.pg.K_RIGHT]:
         # fixes getting stuck on objects
         if I.info.OFFSCREEN[0] == 0:
-            data["Zoom_rect"].x -= last_orientation[0] * I.info.FAST
+            data["Zoom_rect"].x -= I.info.LAST_ORIENTAION[0] * I.info.FAST
         if I.info.OFFSCREEN[1] == 0:
-            data["Zoom_rect"].y -= last_orientation[1] * I.info.FAST
+            data["Zoom_rect"].y -= I.info.LAST_ORIENTAION[1] * I.info.FAST
         if I.info.OFFSCREEN[0] != 0:
-            I.info.OFFSCREEN = (I.info.OFFSCREEN[0] - last_orientation[0] * 3 * I.info.FAST, I.info.OFFSCREEN[1])
+            I.info.OFFSCREEN = (I.info.OFFSCREEN[0] - I.info.LAST_ORIENTAION[0] * 3 * I.info.FAST, I.info.OFFSCREEN[1])
         if I.info.OFFSCREEN[1] != 0:
-            I.info.OFFSCREEN = (I.info.OFFSCREEN[0], I.info.OFFSCREEN[1] - last_orientation[1] * 3 * I.info.FAST)
+            I.info.OFFSCREEN = (I.info.OFFSCREEN[0], I.info.OFFSCREEN[1] - I.info.LAST_ORIENTAION[1] * 3 * I.info.FAST)
 
 
 
     return pressed
-def display_spell_bar(screen, spells):
+def display_spell_bar(screen, spells, gifs):
     Ff.add_image_to_screen(screen, S.PLAYING_PATH["Spell_bar"], (S.SCREEN_WIDTH * 0.8, S.SCREEN_HEIGHT * 0.9,  S.SCREEN_WIDTH / 5,  S.SCREEN_HEIGHT / 10))
     for pos, spell in spells.selected_spell.items():
-        Ff.add_image_to_screen(screen, S.SPELL_PATHS[spell] + "0.png", (S.SCREEN_WIDTH * 0.803 + pos * 25, S.SCREEN_HEIGHT * 0.91,  S.SCREEN_WIDTH / 25,  S.SCREEN_HEIGHT / 10))
-def handle_mob_respawn(mob, data):
-    if I.info.CURRENT_ROOM["type"] in ["Village"]:
-        if mob.count[0] < mob.count[1]:
-            mob.count = (mob.count[0] + 1, mob.count[1])
-            id = mob.count[1] + 1
-            mob.mobs.append(mob.create_mob(id))
-            data[mob.name] = br.generate_mobs(mob, data["Image_rect"].size)
+        Ff.add_image_to_screen(screen, gifs[spell].frame_paths[0], (S.SCREEN_WIDTH * 0.803 + pos * 25, S.SCREEN_HEIGHT * 0.91,  S.SCREEN_WIDTH / 25,  S.SCREEN_HEIGHT / 10))
+def handle_mob_respawn(mob, data, rooms):
+    if rooms.type in ["Village"]:
+        print("mob: ", mob)
+        for monster_name in mob.keys():
+            if mob[monster_name].count[0] < mob[monster_name].count[1]:
+                mob[monster_name].count = (mob[monster_name].count[0] + 1, mob[monster_name].count[1])
+                id = mob[monster_name].count[1] + 1
+                mob[monster_name].mobs.append(mob[monster_name].create_mob(id))
+                data[mob[monster_name].name] = br.generate_mobs(mob[monster_name], data["Image_rect"].size)
 
-def handle_timer_actions(event, timers, data, mob, spells, decorations):
+def handle_timer_actions(event, timers, data, mob, spells, decorations, rooms, npc):
     if timers["Exhaustion"] == event.type:
         data["Player"]["Exhaustion"] = (data["Player"]["Exhaustion"][0] - 1, data["Player"]["Exhaustion"][1])
-    elif timers["Mob_respawn"] == event.type:
-        handle_mob_respawn(mob, data)
-    elif timers["cook"] == event.type:
+        for npc_name in npc.keys():
+            if npc[npc_name]["dialog"].iteration == 3: # after some time if value is 4 sets to value 5
+                npc[npc_name]["dialog"].iteration = 0
+    if timers["Mob_respawn"] == event.type:
+        handle_mob_respawn(mob, data, rooms)
+    if timers["cook"] == event.type:
         if I.info.APPLIANCE_CLICK == "Furnace":
             I.info.APPLIANCE_CLICK = ""
             if I.info.Temp_variable_holder[2] == "cook":
@@ -231,7 +226,7 @@ def handle_timer_actions(event, timers, data, mob, spells, decorations):
                     # insert_item_to_backpack(I.info.Temp_variable_holder[0] + "_Cooked", 1)
                 if any(char.isdigit() for char in I.info.Temp_variable_holder[0]):
                     I.info.Temp_variable_holder[0] = I.info.Temp_variable_holder[0][:-1]
-                I.info.TEXT.append("Cooked " + I.info.Temp_variable_holder[0] + ",,3000")
+                Ff.display_text_player("Cooked " + I.info.Temp_variable_holder[0], 3000)
             else:
                 if "Ashes" in list(I.info.BACKPACK_CONTENT.keys()):
                     I.info.BACKPACK_CONTENT["Ashes"] = I.info.BACKPACK_CONTENT["Ashes"][0] + 1, I.info.BACKPACK_CONTENT["Ashes"][1], I.info.BACKPACK_CONTENT["Ashes"][2]
@@ -239,17 +234,17 @@ def handle_timer_actions(event, timers, data, mob, spells, decorations):
                     x, y = br.find_open_space()
                     I.info.BACKPACK_CONTENT["Ashes"] = (1, x, y)
                     # insert_item_to_backpack("Ashes", 1)
-                I.info.TEXT.append("Burned " + I.info.Temp_variable_holder[0] + ",,3000")
+                Ff.display_text_player("Burned " + I.info.Temp_variable_holder[0], 3000)
             I.info.Temp_variable_holder = []
-    elif timers["Harvest"] == event.type:
+    if timers["Harvest"] == event.type:
         harvest_timeout()
-    elif timers["Walk"] == event.type:
+    if timers["Walk"] == event.type:
         I.info.CURRENT_STANCE += 1
         if I.info.CURRENT_STANCE > 3:
             I.info.CURRENT_STANCE = 0
-    elif timers["mob_gif"] == event.type:
+    if timers["mob_gif"] == event.type:
+        I.info.COMBAT_RECT = (0, I.info.COMBAT_RECT[1]) # when holding down key [X] it wont stay in {Attacked} posision for too long
         if I.info.CURRENT_ROOM["Mobs"]:
-            I.info.COMBAT_RECT = 0
             for key in mob.keys():
                 for current_mob in mob[key].mobs:
                     current_mob["gif_frame"] = (current_mob["gif_frame"][0] + 1, current_mob["gif_frame"][1])
@@ -259,12 +254,11 @@ def handle_timer_actions(event, timers, data, mob, spells, decorations):
         for key in spells.spell_cooloff.keys():
             if spells.spell_cooloff[key] != 0:
                 spells.spell_cooloff[key] -= 1
-    elif timers["healing"] == event.type:
+    if timers["healing"] == event.type:
         if I.pg.time.get_ticks() - data["Player"]["Last_hit"] > 20000 and data["Player"]["Exhaustion"][0] >= 90:
             if data["Player"]["hp"][0] < data["Player"]["hp"][1]:
                 data["Player"]["hp"] = (data["Player"]["hp"][0] + 1, data["Player"]["hp"][1])
-            if data["Player"]["mana"][0] < data["Player"]["mana"][1]:
-                # data["Player"]["mana"] = (data["Player"]["mana"][0] + 100, data["Player"]["mana"][1])
+            if float(data["Player"]["mana"][0]) < float(data["Player"]["mana"][1]):
                 data["Player"]["mana"] = (data["Player"]["mana"][0] + 1, data["Player"]["mana"][1])
         if I.info.CURRENT_ROOM["Type"] in ["Village"]:
             if decorations.effected_decor != {}:
@@ -292,6 +286,9 @@ def handle_timer_actions(event, timers, data, mob, spells, decorations):
                     for option, index, old_index in dict_to_burn:
                         del decorations.decor_dict[option][index]
                         del decorations.effected_decor[old_index]
+    if timers["hit"] == event.type:
+        I.info.COMBAT_RECT = (I.info.COMBAT_RECT[0], 0)
+
 def handle_timers():
     timers = {}
     EXHAUSTION_TIM = I.pg.USEREVENT + 1
@@ -306,18 +303,20 @@ def handle_timers():
     I.pg.time.set_timer(Harvest_timer, 60000) # 1 min
     timers["Harvest"] = Harvest_timer
 
+    timers["hit"] = I.pg.USEREVENT + 4
+
     Walk = I.pg.USEREVENT + 5
-    I.pg.time.set_timer(Walk, 300)
+    I.pg.time.set_timer(Walk, 300) #0.3 sec
     timers["Walk"] = Walk
 
     mob_gif = I.pg.USEREVENT + 6
-    I.pg.time.set_timer(mob_gif, 100)
+    I.pg.time.set_timer(mob_gif, 100) # 0.1 sec
     timers["mob_gif"] = mob_gif
 
     timers["cook"] = I.pg.USEREVENT + 7
 
     healing = I.pg.USEREVENT + 8
-    I.pg.time.set_timer(healing, 1000)
+    I.pg.time.set_timer(healing, 1000) # 1 sec
     timers["healing"] = healing
 
 
@@ -332,7 +331,7 @@ def update_char_bar(screen, data, gifs, items):
         data["Player"]["dead"] = data["Zoom_rect"].copy()
         data["Player"]["dead"].x += I.info.OFFSCREEN[0] / 4
         data["Player"]["dead"].y += I.info.OFFSCREEN[1] / 4
-        gifs["ghost"].Start_gif("Dead",[S.SCREEN_WIDTH / 2 - S.SCREEN_WIDTH / 20, S.SCREEN_HEIGHT / 2 - S.SCREEN_HEIGHT / 20 * 2, S.SCREEN_WIDTH / 14, S.SCREEN_HEIGHT / 7])
+        gifs["Ghost"].Start_gif("Ghost",[S.SCREEN_WIDTH / 2 - S.SCREEN_WIDTH / 20, S.SCREEN_HEIGHT / 2 - S.SCREEN_HEIGHT / 20 * 2, S.SCREEN_WIDTH / 14, S.SCREEN_HEIGHT / 7])
         gifs["Portal"].Start_gif("Portal", [I.info.SPAWN_POINT[0] + 30, I.info.SPAWN_POINT[1], S.SCREEN_WIDTH / 14, S.SCREEN_HEIGHT / 7])
         data["Zoom_rect"].x = I.info.SPAWN_POINT[0]
         data["Zoom_rect"].y = I.info.SPAWN_POINT[1]
@@ -358,25 +357,26 @@ def update_char_bar(screen, data, gifs, items):
     item_h = list(I.info.BACKPACK_COORDINATES_Y.values())[1] - list(I.info.BACKPACK_COORDINATES_Y.values())[0]
     for option in options:
         if I.info.EQUIPED[option] != 0:
-            Ff.add_image_to_screen(screen, items.item_dict[I.info.EQUIPED[option]]["path"], [position[option][0], position[option][1], item_w, item_h])
+            content = I.info.EQUIPED[option]
+            if "|" in content:
+                Ff.add_image_to_screen(screen, items.item_dict[content.split("|")[0]]["path"], [position[option][0], position[option][1], item_w, item_h])
+            else:
+                Ff.add_image_to_screen(screen, items.item_dict[content]["path"], [position[option][0], position[option][1], item_w, item_h])
 
-
-
-def walking(dx, dy, collide, data, last_orientation):
-    if (dx, dy) in movement and not collide[0] or (dx, dy) in movement and collide[0] in ["Portal"]:
-        last_orientation = regular_walking(data, dx, dy)
-    elif collide[0] not in ["mob"]:
+def walking(dx, dy, collide, data):
+    if (dx, dy) in movement and not collide[0] or (dx, dy) in movement and collide[0] in ["Portal", "Barkeep"]:
+        I.info.LAST_ORIENTAION = regular_walking(data, dx, dy)
+    elif collide[0] not in ["mob_collide"]:
         # if collision not with mob
-        if movement[(dx, dy)] == last_orientation or movement[(dx, dy)][0] == last_orientation[0] or movement[(dx, dy)][1] == last_orientation[1]:
+        if movement[(dx, dy)] == I.info.LAST_ORIENTAION or movement[(dx, dy)][0] == I.info.LAST_ORIENTAION[0] or movement[(dx, dy)][1] == I.info.LAST_ORIENTAION[1]:
             data["Zoom_rect"].x -= 0
             data["Zoom_rect"].y -= 0
             I.info.OFFSCREEN = (I.info.OFFSCREEN[0] - (dx * 3 * I.info.FAST), I.info.OFFSCREEN[1] - (dy * 3 * I.info.FAST))
         else:
             regular_walking(data, dx, dy)
-    elif collide[0] == "mob":
+    elif collide[0] == "mob_collide":
         # if collide is mob
         hit_by_mob_walking(data, collide)
-    return last_orientation
 
 def regular_walking(data, dx, dy):
     if I.info.CURRENT_ROOM["Type"] in ["Village"]:
@@ -419,7 +419,7 @@ def hit_by_mob_walking(data, collide):
     else:
         data["Zoom_rect"].x -= 0
         data["Zoom_rect"].y -= 0
-def keypress_handle(screen, data, song, items, spells):
+def keypress_handle(screen, data, song, items, spells, gifs):
     keys = I.pg.key.get_pressed()
     dx = (keys[I.pg.K_RIGHT] - keys[I.pg.K_LEFT])
     dy = (keys[I.pg.K_DOWN] - keys[I.pg.K_UP])
@@ -428,20 +428,24 @@ def keypress_handle(screen, data, song, items, spells):
         I.info.FAST = 2
     elif not keys[I.pg.K_z]:
         I.info.FAST = 1
-    if keys[I.pg.K_v]:
+    if keys[I.pg.K_v] and not data["Player"]["dead"]:
         curr_song = song["Playing"]
         song[curr_song].channel0.pause()
-        br.spell_book(screen, data, spells)
+        br.spell_book(screen, data, spells, gifs)
         song[curr_song].channel0.unpause()
     if keys[I.pg.K_b] and not data["Player"]["dead"]:
         curr_song = song["Playing"]
         song[curr_song].channel0.pause()
         br.BackPack(screen, items, data["Player"])
         song[curr_song].channel0.unpause()
-
+    if keys[I.pg.K_n] and not data["Player"]["dead"]:
+        curr_song = song["Playing"]
+        song[curr_song].channel0.pause()
+        br.quest_render(screen, items)
+        song[curr_song].channel0.unpause()
     return dx, dy
 
-def interract(collide, data, gifs, items, screen, songs, spells, clock):
+def interract(collide, data, gifs, items, screen, songs, spells, clock, rooms, npc, decorations):
     if collide[0] != False:
         if collide[0] in I.info.HARVESTABLE.keys() and not data["Player"]["dead"]:
             if any((collide[1], collide[2]) == (t[0], t[1]) for t in I.info.HARVESTED_OBJECTS.get(collide[0], [])):
@@ -449,7 +453,7 @@ def interract(collide, data, gifs, items, screen, songs, spells, clock):
             else:
                 item = I.info.HARVESTABLE[collide[0]]
                 amount = random.randrange(1, 5)
-                br.add_to_backpack(item, amount)
+                br.add_to_backpack(item, amount, items)  # Adds harvested plants
                 duration = int(items.item_dict[item]["Aquire"].split(",,")[3])
                 #  Handle registering items that were taken, used in not allowing collection of too many items from single bush
                 if I.info.HARVESTED_OBJECTS.get(collide[0]) == []:
@@ -460,24 +464,27 @@ def interract(collide, data, gifs, items, screen, songs, spells, clock):
                     existing_values.append((collide[1], collide[2], duration))
                     I.info.HARVESTED_OBJECTS[collide[0]] = existing_values
 
-                I.info.TEXT.append("Recieved " + str(amount) + " " + str(item) + ",,5000")
+                Ff.display_text_player("Recieved " + str(amount) + " " + str(item), 5000)
                 return
-        elif collide[0] == "Door":
-            br.render_door_open(screen)
-            I.info.CURRENT_ROOM = {"name": "House_S", "Spells": True, "Backpack": True, "Running": True, "Mobs": False, "Type": "House"}
-            br.update_character_stats('static/data/created_characters/' + I.info.SELECTED_CHARACTER + "/" + I.info.SELECTED_CHARACTER + ".txt", data["Player"], spells.selected_spell)
-            I.info.ENTRY_POS = (1, 1)
-            I.info.OFFSCREEN = (25, 250)
-            Start(screen, clock)
+        elif "door" in collide[0]:
+            I.info.DOOR_CLICK = 0, collide[0]
+
+            # building = collide[0].split("_")[0]
+            # I.info.CURRENT_ROOM = {"name": building, "Spells": True, "Backpack": True, "Running": True, "Mobs": False, "Type": "House"}
+            # rooms.select_room(building)
+            # br.update_character_stats('static/data/created_characters/' + I.info.SELECTED_CHARACTER + "/" + I.info.SELECTED_CHARACTER + ".txt", data["Player"], spells.selected_spell, npc)
+            # I.info.ENTRY_POS = (1, 1)
+            # I.info.OFFSCREEN = (25, 250)
+            # Start(screen, clock, rooms)
         elif collide[0] == "Portal":
-            I.info.TEXT.append("Reviving.,,3000")
+            Ff.display_text_player("Reviving", 3000)
         elif collide[0] == "Grave":
-            I.info.TEXT.append("Was Purgatory Fun?,,5000")
+            Ff.display_text_player("Was Purgatory Fun?", 5000)
             data["Player"]["dead"] = False
             data["Player"]["hp"] = (data["Player"]["hp"][1], data["Player"]["hp"][1])
-            gifs["ghost"].start_gif = False
+            gifs["Ghost"].start_gif = False
         elif collide[0] == "Sign":
-            br.handdle_sign_display(screen)
+            br.init_dialog("Sign", data["Player"], screen, npc, items)
         elif "Appliance" in collide[0]:
             appliance_name = collide[0].split("-")[1]
             for item in I.info.EQUIPED.values():
@@ -488,16 +495,24 @@ def interract(collide, data, gifs, items, screen, songs, spells, clock):
                         del I.info.BACKPACK_CONTENT[item]
                     else:
                         I.info.BACKPACK_CONTENT[item] = (int(I.info.BACKPACK_CONTENT[item][0]) - 1, I.info.BACKPACK_CONTENT[item][1], I.info.BACKPACK_CONTENT[item][2])
-                    if "COOK" in items.item_dict[item]["Properties"]:
-                        I.info.Temp_variable_holder = [item, 1, "cook"]
+                    backup_item = item
+                    if "|" in backup_item:
+                        backup_item = item.split("|")[0]
+                    if "COOK" in items.item_dict[backup_item]["Properties"]:
+                        I.info.Temp_variable_holder = [backup_item, 1, "cook"]
                     else:
-                        I.info.Temp_variable_holder = [item, 1, "burn"]
+                        I.info.Temp_variable_holder = [backup_item, 1, "burn"]
             br.update_equiped()
+        elif collide[0] in npc.keys():
+            # print("npc: ", collide[0])
+            # print("I.info.Conversation: ", I.info.CONVERSATION)
+            br.init_dialog(collide[0], data["Player"], screen, npc, items)
+            # I.info.CONVERSATION = 0
+            # if shop:
+            #     br.init_shop(screen)
         else:
             print("not harvestable", collide)
             print(collide)
-    # return text
-    return
 
 def harvest_timeout():
     for harvastable in I.info.HARVESTED_OBJECTS.keys():
@@ -536,10 +551,10 @@ def update_display_text(screen, gifs, data, collide):
                     I.info.TEXT[a] = lines[0] + "." + ",,3000"
                     if "..." in I.info.TEXT[a]:
                         I.info.TEXT.remove(lines[0] + "." + ",,3000")
-                        gifs["ghost"].start_gif = False  # stop the ghost gif
+                        gifs["Ghost"].start_gif = False  # stop the ghost gif
                         data["Player"]["dead"] = False  # set to alive
                         data["Player"]["hp"] = (data["Player"]["hp"][1], data["Player"]["hp"][1])  # return hp
-                        I.info.BACKPACK_CONTENT = {}  # remove backpack content
+                        I.info.BACKPACK_CONTENT = {"Gold": (0, 0, 0)}  # remove backpack content
                 else:
                     I.info.TEXT.remove(text)
             else:
@@ -547,13 +562,17 @@ def update_display_text(screen, gifs, data, collide):
                 I.info.TEXT[a] = lines[0] + ",," + str(time)
 
 
-def handle_combat():
+def handle_combat(items):
+    speed = 1
     orientation = I.info.LAST_ORIENT[0].split(".")[0]
     attack_direction = {"Front": (0, 10),
                         "Back": (0, -10),
                         "Left": (-10, 0),
                         "Right": (10, 0)}
-    I.info.COMBAT_RECT = I.pg.Rect(150 + attack_direction[orientation][0] + I.info.OFFSCREEN[0] / 4, 85 + attack_direction[orientation][1] + I.info.OFFSCREEN[1] / 4, S.SCREEN_WIDTH / 100, S.SCREEN_HEIGHT / 100)  # Player rect (if it gets hit with other rect. colide is set to True
+    if I.info.EQUIPED["Sword"] != 0:
+        damage, speed, knockback, type = Ff.get_property(I.info.EQUIPED["Sword"], items, "WEAPON")
+
+    I.info.COMBAT_RECT = (I.pg.Rect(150 + attack_direction[orientation][0] + I.info.OFFSCREEN[0] / 4, 85 + attack_direction[orientation][1] + I.info.OFFSCREEN[1] / 4, S.SCREEN_WIDTH / 100, S.SCREEN_HEIGHT / 100), float(speed) * I.info.BASE_ATTACKING_SPEED)  # Player rect (if it gets hit with other rect. colide is set to True
 
 def handle_music(song, collide, data):
     if data["Player"]["dead"]:
@@ -576,15 +595,3 @@ def handle_music(song, collide, data):
 
     if I.pg.time.get_ticks() - song[curr_song].effect_time > 500:
         song[curr_song].channel1.stop()
-
-
-
-
-def insert_item_to_backpack(item, amount):
-    taken_spaces = list(I.info.BACKPACK_CONTENT.values())
-    for column in range(0, 26, 2):
-        for row in range(0, 14, 2):
-            if any((row, column) == (tpl[1], tpl[2]) for tpl in taken_spaces):
-                continue
-            I.info.BACKPACK_CONTENT[item] = (amount, row, column)
-            return

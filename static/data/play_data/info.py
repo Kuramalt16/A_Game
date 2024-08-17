@@ -5,11 +5,11 @@ DATA = {}
 
 TICK = 50
 
-FAST = 0
+FAST = 1
 
 SPAWN_POINT = [330, 1]
 
-ENTRY_POS = [510, 370]
+ENTRY_POS = [180, 370]
 # START_POS = (141, 70)
 CURRENT_STANCE = 0
 LAST_ORIENT = ["Front.png", "_Walk.png", "_Walk1.png"]
@@ -25,6 +25,11 @@ SPELLBOOK_CONTENT = {}
 SPELLBOOK_COORDINATES_X = {}
 SPELLBOOK_COORDINATES_Y = {}
 
+SHOP_CONTENT = {}
+SHOP_COORDINATES_X = {}
+SHOP_COORDINATES_Y = {}
+
+LAST_ORIENTAION = (0,0)
 OFFSCREEN = (0, 0)
 
 Player_rect = 0
@@ -33,11 +38,16 @@ TEXT = [] # place holder for displayable text on the screen
 
 HARVESTED_OBJECTS = {} # Place holder for harvested decoration lists which contain rects
 
-COMBAT_RECT = 0
+COMBAT_RECT = (0, 0) # rect, speed, damage
+
+BASE_ATTACKING_SPEED = 500
+BASE_ATTACKING_DAMAGE = 1
+BASE_KNOCKBACK = 1
 
 CURRENT_ROOM = ""
 
 APPLIANCE_CLICK = ""
+DOOR_CLICK = 90, ""
 
 EQUIPED = {
     "Sword": 0,
@@ -62,3 +72,8 @@ equipment = {
 }
 
 Temp_variable_holder = []
+
+# CONVERSATION = 0
+
+QUESTS = 0
+COMPLETED_QUESTS = 0

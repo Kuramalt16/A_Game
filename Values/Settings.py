@@ -14,7 +14,7 @@ RESOLUTION = (SCREEN_WIDTH - 680) * 1 / 600
 FRAMERATE = 60  #Default 60
 
 # Volume
-VOLUME = 1.0
+VOLUME = 0.0
 
 
 #  back-end values
@@ -97,37 +97,40 @@ PATHS = {
 
 PLAYING_PATH = {
     "Backpack_Empty": 'static/images/Playing/Backpack_Empty.png',
+    "Shop_Empty": 'static/images/Playing/Shop_Empty.png',
+    "Quest_Empty": 'static/images/Playing/Quest_Empty.png',
     "Spellbook_Empty": 'static/images/Playing/Spellbook_Empty.png',
     "Char_bar": "static/images/Playing/Char_bar.png",
     "Grave": "static/images/Playing/Grave.png",
-    "Dead": "static/images/Playing/Dead/Dead_",
-    "Portal": "static/images/Playing/Portal/Portal_",
+    # "Dead": "static/images/Playing/Dead/Dead_",
+    # "Portal": "static/images/Playing/Portal/Portal_",
     "Sign": "static/images/Playing/Sign.png",
     "Text_bar": "static/images/Playing/Text_bar.png",
     "Spell_bar": "static/images/Playing/Spell_bar.png",
-    "Luna": "static/images/Playing/NPC/Luna/Luna_",
-    "Bear": "static/images/Playing/NPC/Bear/Bear_",
+    # "Luna": "static/images/Playing/NPC/Luna/Luna_",
+    # "Bear": "static/images/Playing/NPC/Bear/Bear_",
 }
-SPELL_PATHS = {
-    "Magic Bolt": 'static/images/Spells/Magic_Bolt/Magic_Bolt_',
-    "Cold Bolt": 'static/images/Spells/Ice_Bolt/Ice_Bolt_',
-    "Fire Bolt": 'static/images/Spells/Fire_Bolt/Fire_Bolt_',
-}
+# SPELL_PATHS = {
+#     "Magic Bolt": 'static/images/Spells/Magic_Bolt/Magic_Bolt_',
+#     "Cold Bolt": 'static/images/Spells/Ice_Bolt/Ice_Bolt_',
+#     "Fire Bolt": 'static/images/Spells/Fire_Bolt/Fire_Bolt_',
+# }
 DECOR_PATH = {
     "Grass":    'static/images/Background/Grass.png',
     "Wooden_tiles":  'static/images/Background/House/Wooden_tiles.png',
+    "Stone_tiles":  'static/images/Background/House/Stone_tiles.png',
 }
 MOB_PATH = {
     "Slime_S": ('static/images/Mobs/Ooze/Slime_S/', 10),
     "Pig": ('static/images/Mobs/Beast/Pig/', 6),
 }
-COMBAT_PATH = {
-    "Blunt": ('static/images/Combat/Blunt/Blunt_', 11),
-    "Slashing": ('static/images/Combat/Slashing/Slashing_', 9),
-    "Piercing": ('static/images/Combat/Piercing/Piercing_', 17),
-    "Fire": ('static/images/Combat/Fire/Fire_', 21),
-    "Cold": ('static/images/Combat/Cold/Cold_', 7),
-}
+# COMBAT_PATH = {
+#     "Blunt": ('static/images/Combat/Blunt/Blunt_', 11),
+#     "Slashing": ('static/images/Combat/Slashing/Slashing_', 9),
+#     "Piercing": ('static/images/Combat/Piercing/Piercing_', 17),
+#     "Fire": ('static/images/Combat/Fire/Fire_', 21),
+#     "Cold": ('static/images/Combat/Cold/Cold_', 7),
+# }
 
 CHAR_SAVE_PATH = 'static/data/created_characters'
 
@@ -140,3 +143,5 @@ GIF_DICT = {"Walk": "_Walk, Front, _Walk1, Front",
 # Dummy Values
 DUMMY_VALUE1 = 0
 DUMMY_VALUE2 = 0
+
+GOD_MODE = False

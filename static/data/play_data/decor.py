@@ -10,7 +10,7 @@ class Decorations:
     def create_place_holders(self):
         db_data = Ff.read_data_from_db("decor", ["name", "action", "flamable", "type", "path"])
         for data in db_data:
-            if data[3] in ["Nature", "House"]:
+            if data[3] in ["Nature", "House", "Door"]:
                 self.decor_dict[data[0]] = {"action": data[1],
                                            "flamable": data[2],
                                             "type": data[3],
@@ -19,10 +19,10 @@ class Decorations:
                 if "HARVESTABLE:" in data[1]:
                     I.info.HARVESTED_OBJECTS[data[0]] = []
                 elif "ENTERABLE:" in data[1]:
-                    if ",," in data[1]:
-                        enter_through = data[1].split(",,")[0]
+                    # if ",," in data[1]:
+                    #     enter_through = data[1].split(",,")[0]
                     I.info.ENTERABLE.append(data[0])
-            elif data[3] in ["Furniture", "Appliance"]:
+            elif data[3] in ["Furniture", "Appliance", "NPC"]:
                 self.decor_dict[data[0]] = {"action": data[1],
                                             "flamable": data[2],
                                             "type": data[3],

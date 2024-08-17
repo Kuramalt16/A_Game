@@ -160,7 +160,7 @@ NOTES = {
 
 DROPS = {
     "Slime_S": ("Slime Ball", 1, 3),
-    "Pig": [("Meat0", 1, 3), ("Meat1", 1, 3)],
+    "Pig": [("Meat0", 1, 2), ("Meat1", 1, 3)],
          }   # Key: Mob that drops : value: tuple(name of item, amount of item, chance of item, write only the denominator of fraction 1/x)
 
 background_music = [

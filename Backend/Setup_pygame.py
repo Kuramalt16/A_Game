@@ -80,10 +80,13 @@ def run_game(screen, clock):
                             I.pg.display.flip()
                             S.MAIN_MENU = False
                             CB.Character_Selection(screen)
+
                             if S.PLAY:
                                 I.info.CURRENT_ROOM = {"name": "Village_1", "Spells": True, "Backpack": True,
                                                        "Running": True, "Mobs": True, "Type": "Village"}
-                                Play.Start(screen, clock)
+                                rooms = I.rooms.Room()
+                                rooms.select_room("Village_1")
+                                Play.Start(screen, clock, rooms)
 
                         elif key == "Settings" and clicked_button == key:
                             Ff.button_click_render_down(screen, value, 0, S.PATHS["Empty_button_frame"])

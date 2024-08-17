@@ -44,7 +44,18 @@ def display_text(screen, text, size, pos_tuple, color):
     screen.blit(text_surface, text_rect)
     return text_rect
 
-
+def get_property(item, items, property):
+    stack = I.info.BASE_ATTACKING_DAMAGE, I.info.BASE_ATTACKING_SPEED, I.info.BASE_KNOCKBACK, "Blunt"
+    if "|" in item:
+        property_list = items.item_dict[item.split("|")[0]]["Properties"].split(",,,")
+    else:
+        property_list = items.item_dict[item]["Properties"].split(",,,")
+    for prop in property_list:
+        if property in prop and property == "STACK":
+            stack = int(prop.split(":")[1])
+        elif property in prop and property == "WEAPON":
+            stack = prop.split(":")[1:]
+    return stack
 def button_click_render(screen, button, data, name):
     if data == 1:
         # Pressed down
@@ -497,6 +508,33 @@ def check_if_mob_collides(obstacles, mob):
     else:
         return a
 
+
+def read_one_column_from_db(table, name):
+    """
+    Read data from a specific column in the specified table in the database.
+
+    Args:
+        table (str): The table name.
+        column (str): The name of the column to retrieve.
+        conditions (str): SQL conditions for filtering the results. Default is None (no conditions).
+
+    Returns:
+        list: A list of values from the specified column.
+    """
+    conn = I.sqlite3.connect("./static/data/A_Game.db")
+    cursor = conn.cursor()
+
+    query = f"SELECT * FROM {table} WHERE Name = ?"
+    cursor.execute(query, (name,))
+    rows = cursor.fetchall()
+
+    cursor.close()
+    conn.close()
+    if rows != []:
+        return rows[0]
+    # Flatten the list of tuples into a simple list
+    return rows
+
 def read_data_from_db(table, columns='*', conditions=None):
     """
     Read data from the specified table in the database.
@@ -525,3 +563,16 @@ def read_data_from_db(table, columns='*', conditions=None):
     cursor.close()
     conn.close()
     return rows
+
+def display_text_player(text, time):
+    if "Meat" in text:
+        lines = text.split("Meat")
+        text = lines[0] + "Meat" + lines[1][1:]
+    if "_" in text:
+        lines = text.split("_")
+        text = lines[0] + " " + lines[1]
+    if I.info.TEXT == []:
+        I.info.TEXT.append(text + ",," + str(time))
+    else:
+        last_text = I.info.TEXT[-1]
+        I.info.TEXT.append(text + ",," + str(time + int(last_text.split(",,")[1])))
