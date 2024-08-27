@@ -13,9 +13,6 @@
 * DESC: fix sound playing while constantly clicking settings, cancel settings cancel.
 * PRIORITY: LOW
 
-* DESC: in rooms db changing image size doesnt change the size. changing the rect size does. fix it.
-* PRIORITY: LOW
-
 * DESC: walking behind decor doesnt work in offset or in rooms
 * PRIORITY: MEDIUM
 
@@ -28,6 +25,30 @@
 * DESC: Fire effect completely fucked up
 * PRIORITY: MEDIUM
 
+* DESC: In handle_axe_chopping(decor_rect, decor_name, decor_dict, id): the if and statement 1000 seconds is bad. wont work properly if the speed of the swing is faster than 1000. needs updating.
+* PRIORITY: MEDIUM
+
+* DESC: Trying to slide on offscreeen can teleport player to mid screen also offscreen barriers dont work at all when trying to slide
+* PRIORITY: HIGH
+
+* DESC: Mobs walk on decor when decor rects are displayed diferently (green yellow rects)
+* PRIORITY: LOW
+
+* DESC: Blunt Strike doesn't exist
+* PRIORITY: LOW
+
+* DESC: how can i make furnace cook food better?
+* PRIORITY: LOW
+
+* DESC: redo shop. also dont need the {shop} text for user
+* PRIORITY: LOW
+
+* DESC: sign doesn't work
+* PRIORITY: LOW
+
+* DESC: stacked items dont switch places if c pressed on them. change with the addition of name. if the name is the same. dont change. if not, change spots
+* PRIORITY: LOW
+
 # Optimization
 
 * Decreased Character selection processing time from 600 ms to 200 ms ( by adding ranges where to search for color pixels)
@@ -39,5 +60,8 @@
 * PRIORITY: Test
 
 * DESC: Test killing mobs, respawn time, harvesting, harvest time.
+* PRIORITY: Test
+
+* DESC: Test collision. try running into objects, running through them flashing into them
 * PRIORITY: Test
 

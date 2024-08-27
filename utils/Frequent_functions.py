@@ -215,6 +215,19 @@ def read_text_file_return_dict(file_path):
     except Exception as e:
         return f"An error occurred: {e}"
 
+
+def str_to_tuple(input_str):
+    try:
+        # Use eval to convert the string representation into a tuple
+        result = eval(input_str)
+
+        # Ensure that the result is a tuple
+        if isinstance(result, tuple):
+            return result
+        else:
+            raise ValueError("The provided string does not represent a tuple.")
+    except (SyntaxError, ValueError):
+        raise ValueError("Invalid input string for tuple conversion.")
 def Gif_maker(image_folder, duration, name):
     print("use the movement parts to create four gifs for moving up down left right also do this in save character to properly save the character moving")
     # Get all the image files in the folder

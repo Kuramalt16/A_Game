@@ -215,3 +215,5 @@ dead_music = [
     ((NOTES["D4"], NOTES["F3"]), 1000),
     ((NOTES["D4"], NOTES["F3"]), 1000),
 ]
+
+COMMANDS = ["TOGGLE GOD_MODE", "TELEPORT", "ROOM"]

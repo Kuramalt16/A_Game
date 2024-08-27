@@ -205,3 +205,12 @@
 * DESC: change spell book display to an actual book with page flipping.
 * PRIORITY: LOW
 * NEEDS: Beta version
+
+* DESC: add spell to transform to decorations (later also maybe mobs) use the function to transform into an item. once you are an item you are hidden. every room has diferent surroundings. so if casting a spell in a village. transform to a tree, if in a house, a barrel if in an armory into an anvil or sth.
+* PRIORITY: LOW
+* NEEDS: willpower and how to change to diferent items
+* HOW: Ff.add_image_to_screen(screen, decorations.decor_dict["Tree_M_2"]["path"],[S.SCREEN_WIDTH / 2 - S.SCREEN_WIDTH / 20 + I.info.OFFSCREEN[0], S.SCREEN_HEIGHT / 2 - S.SCREEN_HEIGHT / 20 * 2 + I.info.OFFSCREEN[1], decorations.decor_dict["Tree_M_2"][0]["rect"].w * 4, decorations.decor_dict["Tree_M_2"][0]["rect"].h * 4])  # walking possision could be legs spread
+
+* DESC: when thieving will be achieved also make items in containers "mysteriously" dissappear. and appear on some random people.
+* PRIORITY: LOW
+* NEEDS: Beta version

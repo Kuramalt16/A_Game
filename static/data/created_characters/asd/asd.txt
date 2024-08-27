@@ -18,15 +18,15 @@ Color_Shir: (238, 28, 36, 255)
 Color_Pant: (240, 28, 36, 255)
 Color_Shoe: (239, 28, 36, 255)
 
-Last Save: 2024/08/17 23:03
+Last Save: 2024/08/27 22:51
 
 
 
 Level: 1
-Experience: 105
+Experience: 0
 Health: 10
 Mana: 10
-Exhaustion: 104
+Exhaustion: 100
 
 Gold: 0
 
@@ -34,10 +34,14 @@ Alignment: Unaligned
 
 Class: Not trained
 
-Backpack: Gold__0__0__0,,Meat1__13.0__2__0,,Slime Ball__7.0__4__0,,Meat0__12.0__6__0,,Light Berries__13.0__8__0,,Ale__8.0__10__0,,Wooden Dagger|STACK0__1.0__12__0,,Wooden Dagger|STACK1__1.0__14__0,,Meat0_Cooked__3.0__0__2,,Meat1_Cooked__3.0__2__2,,Wooden Axe|STACK0__1.0__4__2,,
+Backpack: Gold__0__0__0
 
-Spells: 0__Magic Bolt,,2__Fire Bolt,,4__Cold Bolt,,
+Spells: 
 
-Dialog: Luna__0,,Bear__0,,Joseph__1,,Mayor__0,,Gwen__0,,
+Dialog: 
 
-Quests: ,,
+Quests: 
+
+Containers: 
+
+Spawn: Village_10_10:330:1:0:0

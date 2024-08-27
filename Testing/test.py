@@ -1,6 +1,8 @@
 from utils import Imports as I, Frequent_functions as Ff
 from Values import Settings as S
 
+AVERAGE_TIME = (0, 0)
+
 def testing_events(event):
     if event.type == I.pg.ACTIVEEVENT:
         # print("ACTIVEEVENT")
@@ -136,6 +138,9 @@ def Put_a_stone(screen):
 def Make_rect_visible(screen, rect, color):
     I.pg.draw.rect(screen, color, rect)
 
+def print_coordinates(event, coordinates):
+    if event.key == I.pg.K_c:
+        print(f"{int(coordinates.x + 145 + I.info.OFFSCREEN[0] / 4)},{int(coordinates.y + 72 + I.info.OFFSCREEN[1] / 4)},1,1,1,1,,")
 
 def get_time_diferance(time1, time2):
     print(time1-time2)
@@ -155,8 +160,11 @@ def start_mesure():
 
 def end_mesure(start_time):
     end_time = I.t.perf_counter()
-    execution_time = end_time - start_time
-    print("overall time: should be 233 ms ", execution_time)
+    execution_time = end_time - start_time - 0.0000017
+    I.T.AVERAGE_TIME = (I.T.AVERAGE_TIME[0] + execution_time, I.T.AVERAGE_TIME[1] + 1)
+    print("overall time in ms: ", execution_time * 1000, "AVERAGE: ", (I.T.AVERAGE_TIME[0] / I.T.AVERAGE_TIME[1]) * 1000, " ms")
+    # if execution_time * 1000 > 30:
+    #     pause_pygame()
 
 
 

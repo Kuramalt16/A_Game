@@ -17,9 +17,11 @@ LAST_ORIENT = ["Front.png", "_Walk.png", "_Walk1.png"]
 HARVESTABLE = {}
 ENTERABLE = [] # Place holder for places that can be entered
 
-BACKPACK_CONTENT = {}
+BACKPACK_CONTENT = {} # changes values in add to backpack, remove from backpack and in backpack when items are switching possisions
 BACKPACK_COORDINATES_X = {}
 BACKPACK_COORDINATES_Y = {}
+
+CONTAINERS = {}
 
 SPELLBOOK_CONTENT = {}
 SPELLBOOK_COORDINATES_X = {}
@@ -38,24 +40,26 @@ TEXT = [] # place holder for displayable text on the screen
 
 HARVESTED_OBJECTS = {} # Place holder for harvested decoration lists which contain rects
 
-COMBAT_RECT = (0, 0) # rect, speed, damage
+COMBAT_RECT = (0, 0) # rect, time
+AXE = (0, 0)  # rect, time
+POS_CHANGE = 0, 0  # Last orientation, type of strike
 
-BASE_ATTACKING_SPEED = 500
-BASE_ATTACKING_DAMAGE = 1
-BASE_KNOCKBACK = 1
+BASE_ATTACKING_SPEED = 500  # time used for timer to reset. multiplied by the weapon speed
+BASE_ATTACKING_DAMAGE = 1  # damage used for damaging mobs
+BASE_KNOCKBACK = 1 # how many steps mobs get knocked back
 
-CURRENT_ROOM = ""
+CURRENT_ROOM = ""  # data used for knowing which room is currently used. after mobs start reziding in buildings this will stop
 
-APPLIANCE_CLICK = ""
-DOOR_CLICK = 90, ""
+APPLIANCE_CLICK = "" # for furnace to know when it was clicked and able to play the gif
+DOOR_CLICK = 90, ""  # for doors when to open. the 90 is because i need a big value and then decreese from some other set value. and char value is for which building it was.
 
-EQUIPED = {
+EQUIPED = {  # USED to know what is equiped on the char
     "Sword": 0,
     "Axe": 0,
     "Picaxe": 0,
 }
 
-equipment = {
+equipment = {  # equipment posisions with block tuple in inventory
     (-8, 8): "Sword",
     (-6, 8): "Axe",
     (-4, 8): "Picaxe",
@@ -71,9 +75,10 @@ equipment = {
     (-10, 8): "L_Ring",
 }
 
-Temp_variable_holder = []
+Temp_variable_holder = []  # used for cooking food
 
 # CONVERSATION = 0
 
-QUESTS = 0
-COMPLETED_QUESTS = 0
+QUESTS = 0  # obtained quests
+COMPLETED_QUESTS = 0  # completed quests. removes data from previous variable
+

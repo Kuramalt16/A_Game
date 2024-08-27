@@ -9,8 +9,9 @@ class Song:
         self.current_note = 0
         self.start_time = 0
         self.effect_time = 0
+        self.effect_flag = False
         self.channel0 = I.pg.mixer.Channel(0)
-        self.channel1 = I.pg.mixer.Channel(1)
+        self.channel1 = I.pg.mixer.Channel(5)
     def generate_song(self, notes):
         i = 0
         chord = []
@@ -97,6 +98,143 @@ class Song:
 
         return stereo_noise
 
+    def generate_teleport_sound(self, duration=0.2, sample_rate=44100, amplitude=32767 / 3):
+        # Time array
+        t = I.np.linspace(0, duration, int(sample_rate * duration), False)
+
+        # Frequency parameters
+        start_freq = 10.0  # Low starting frequency
+        end_freq = 200.0  # High climax frequency
+        sweep_duration = 0.1  # Duration of pitch sweep to climax
+
+        # Frequency sweep
+        num_sweep_samples = int(sample_rate * sweep_duration)
+        frequency = I.np.linspace(start_freq, end_freq, num_sweep_samples)
+
+        # Generate the smooth sine wave
+        wave = I.np.zeros(len(t))
+        for i in range(len(t)):
+            f = I.np.interp(i, [0, len(t) - 1], [start_freq, end_freq])
+            wave[i] = I.np.sin(2 * I.np.pi * f * t[i])
+
+        # Apply envelope: smooth attack, peak, and decay
+        attack_samples = int(sample_rate * sweep_duration)
+        sustain_samples = int(sample_rate * (duration - sweep_duration - 0.05))
+        decay_samples = int(sample_rate * 0.05)
+
+        envelope = I.np.concatenate([
+            I.np.linspace(0, 1, attack_samples),  # Attack
+            I.np.ones(sustain_samples),  # Sustain
+            I.np.linspace(1, 0, decay_samples)  # Decay
+        ])
+        envelope = envelope[:len(wave)]  # Ensure the envelope matches the length of the wave
+        wave *= envelope
+
+        # Add reverb effect (simple room simulation)
+        reverb_strength = 0.3
+        reverb_wave = I.np.copy(wave)
+        reverb_wave[int(sample_rate * 0.02):] += wave[:len(wave) - int(sample_rate * 0.02)] * reverb_strength
+
+        # Normalize and convert to stereo
+        stereo_wave = I.np.zeros((len(reverb_wave), 2), dtype=I.np.int16)
+        stereo_wave[:, 0] = (amplitude * reverb_wave).astype(I.np.int16)
+        stereo_wave[:, 1] = (amplitude * reverb_wave).astype(I.np.int16)
+
+        return stereo_wave
+
+    def generate_stabbing_sound(self, duration=0.1, sample_rate=44100, amplitude=32767 / 10):
+        # Time array
+        t = I.np.linspace(0, duration, int(sample_rate * duration), False)
+
+        # Frequency parameters
+        base_freq = 200.0  # High frequency for piercing sound
+        noise_strength = 0.5  # Strength of the white noise
+
+        # Generate the high-frequency component
+        wave = I.np.sin(2 * I.np.pi * base_freq * t)
+
+        # Generate white noise
+        noise = I.np.random.normal(0, noise_strength, len(t))
+
+        # Combine wave and noise
+        combined_wave = wave + noise
+
+        # Apply envelope: fast attack and sharp decay
+        attack_duration = 0.02  # Short attack phase
+        decay_duration = 0.08  # Short decay phase
+
+        attack_samples = int(sample_rate * attack_duration)
+        decay_samples = int(sample_rate * decay_duration)
+
+        envelope = I.np.concatenate([
+            I.np.linspace(0, 1, attack_samples),  # Attack
+            I.np.ones(len(t) - attack_samples - decay_samples),  # Sustain
+            I.np.linspace(1, 0, decay_samples)  # Decay
+        ])
+        envelope = envelope[:len(combined_wave)]  # Ensure the envelope matches the length of the wave
+        combined_wave *= envelope
+
+        # Apply a basic reverb effect
+        reverb_strength = 0.2
+        reverb_wave = I.np.copy(combined_wave)
+        delay = int(sample_rate * 0.01)  # Short delay for reverb effect
+        if len(reverb_wave) > delay:
+            reverb_wave[delay:] += combined_wave[:len(combined_wave) - delay] * reverb_strength
+
+        # Normalize and convert to stereo
+        stereo_wave = I.np.zeros((len(reverb_wave), 2), dtype=I.np.int16)
+        stereo_wave[:, 0] = (amplitude * reverb_wave).astype(I.np.int16)
+        stereo_wave[:, 1] = (amplitude * reverb_wave).astype(I.np.int16)
+
+        return stereo_wave
+    def generate_slash_sound(self, duration=0.2, sample_rate=44100, amplitude=32767 / 10):
+        # Time array
+        t = I.np.linspace(0, duration, int(sample_rate * duration), False)
+
+        # Frequency parameters
+        start_freq = 300.0  # Starting frequency
+        end_freq = 310.0  # Ending frequency
+        sweep_duration = 0.1  # Duration of pitch sweep
+
+        # Generate the frequency sweep
+        frequency_sweep = I.np.linspace(start_freq, end_freq, int(sample_rate * sweep_duration))
+        wave = I.np.zeros(len(t))
+        for i in range(len(t)):
+            f = I.np.interp(i, [0, len(t) - 1], [start_freq, end_freq])
+            wave[i] = I.np.sin(2 * I.np.pi * f * t[i])
+
+        # Generate white noise
+        noise = I.np.random.normal(0, 0.2, len(t))
+
+        # Combine wave and noise
+        combined_wave = wave * 0.1 + noise * 0.9
+
+        # Apply envelope: attack, peak, and decay
+        attack_samples = int(sample_rate * sweep_duration)
+        sustain_samples = int(sample_rate * (duration - sweep_duration - 0.05))
+        decay_samples = int(sample_rate * 0.05)
+
+        envelope = I.np.concatenate([
+            I.np.linspace(0, 1, attack_samples),  # Attack
+            I.np.ones(sustain_samples),  # Sustain
+            I.np.linspace(1, 0, decay_samples)  # Decay
+        ])
+        envelope = envelope[:len(combined_wave)]  # Ensure the envelope matches the length of the wave
+        combined_wave *= envelope
+
+        # Apply a basic form of reverb by mixing the sound with a delayed version
+        reverb_strength = 0.3
+        reverb_wave = I.np.copy(combined_wave)
+        delay = int(sample_rate * 0.02)  # Short delay for reverb effect
+        if len(reverb_wave) > delay:
+            reverb_wave[delay:] += combined_wave[:len(combined_wave) - delay] * reverb_strength
+
+        # Normalize and convert to stereo
+        stereo_wave = I.np.zeros((len(reverb_wave), 2), dtype=I.np.int16)
+        stereo_wave[:, 0] = (amplitude * reverb_wave).astype(I.np.int16)
+        stereo_wave[:, 1] = (amplitude * reverb_wave).astype(I.np.int16)
+
+        return stereo_wave
     def generate_thump_sound(self, duration=0.2, sample_rate=44100, amplitude=32767 / 10):
         """
         Generate a 'thump' sound effect representing a punch or impact.
@@ -221,8 +359,67 @@ class Song:
         stereo_charging[:, 1] = (amplitude * charging_sound).astype(I.np.int16)
         return stereo_charging
 
+    def generate_deep_bubble_sound(self, duration=0.25, sample_rate=44100, amplitude=32767 / 10):
+        t = I.np.linspace(0, duration, int(sample_rate * duration), False)
+        base_freq = 150.0
+        wave = I.np.sin(2 * I.np.pi * base_freq * t)
+        wave *= I.np.exp(-4 * t)  # Longer decay for a deeper sound
+        # noise = I.np.random.normal(0, 0.3, wave.shape)
+        # wave += noise * 0.2
+        stereo_wave = I.np.zeros((len(wave), 2), dtype=I.np.int16)
+        stereo_wave[:, 0] = (amplitude * wave).astype(I.np.int16)
+        stereo_wave[:, 1] = (amplitude * wave).astype(I.np.int16)
+        return stereo_wave
+
+    def generate_slime_sound(self, duration=0.15, sample_rate=44100, amplitude=32767 / 5):
+        t = I.np.linspace(0, duration, int(sample_rate * duration), False)
+
+        # Base frequency for the "cutting" sound
+        base_freq = 120.0
+
+        # Generate a sharp, high-pitched sine wave
+        sine_wave = I.np.sin(2 * I.np.pi * base_freq * t)
+
+        # Apply frequency modulation to give a dynamic effect
+        modulating_wave = I.np.sin(2 * I.np.pi * 60 * t)
+        modulated_wave = I.np.sin(2 * I.np.pi * (base_freq + 400 * modulating_wave) * t)
+
+        # Combine the original and modulated waves
+        slash_wave = sine_wave * 0.7 + modulated_wave * 0.3
+
+        # Apply an aggressive exponential decay for quick fade-out
+        slash_wave *= I.np.exp(-12 * t)
+
+        # Add a burst of white noise for texture
+        noise = I.np.random.normal(0, 0.2, slash_wave.shape)
+        slash_wave += noise * 0.1
+
+        # Normalize and convert to stereo
+        stereo_wave = I.np.zeros((len(slash_wave), 2), dtype=I.np.int16)
+        stereo_wave[:, 0] = (amplitude * slash_wave).astype(I.np.int16)
+        stereo_wave[:, 1] = (amplitude * slash_wave).astype(I.np.int16)
+
+        return stereo_wave
+
+    def generate_blunt_sound(self, duration=0.1, sample_rate=44100, amplitude=32767 / 10):
+        # Generate white noise
+        noise = I.np.random.uniform(0, 1, int(sample_rate * duration))
+
+        # Apply an envelope to create a quick attack and decay
+        t = I.np.linspace(0, duration, int(sample_rate * duration), False)
+        # envelope = I.np.exp(-5 * t)  # Exponential decay for quick attack and decay
+        # noise *= envelope
+
+        # Convert to stereo by duplicating the single channel
+        stereo_noise = I.np.zeros((len(noise), 2), dtype=I.np.int16)
+        stereo_noise[:, 0] = (amplitude * noise).astype(I.np.int16)  # Left channel
+        stereo_noise[:, 1] = (amplitude * noise).astype(I.np.int16)  # Right channel
+
+        return stereo_noise
     def play_effect(self, effect):
-        self.effect_time = I.pg.time.get_ticks()
-        self.channel1.stop()
-        sound = I.pg.sndarray.make_sound(effect)
-        self.channel1.play(sound)
+        if not self.effect_flag:
+            self.effect_flag = True
+            self.effect_time = I.pg.time.get_ticks()
+            self.channel1.stop()
+            sound = I.pg.sndarray.make_sound(effect)
+            self.channel1.play(sound)

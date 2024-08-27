@@ -147,7 +147,9 @@ def take_pictures(value, screen, side):
                        "Backpack: " + "Gold__0__0__0" + "\n\n" +
                        "Spells: " + "" + "\n\n" +
                        "Dialog: " + "" + "\n\n" +
-                       "Quests: " + "" + "\n\n"
+                       "Quests: " + "" + "\n\n" +
+                       "Containers: " + "" + "\n\n" +
+                       "Spawn: " + "Village_10_10:330:1:0:0"
                        )
 
 def Save_Character(character, screen):

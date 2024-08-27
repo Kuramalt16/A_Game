@@ -1,0 +1,47 @@
+Name: asdd
+
+Gender: Girl
+Age: 12
+Race: Elf
+
+Eyes: (33, 150, 243, 255)
+Skin: (255, 205, 210, 255)
+Skin2: (239, 154, 154, 255)
+
+Hair: Hair_0
+Shir: Shir_1
+Pant: Pant_0
+Shoe: Shoe_0
+
+Color_Hair: (237, 28, 36, 255)
+Color_Shir: (238, 28, 36, 255)
+Color_Pant: (240, 28, 36, 255)
+Color_Shoe: (239, 28, 36, 255)
+
+Last Save: 2024/08/27 22:50
+
+
+
+Level: 1
+Experience: 0
+Health: 10
+Mana: 10
+Exhaustion: 100
+
+Gold: 0
+
+Alignment: Unaligned
+
+Class: Not trained
+
+Backpack: Gold__0__0__0
+
+Spells: 
+
+Dialog: 
+
+Quests: 
+
+Containers: 
+
+Spawn: Village_10_10:330:1

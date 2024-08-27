@@ -6,17 +6,20 @@ class Room:
         self.decor = []
         self.data = {}
         self.type = ""
+        self.mobs = []
         self.background = ""
         self.room_dict = {}
         self.read_db()
+        self.start_game = 1
     def read_db(self):
-        db_data = Ff.read_data_from_db("rooms", ["name", "decor", "coordinates", "type", "background", "exit"])
+        db_data = Ff.read_data_from_db("rooms", ["name", "decor", "coordinates", "type", "background", "exit", "mobs"])
         for data in db_data:
             self.room_dict[data[0]] = {"decor": data[1],
                                         "coordinates": data[2],
                                         "type": data[3],
                                         "background": data[4],
-                                       "exit": data[5]
+                                       "exit": data[5],
+                                       "mobs": data[6]
                                         }
     def select_room(self, name):
         previous_name = name  # Idiotic way
@@ -26,11 +29,38 @@ class Room:
         self.decor = self.room_dict[name]["decor"].split(", ")
         self.type = self.room_dict[name]["type"]
         self.background = self.room_dict[name]["background"]
+        self.mobs = self.room_dict[name]["mobs"]
         data_list = self.room_dict[name]["coordinates"].split(",,,")
         pos = self.room_dict[previous_name]["exit"].split(", ")
         if not S.GOD_MODE:
-            I.info.ENTRY_POS = [int(pos[0]), int(pos[1])]
-
+            values = previous_name.split("_")
+            new_values = name.split("_")
+            direction = (0, 0)
+            if len(new_values) != 1 and len(values) != 1:
+                direction = int(new_values[1]) - int(values[1]), int(new_values[2]) - int(values[2])
+            # direction = int(new_values[1]) - int(values[1]), int(new_values[2]) - int(values[2])
+            if self.start_game == 1:
+                self.start_game = 0
+            else:
+                if direction != (0, 0):
+                    starting_pos = {
+                        (-1, 0): (800, 390),
+                        (1, 0): (1, 390),
+                        (0, -1): (330, 820),
+                        (0, 1): (330, 1)
+                                    }
+                    offscreen = {
+                        (-1, 0): (600, 0),
+                        (1, 0): (-600, 0),
+                        (0, -1): (0, 300),
+                        (0, 1): (0, -330)
+                    }
+                    I.info.OFFSCREEN = offscreen[direction]
+                    I.info.ENTRY_POS = starting_pos[direction]
+                else:
+                    I.info.OFFSCREEN = (0, 0)
+                    # I.info.ENTRY_POS
+                    I.info.ENTRY_POS = (int(pos[0]), int(pos[1]))
         for i in range(0, len(data_list)):
             if ",," in data_list[i]:
                 self.data[self.decor[i]] = []

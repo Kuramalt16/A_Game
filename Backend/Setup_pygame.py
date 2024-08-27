@@ -82,10 +82,22 @@ def run_game(screen, clock):
                             CB.Character_Selection(screen)
 
                             if S.PLAY:
-                                I.info.CURRENT_ROOM = {"name": "Village_1", "Spells": True, "Backpack": True,
-                                                       "Running": True, "Mobs": True, "Type": "Village"}
+
+                                with open('static/data/created_characters/' + I.info.SELECTED_CHARACTER + "/" + I.info.SELECTED_CHARACTER + ".txt", 'r') as file:
+                                    lines = file.readlines()  # Read all lines into a list
+
+                                # Get the last line
+                                last_line = lines[-1].strip()  # Remove any trailing newline characters
+                                # Check if the last line starts with "Spawn:"
+                                if last_line.startswith("Spawn:"):
+                                    map_name = last_line[7:].split(":")[0]
+                                    I.info.ENTRY_POS = last_line[7:].split(":")[1:3]
+                                    I.info.OFFSCREEN = last_line[7:].split(":")[3:5]
+
+                                # map_name =
                                 rooms = I.rooms.Room()
-                                rooms.select_room("Village_1")
+                                rooms.select_room(map_name)
+                                I.info.CURRENT_ROOM = {"name": map_name, "Spells": True, "Backpack": True, "Running": True, "Mobs": rooms.mobs, "Type": rooms.type}
                                 Play.Start(screen, clock, rooms)
 
                         elif key == "Settings" and clicked_button == key:

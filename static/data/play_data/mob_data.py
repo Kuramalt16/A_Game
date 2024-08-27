@@ -37,7 +37,7 @@ class Mob:
         "damage": self.damage,
         "exp": self.exp,
         "drop": I.A.DROPS[self.name],
-        "speed": (self.speed, self.speed),
+        "speed": (self.speed, 0),
         "effect": {
             "Fire": 0,
             "Cold": 0,
@@ -72,20 +72,28 @@ class Mob:
         for mob in self.mobs:
             if not mob["visible"]:
                 # Randomly generate movement offsets
-                x_offset = random.randint(-1, 1)
-                y_offset = random.randint(-1, 1)
+                speed = mob["speed"]
+                if speed[1] == 0:
+                    mob["speed"] = speed[0], speed[0]
+                    x_offset = random.randint(-1, 1)
+                    y_offset = random.randint(-1, 1)
 
-                new_rect = mob["rect"][0].copy()
-                new_rect.x += x_offset - data["Zoom_rect"].x
-                new_rect.y += y_offset - data["Zoom_rect"].y
+                    new_rect = mob["rect"][0].copy()
+                    new_rect.x += x_offset - data["Zoom_rect"].x
+                    new_rect.y += y_offset - data["Zoom_rect"].y
 
-                if not any(new_rect.colliderect(displayed_rect) for displayed_rect in decorations.displayed_rects):
-                    self._update_mob_position(mob, x_offset, y_offset)
+                    if not any(new_rect.colliderect(displayed_rect) for displayed_rect in decorations.displayed_rects):
+                        if new_rect.collidelist(decorations.displayed_rects) != -1:
+                            print(new_rect.collidelist(decorations.displayed_rects))
+                        self._update_mob_position(mob, x_offset, y_offset)
+                    else:
+                        self._escape_collision(mob, decorations, data, 1)
                 else:
-                    self._escape_collision(mob, decorations, data)
+                    mob["speed"] = speed[0], speed[1] - 1
 
     def _update_mob_position(self, mob, x_offset, y_offset):
         """Update the mob's position by the given offsets."""
+
         for rect in mob["rect"]:
             rect.x += x_offset
             rect.y += y_offset
@@ -94,10 +102,11 @@ class Mob:
             mob["flip"] = x_offset < 0
 
         mob["current_pos"] = mob["rect"][0].copy()
-
-    def _escape_collision(self, mob, decorations, data):
+    def _escape_collision(self, mob, decorations, data, level):
         """Move the mob out of any collisions."""
-        escape_directions = [(1, 0), (-1, 0), (0, 1), (0, -1)]
+        stuck = 0
+        escape_directions = [(level, 0), (-level, 0), (0, level), (0, -level)]
+
         for x_offset, y_offset in escape_directions:
             new_rect = mob["rect"][0].copy()
             new_rect.x += x_offset - data["Zoom_rect"].x
@@ -106,6 +115,11 @@ class Mob:
             if not any(new_rect.colliderect(displayed_rect) for displayed_rect in decorations.displayed_rects):
                 self._update_mob_position(mob, x_offset, y_offset)
                 return
+            else:
+                stuck += 1
+        if stuck == 4:
+            self._escape_collision(mob, decorations, data, level + 1)
+
     def update_visibility(self, screen, rect, id):
         screen_rect = screen.get_rect()
         if rect.colliderect(screen_rect):
@@ -208,3 +222,15 @@ class Mob:
         mob['current_pos'][1] = new_y
         for rect in mob["rect"]:
             rect.topleft = (new_x, new_y)
+
+def read_db():
+    db_data = Ff.read_data_from_db("mobs", ["name", "exp", "health", "allignment", "damage", "speed"])
+    db_dict = {}
+    for data in db_data:
+        db_dict[data[0]] = {"exp": int(data[1]),
+                           "health": int(data[2]),
+                           "allignment": int(data[3]),
+                           "damage": data[4],
+                           "speed": int(data[5])
+                           }
+    return db_dict
