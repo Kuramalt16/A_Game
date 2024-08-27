@@ -18,7 +18,7 @@ Color_Shir: (238, 28, 36, 255)
 Color_Pant: (240, 28, 36, 255)
 Color_Shoe: (239, 28, 36, 255)
 
-Last Save: 2024/08/27 22:51
+Last Save: 2024/08/27 23:37
 
 
 
@@ -34,14 +34,14 @@ Alignment: Unaligned
 
 Class: Not trained
 
-Backpack: Gold__0__0__0
+Backpack: Gold__0__0__0,,Apple__8.0__2__0,,Meat0__8.0__4__0,,Wooden Axe__1.0__6__0,,Wooden Picaxe__1.0__-4__8,,Stick__8.0__10__0,,
 
-Spells: 
+Spells: 0__Magic Bolt,,2__Fire Bolt,,4__Cold Bolt,,6__Flash,,
 
-Dialog: 
+Dialog: Luna__0,,Bear__0,,Joseph__0,,Mayor__0,,Gwen__0,,
 
-Quests: 
+Quests: quest__Mayor__Get__5__Meat0,,
 
 Containers: 
 
-Spawn: Village_10_10:330:1:0:0
+Spawn: Village_10_11:330:1:0:-330

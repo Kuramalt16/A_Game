@@ -42,6 +42,7 @@ HARVESTED_OBJECTS = {} # Place holder for harvested decoration lists which conta
 
 COMBAT_RECT = (0, 0) # rect, time
 AXE = (0, 0)  # rect, time
+PICAXE = (0, 0)  # rect, time
 POS_CHANGE = 0, 0  # Last orientation, type of strike
 
 BASE_ATTACKING_SPEED = 500  # time used for timer to reset. multiplied by the weapon speed

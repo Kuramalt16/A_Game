@@ -465,7 +465,7 @@ def display_char(dx, dy, screen, gifs, data, decorations):
         frame = I.pg.transform.scale(frame, (S.SCREEN_WIDTH / 18, S.SCREEN_HEIGHT / 7))
         screen.blit(frame, [S.SCREEN_WIDTH / 2 - S.SCREEN_WIDTH / 20 + I.info.OFFSCREEN[0], S.SCREEN_HEIGHT / 2 - S.SCREEN_HEIGHT / 20 * 2 + I.info.OFFSCREEN[1]])
     else:
-        if I.info.COMBAT_RECT[0] != 0 or I.info.AXE[0] != 0:
+        if I.info.COMBAT_RECT[0] != 0 or I.info.AXE[0] != 0 or I.info.PICAXE[0] != 0:
             if dx == 0 and dy == 0:
                 for key, value in orientation.items():
                     if value == I.info.LAST_ORIENT[0].split(".")[0]:
@@ -1777,7 +1777,7 @@ def New_Update(data, decorations, gifs, rooms, clock, screen, spells, npc, mob, 
 
                 handle_axe_chopping(rect, option, decorations.decor_dict, id)
 
-
+                handle_picaxe_chopping(rect, option, decorations.decor_dict, id)
 
                 # Check and process decorations in the upper part of the screen
                 if decor_y - rect.h / 2 <= 79 + I.info.OFFSCREEN[1] / 4:
@@ -1884,6 +1884,35 @@ def handle_map_walk(data, rooms, screen, clock, spells, npc):
 
             Play.Start(screen, clock, rooms)
 
+
+def handle_picaxe_chopping(decor_rect, decor_name, decor_dict, id):
+    if I.info.PICAXE[0] != 0 and I.info.PICAXE[1] == 1000: # WILL CAUSE ISSUES WITH FASTER SWINGING AXES
+        if "Picaxe" in I.info.EQUIPED["Picaxe"]:
+            if I.info.PICAXE[0].colliderect(decor_rect):
+                type = I.info.EQUIPED["Picaxe"].split("|")[0].split(" ")[0]
+                if type == "Wooden":
+                    breakable = ["Stone_T_1"]
+                    damage = 1
+                elif type == "Stone":
+                    breakable = ["Stone_T_1", "Stone_S_1"]
+                    damage = 2
+                if decor_name in breakable:
+                    bool_var, health = decor_dict[decor_name][id]["health"].split(",,")
+                    health = int(health.split(",")[0]) - damage
+                    I.info.PICAXE = I.info.PICAXE[0], I.info.PICAXE[1] - 1 # it is no longer 1000 so it wont be comming back here for a second
+                    if health < 0:
+                        health = 0
+                    elif health < float(decor_dict[decor_name][id]["health"].split(",,")[1].split(",")[1]) / 2: # change texture once half is chopped off.
+                        path = decor_dict[decor_name]["path"]
+                        path_list = path.split(decor_name)
+                        path = path_list[0] + decor_name + "_Chop" + path_list[1]
+                        image = I.pg.image.load(path)
+                        decor_dict[decor_name][id]["image"] = image
+
+
+                    decor_dict[decor_name][id]["health"] = bool_var + ",," + str(health) + "," + decor_dict[decor_name][id]["health"].split(",,")[1].split(",")[1] # Removes 1 hp from wood. later change to amount of damage axe does
+                    print(decor_dict[decor_name][id])
+
 def handle_axe_chopping(decor_rect, decor_name, decor_dict, id):
     if I.info.AXE[0] != 0 and I.info.AXE[1] == 1000: # WILL CAUSE ISSUES WITH FASTER SWINGING AXES
         if "Axe" in I.info.EQUIPED["Axe"]:
@@ -1913,7 +1942,25 @@ def handle_axe_chopping(decor_rect, decor_name, decor_dict, id):
                     # print(decor_dict[decor_name][id])
 
 def handle_axe_rewards(decorations, tree_name, items):
-    if "AXE" in decorations.decor_dict[tree_name]["action"]:
+    if "PICAXE" in decorations.decor_dict[tree_name]["action"]:
+        action_list = decorations.decor_dict[tree_name]["action"].split(",,")
+        for action in action_list:
+            if "PICAXE" in action:
+                action = action[7:]
+                possible_rewards = action.split(",")
+                loot_list = []
+                amount_list = []
+                print(action, possible_rewards)
+                for reward in possible_rewards:
+                    loot, chance_min, chance_max = reward.split(":")
+
+                    amount = int(random.uniform(float(chance_min), float(chance_max)))
+                    if amount != 0:
+                        loot_list.append(loot)
+                        amount_list.append(amount)
+                    print(amount, loot_list, amount_list)
+
+    elif "AXE" in decorations.decor_dict[tree_name]["action"]:
         action_list = decorations.decor_dict[tree_name]["action"].split(",,")
         for action in action_list:
             if "AXE" in action:
@@ -1922,9 +1969,9 @@ def handle_axe_rewards(decorations, tree_name, items):
                 loot_list = []
                 amount_list = []
                 for reward in possible_rewards:
-                    loot, chanse_min, chanse_max = reward.split(":")
+                    loot, chance_min, chance_max = reward.split(":")
 
-                    amount = int(random.uniform(float(chanse_min), float(chanse_max)))
+                    amount = int(random.uniform(float(chance_min), float(chance_max)))
                     if amount != 0:
                         loot_list.append(loot)
                         amount_list.append(amount)

@@ -92,6 +92,8 @@ def handle_keyup(event, pressed, gifs, songs, screen, items, data, collide, spel
             I.info.COMBAT_RECT = (0, I.info.COMBAT_RECT[1])
         elif pressed == I.pg.K_v:
             I.info.AXE = (0, I.info.AXE[1])
+        elif pressed == I.pg.K_b:
+            I.info.PICAXE = (0, I.info.PICAXE[1])
         elif pressed == I.pg.K_ESCAPE:
             handle_esc_click(screen, clock)
         return 0
@@ -183,8 +185,22 @@ def handle_keydown(event, data, spells, gifs, items, songs):
             I.info.AXE = (I.pg.Rect(150 + attack_direction[orientation][0] + I.info.OFFSCREEN[0] / 4, 85 + attack_direction[orientation][1] + I.info.OFFSCREEN[1] / 4, S.SCREEN_WIDTH / 100, S.SCREEN_HEIGHT / 100), 1000)
             I.pg.time.set_timer(I.pg.USEREVENT + 9, int(I.info.AXE[1]))
             songs[curr_song].channel0.unpause()
-
         pressed = I.pg.K_v
+    if event.key == I.pg.K_b:
+        if I.info.EQUIPED["Picaxe"] != 0 and not data["Player"]["dead"] and I.info.PICAXE[1] == 0:
+            curr_song = songs["Playing"]
+            songs[curr_song].channel0.pause()
+            orientation = I.info.LAST_ORIENT[0].split(".")[0]
+            attack_direction = {"Front": (0, 10),
+                                "Back": (0, -10),
+                                "Left": (-10, 0),
+                                "Right": (10, 0)}
+            type = Ff.get_property(I.info.EQUIPED["Picaxe"].split("|")[0], items, "WEAPON")[3] + " Strike"
+            gifs[type].Start_gif(type, 1)
+            I.info.PICAXE = (I.pg.Rect(150 + attack_direction[orientation][0] + I.info.OFFSCREEN[0] / 4, 85 + attack_direction[orientation][1] + I.info.OFFSCREEN[1] / 4, S.SCREEN_WIDTH / 100, S.SCREEN_HEIGHT / 100), 1000)
+            I.pg.time.set_timer(I.pg.USEREVENT + 9, int(I.info.PICAXE[1]))
+            songs[curr_song].channel0.unpause()
+        pressed = I.pg.K_b
     if event.key in [I.pg.K_a, I.pg.K_s, I.pg.K_d, I.pg.K_f, I.pg.K_g]:
         keys_pressed = I.pg.key.get_pressed()
         if keys_pressed[I.pg.K_LSHIFT]:
@@ -328,6 +344,7 @@ def handle_timer_actions(event, timers, data, mob, spells, decorations, rooms, n
 
     if timers["axe"] == event.type:
         I.info.AXE = (0, 0)
+        I.info.PICAXE = (0, 0)
         if I.info.POS_CHANGE[1] != 0:
             gifs[I.info.POS_CHANGE[1]].start_gif = False
             I.info.POS_CHANGE = 0, 0
@@ -576,6 +593,9 @@ def interract(collide, data, gifs, items, screen, songs, spells, clock, rooms, n
             gifs["Ghost"].start_gif = False
         elif collide[0] == "Sign":
             br.init_dialog("Sign", data["Player"], screen, npc, items)
+        elif collide[0] in npc.keys():
+            # print("I.info.Conversation: ", I.info.CONVERSATION)
+            br.init_dialog(collide[0], data["Player"], screen, npc, items)
         elif decorations.decor_dict.get(collide[0]) != None:
             if "CONTAINER" in decorations.decor_dict[collide[0]]["action"]:
                 container_name = collide[0]
@@ -599,10 +619,6 @@ def interract(collide, data, gifs, items, screen, songs, spells, clock, rooms, n
                         else:
                             I.info.Temp_variable_holder = [backup_item, 1, "burn"]
                 br.update_equiped()
-        elif collide[0] in npc.keys():
-            # print("npc: ", collide[0])
-            # print("I.info.Conversation: ", I.info.CONVERSATION)
-            br.init_dialog(collide[0], data["Player"], screen, npc, items)
         else:
             print("not harvestable", collide)
             print(collide)

@@ -214,3 +214,32 @@
 * DESC: when thieving will be achieved also make items in containers "mysteriously" dissappear. and appear on some random people.
 * PRIORITY: LOW
 * NEEDS: Beta version
+
+* DESC: when breaking trees, stones, anything, display hp.
+* PRIORITY: LOW
+* NEEDS: willpower
+
+* DESC: when smelting. make the player set the temperature and see what happens, if player intterracts with others he finds out what temperature normal things need to be at.
+* PRIORITY: LOW
+* NEEDS: smelter
+
+UNTILL FULL ALPHA:
+* 20 QUESTS (19 Remain)
+* Make Levelup
+* Stat changes
+* Allignment changes
+* Rock mining
+* 10 Areas ( 7 remaining)
+* Fishing
+* Smelting
+* Followers
+* Savable interractions
+* Tree respawning
+* Planting plants
+* Hoe for seed beds
+* Blunt strikes
+* 10 spells (6 remaining)
+* Bow and arrows
+* Add masteries (fishing, smelting, mining, axing, hoeing, planting, hunter, wizard, glassblowing)
+* 20 mobs (18 remaining)
+* make a house (rundown old building, get the mayor to sell it to you for too much money, ask wood carver for help in fixing it and then later other villagers on how to make other stuff (beds, cupboards, glass stuf etc)
