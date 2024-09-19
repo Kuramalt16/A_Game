@@ -6,10 +6,10 @@ from Backend import Settings_backend as SB, Character_selection_backend as CB, P
 
 
 def startup_clear():
-    if I.os.path.exists(S.CHAR_SAVE_PATH):
-        if not I.os.listdir(S.CHAR_SAVE_PATH):
-            # if there is no data in save_file then removes the directory
-            I.os.rmdir(S.CHAR_SAVE_PATH)
+    # if I.os.path.exists(S.CHAR_SAVE_PATH):
+    #     if not I.os.listdir(S.CHAR_SAVE_PATH):
+    #         # if there is no data in save_file then removes the directory
+    #         I.os.rmdir(S.CHAR_SAVE_PATH)
 
     I.TD.Name = ""
     I.TD.Gender = ""

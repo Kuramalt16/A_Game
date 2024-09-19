@@ -3,7 +3,7 @@ from utils import Imports as I, Frequent_functions as Ff
 from Render import Background_Render as br
 from Values import Settings as S
 class Mob:
-    def __init__(self, name, hp, exp, allignment, count, damage, speed):
+    def __init__(self, name, hp, exp, allignment, count, damage, speed, path, delay):
         self.name = name
         self.hp = hp
         self.exp = exp
@@ -21,6 +21,8 @@ class Mob:
         self.count = (count, count)
         self.damage = damage
         self.speed = speed
+        self.path = path
+        self.delay = delay
         self.mobs = [self.create_mob(i) for i in range(count)]  # Create initial list of mobs
 
 
@@ -31,12 +33,16 @@ class Mob:
         else:
             temp_allignment = self.allignment
 
+        drop = 0
+        if I.A.DROPS.get(self.name) != None:
+            drop = I.A.DROPS[self.name]
+
         return {
         "id": id,
         "hp": (self.hp, self.hp),
         "damage": self.damage,
         "exp": self.exp,
-        "drop": I.A.DROPS[self.name],
+        "drop": drop,
         "speed": (self.speed, 0),
         "effect": {
             "Fire": 0,
@@ -45,7 +51,7 @@ class Mob:
         },
         "damage_type": "",
         "allignment": temp_allignment,
-        "gif_frame": (0, S.MOB_PATH[self.name][1]),
+        "gif_frame": (0, Ff.count_png_files(self.path)),
         "visible": False,
         "rect": [],  # Placeholder for the Pygame rect object
         "image": [],  # Placeholder for the Pygame image list
@@ -55,17 +61,33 @@ class Mob:
 
         }
 
-    def spawn_mobs(self, background_size, path, mob_gif_count):
+    def spawn_mobs(self, background_size, path, mob_gif_count, x1=0, y1=0):
         """Spawn mobs at random positions on the screen."""
         for mob in self.mobs:
             x = random.randint(0, background_size[0] - 100)
             y = random.randint(0, background_size[1] - 350)
             for a in range(mob_gif_count):
+                if "Mine" in self.name:
+                    self.name = self.name.replace(" Mine", "")
                 image = I.pg.image.load(path + self.name + "_" + str(a) + ".png").convert_alpha()
                 mob["image"].append(image)
-                mob["rect"].append(image.get_rect(topleft=(x, y)))
+                if x1 != 0 and y1 != 0:
+                    mob["rect"].append(image.get_rect(topleft=(x1, y1)))
+                    print(x1, y1)
+                else:
+                    mob["rect"].append(image.get_rect(topleft=(x, y)))
             mob["current_pos"] = mob["rect"][mob_gif_count-1]
             mob["previous_pos"] = mob["rect"][mob_gif_count-1]
+
+    def spawn_mob_acurate(self, path, mob_gif_count, id, x, y):
+        for a in range(mob_gif_count):
+            if "Mine" in self.name:
+                self.name = self.name.replace(" Mine", "")
+            image = I.pg.image.load(path + self.name + "_" + str(a) + ".png").convert_alpha()
+            self.mobs[id]["image"].append(image)
+            self.mobs[id]["rect"].append(image.get_rect(topleft=(x, y)))
+        self.mobs[id]["current_pos"] = self.mobs[id]["rect"][mob_gif_count - 1]
+        self.mobs[id]["previous_pos"] = self.mobs[id]["rect"][mob_gif_count - 1]
 
     def move_mobs_randomly(self, decorations, data):
         """Move all mobs by random offsets, avoiding and escaping collisions."""
@@ -77,17 +99,15 @@ class Mob:
                     mob["speed"] = speed[0], speed[0]
                     x_offset = random.randint(-1, 1)
                     y_offset = random.randint(-1, 1)
+                    if mob["rect"] != []:
+                        new_rect = mob["rect"][0].copy()
+                        new_rect.x += x_offset - data["Zoom_rect"].x
+                        new_rect.y += y_offset - data["Zoom_rect"].y
 
-                    new_rect = mob["rect"][0].copy()
-                    new_rect.x += x_offset - data["Zoom_rect"].x
-                    new_rect.y += y_offset - data["Zoom_rect"].y
-
-                    if not any(new_rect.colliderect(displayed_rect) for displayed_rect in decorations.displayed_rects):
-                        if new_rect.collidelist(decorations.displayed_rects) != -1:
-                            print(new_rect.collidelist(decorations.displayed_rects))
-                        self._update_mob_position(mob, x_offset, y_offset)
-                    else:
-                        self._escape_collision(mob, decorations, data, 1)
+                        if not any(new_rect.colliderect(displayed_rect) for displayed_rect in decorations.displayed_rects):
+                            self._update_mob_position(mob, x_offset, y_offset)
+                        else:
+                            self._escape_collision(mob, decorations, data, 1)
                 else:
                     mob["speed"] = speed[0], speed[1] - 1
 
@@ -128,25 +148,28 @@ class Mob:
             self.mobs[id]["visible"] = False
 
     def knockback(self, victim, spaces):
-        rects = victim['rect']
         push = {"Back": (0, -spaces),
                 "Front": (0, spaces),
                 "Left": (-spaces, 0),
                 "Right": (spaces, 0)}
         direction = I.info.LAST_ORIENT[0].split(".")[0]
-        for rect in rects:
-            rect.x += push[direction][0]
-            rect.y += push[direction][1]
+        for i in range(len(victim['rect'])):
+            victim['rect'][i].x += push[direction][0]
+            victim['rect'][i].y += push[direction][1]
+        victim["current_pos"] = victim['rect'][0]
+
 
     def remove_mob(self, mob_id):
         """Remove a mob from the list by id."""
         self.count = (self.count[0] - 1, self.count[1])
         self.mobs = [mob for mob in self.mobs if mob["id"] != mob_id]
-    def deal_damage(self, victim, player, weapon, items, gifs):
+
+
+    def deal_damage(self, victim: object, player: dict, weapon: str, items: dict, gifs: dict):
         if weapon == "":
             # NOT SPELL AND NOT EFFECT DAMAGE
-            if I.info.EQUIPED["Sword"] != 0:
-                damage, speed, knockback, type = Ff.get_property(I.info.EQUIPED["Sword"], items, "WEAPON")
+            if I.info.EQUIPED["Sword"][0] != 0:
+                damage, speed, knockback, type = Ff.get_property(I.info.EQUIPED["Sword"][0], items, "WEAPON")
                 damage = int(damage)
                 speed = float(speed)
                 knockback = int(knockback)
@@ -154,6 +177,11 @@ class Mob:
                 damage = I.info.BASE_ATTACKING_DAMAGE
                 knockback = I.info.BASE_KNOCKBACK
                 type = "Blunt"
+        elif weapon == "Follower":
+            damage = 1 # based on pet's level
+            knockback = 2
+            type = "Piercing"
+
         elif "effect" in weapon:
             # EFFECT DAMAGE
             damage = 0.05
@@ -161,9 +189,15 @@ class Mob:
             type = weapon.split("_")[1]  # get's effect
         else:
             # SPELL DAMAGE
+            extra = 0
+            if any(weapon[0] != 0 and "Staff" in weapon[0] for weapon in I.info.EQUIPED.values()):
+                if any(weapon[0] == "Wooden Staff" for weapon in I.info.EQUIPED.values()):
+                    extra = 1
+                else:
+                    print("some other material staff")
             damage = weapon["damage"]
-            damage = random.randint(int(damage.split("d")[0]), int(damage.split("d")[1]))
-            knockback = weapon["knockback"]
+            damage = random.randint(int(damage.split("d")[0]), int(damage.split("d")[1])) + extra
+            knockback = weapon["knockback"] + extra
             type = weapon["type"]
 
         if victim["allignment"] == 5:
@@ -173,22 +207,24 @@ class Mob:
             gifs[type].start_gif = False
             self.remove_mob(victim["id"])
             player["Experience"] += victim["exp"]
+            br.level_up(player, gifs)
             if isinstance(victim["drop"], tuple): # if victim drops not more than one item
                 amount = victim["drop"][1] if random.randint(0, victim["drop"][2]-1) == 0 else 0
-                br.add_to_backpack(victim["drop"][0], amount, items)  # Adds mob drops 1
+                Ff.add_to_backpack(victim["drop"][0], amount, items)  # Adds mob drops 1
                 if amount != 0:
                     Ff.display_text_player("Recieved " + str(amount) + " " + str(victim["drop"][0]), 5000)
             else:
                 # choose = random.randint(0, len(victim["drop"]) - 1)
-                amount1 = victim["drop"][0][1] if random.randint(0, victim["drop"][0][2]) == 0 else 0
-                br.add_to_backpack(victim["drop"][0][0], amount1, items)  # adds mob drops 2
-                amount2 = victim["drop"][1][1] if random.randint(0, victim["drop"][1][2]) == 0 else 0
-                br.add_to_backpack(victim["drop"][1][0], amount2, items)  # adds mob drops 3
+                if victim["drop"] != 0 and victim["drop"] != []:
+                    amount1 = victim["drop"][0][1] if random.randint(0, victim["drop"][0][2]) == 0 else 0
+                    Ff.add_to_backpack(victim["drop"][0][0], amount1, items)  # adds mob drops 2
+                    amount2 = victim["drop"][1][1] if random.randint(0, victim["drop"][1][2]) == 0 else 0
+                    Ff.add_to_backpack(victim["drop"][1][0], amount2, items)  # adds mob drops 3
 
-                if amount1 != 0:
-                    Ff.display_text_player("Recieved " + str(amount1) + " " + str(victim["drop"][0][0][:-1]), 5000)
-                if amount2 != 0:
-                    Ff.display_text_player("Recieved " + str(amount2) + " " + str(victim["drop"][1][0][:-1]), 5000)
+                    if amount1 != 0:
+                        Ff.display_text_player("Recieved " + str(amount1) + " " + str(victim["drop"][0][0][:-1]), 5000)
+                    if amount2 != 0:
+                        Ff.display_text_player("Recieved " + str(amount2) + " " + str(victim["drop"][1][0][:-1]), 5000)
 
             # gifs[type].start_gif = False
 
@@ -224,13 +260,15 @@ class Mob:
             rect.topleft = (new_x, new_y)
 
 def read_db():
-    db_data = Ff.read_data_from_db("mobs", ["name", "exp", "health", "allignment", "damage", "speed"])
+    db_data = Ff.read_data_from_db("mobs", ["name", "exp", "health", "allignment", "damage", "speed", "path", "delay"])
     db_dict = {}
     for data in db_data:
         db_dict[data[0]] = {"exp": int(data[1]),
                            "health": int(data[2]),
                            "allignment": int(data[3]),
                            "damage": data[4],
-                           "speed": int(data[5])
+                           "speed": int(data[5]),
+                           "path": data[6],
+                           "delay": int(data[7])
                            }
     return db_dict

@@ -113,26 +113,23 @@ PLAYING_PATH = {
 
 DECOR_PATH = {
     "Grass_10_10":    'static/images/Background/Grass_10_10.png',
+    "Grass_10_9":    'static/images/Background/Grass_10_9.png',
     "Grass_9_10":    'static/images/Background/Grass_9_10.png',
     "Grass_10_11":    'static/images/Background/Grass_10_11.png',
     "Wooden_tiles":  'static/images/Background/House/Wooden_tiles.png',
     "Stone_tiles":  'static/images/Background/House/Stone_tiles.png',
 }
-MOB_PATH = {
-    "Slime_S": ('static/images/Mobs/Ooze/Slime_S/', 10),
-    "Pig": ('static/images/Mobs/Beast/Pig/', 6),
-}
 
 CHAR_SAVE_PATH = 'static/data/created_characters'
 
 # Gif maker
-GIF_DICT = {"Walk": "_Walk, Front, _Walk1, Front",
-            "_Back_Walk": "_Back_Walk, Back, _Back_Walk1, Back",
-            "_Side_Walk": "_Side_Walk, Side, _Side_Walk1, Side",
-            "_Side_Walk11": "_Side_Walk11, Side1, _Side_Walk12, Side1"}
+# GIF_DICT = {"Walk": "_Walk, Front, _Walk1, Front",
+#             "_Back_Walk": "_Back_Walk, Back, _Back_Walk1, Back",
+#             "_Side_Walk": "_Side_Walk, Side, _Side_Walk1, Side",
+#             "_Side_Walk11": "_Side_Walk11, Side1, _Side_Walk12, Side1"}
 
 # Dummy Values
-DUMMY_VALUE1 = 0
-DUMMY_VALUE2 = 0
+# DUMMY_VALUE1 = 0
+# DUMMY_VALUE2 = 0
 
 GOD_MODE = False

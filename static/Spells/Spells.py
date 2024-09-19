@@ -7,6 +7,7 @@ class Spells:
         self.direction = {}
         self.init_cast = {}
         self.spell_cooloff = {}
+        self.spawn_counter = {}
 
     def generate_spells(self):
         db_data = Ff.read_data_from_db("spells", ["name", "damage", "type", "direction", "mana", "knockback", "level", "recharge", "description"])

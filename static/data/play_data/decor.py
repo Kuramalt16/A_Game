@@ -6,7 +6,8 @@ class Decorations:
         self.create_place_holders()
         self.effected_decor = {}
         self.displayed_rects = []
-        self.health
+        self.displayed_rects_full = []
+        self.health = 0
 
     def create_place_holders(self):
         db_data = Ff.read_data_from_db("decor", ["name", "action", "health", "type", "path"])

@@ -17,6 +17,7 @@ class Gif:
         self.frame_time = 0
         self.read_image()
         self.repeat = 1
+        self.pause = 0
 
 
     def read_image(self):

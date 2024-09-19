@@ -45,16 +45,22 @@ def display_text(screen, text, size, pos_tuple, color):
     return text_rect
 
 def get_property(item, items, property):
-    stack = I.info.BASE_ATTACKING_DAMAGE, I.info.BASE_ATTACKING_SPEED, I.info.BASE_KNOCKBACK, "Blunt"
-    if "|" in item:
-        property_list = items.item_dict[item.split("|")[0]]["Properties"].split(",,,")
-    else:
-        property_list = items.item_dict[item]["Properties"].split(",,,")
+    stack = I.info.BASE_ATTACKING_DAMAGE, 1, I.info.BASE_KNOCKBACK, "Blunt"
+    property_list = items.item_dict[item.split("|")[0]]["Properties"].split(",,,")
     for prop in property_list:
         if property in prop and property == "STACK":
             stack = int(prop.split(":")[1])
         elif property in prop and property == "WEAPON":
             stack = prop.split(":")[1:]
+        elif property in prop and property == "SMELT":
+            property_str = prop.replace("SMELT(", "").replace(")", "")
+            sub_property_list = property_str.split(",,")
+            probabilities = []
+            outcomes = []
+            for property in sub_property_list:
+                probabilities.append(float(property.split("-")[0]))
+                outcomes.append(property.split("-")[1])
+            return probabilities, outcomes
     return stack
 def button_click_render(screen, button, data, name):
     if data == 1:
@@ -228,22 +234,22 @@ def str_to_tuple(input_str):
             raise ValueError("The provided string does not represent a tuple.")
     except (SyntaxError, ValueError):
         raise ValueError("Invalid input string for tuple conversion.")
-def Gif_maker(image_folder, duration, name):
-    print("use the movement parts to create four gifs for moving up down left right also do this in save character to properly save the character moving")
-    # Get all the image files in the folder
-    orientation_keys = S.GIF_DICT.keys()
-    image_files = [I.os.path.join(image_folder, file) for file in I.os.listdir(image_folder) if file.endswith(('png', 'jpg', 'jpeg'))]
-    print(image_files)
-
-    # Sort the image files by name to ensure correct order
-    for key in orientation_keys:
-        new_image_files = []
-        path_endings = S.GIF_DICT[key].split(", ")
-        for path_end in path_endings:
-            new_image_files.append('static/data/created_characters/' + name + "/" + name + path_end + ".png")
-        images = [I.img.open(image) for image in new_image_files]
-        I.os.makedirs('static/data/created_characters/' + name + "/gif", exist_ok=True)
-        images[0].save('static/data/created_characters/' + name + "/gif/" + name + key + ".gif", save_all=True, append_images=images[1:], duration=duration,loop=0, disposal=2)
+# def Gif_maker(image_folder, duration, name):
+#     print("use the movement parts to create four gifs for moving up down left right also do this in save character to properly save the character moving")
+#     # Get all the image files in the folder
+#     orientation_keys = S.GIF_DICT.keys()
+#     image_files = [I.os.path.join(image_folder, file) for file in I.os.listdir(image_folder) if file.endswith(('png', 'jpg', 'jpeg'))]
+#     print(image_files)
+#
+#     # Sort the image files by name to ensure correct order
+#     for key in orientation_keys:
+#         new_image_files = []
+#         path_endings = S.GIF_DICT[key].split(", ")
+#         for path_end in path_endings:
+#             new_image_files.append('static/data/created_characters/' + name + "/" + name + path_end + ".png")
+#         images = [I.img.open(image) for image in new_image_files]
+#         I.os.makedirs('static/data/created_characters/' + name + "/gif", exist_ok=True)
+#         images[0].save('static/data/created_characters/' + name + "/gif/" + name + key + ".gif", save_all=True, append_images=images[1:], duration=duration,loop=0, disposal=2)
 def clothe_walkers(value, screen):
     S_LEFT = S.SCREEN_WIDTH / 2 - (S.SCREEN_WIDTH / 5)
     S_TOP = S.SCREEN_HEIGHT / 2 - (S.SCREEN_HEIGHT / 2.2)
@@ -589,3 +595,292 @@ def display_text_player(text, time):
     else:
         last_text = I.info.TEXT[-1]
         I.info.TEXT.append(text + ",," + str(time + int(last_text.split(",,")[1])))
+
+    if len(I.info.TEXT) > 10:
+        I.info.TEXT = I.info.TEXT[:-1]
+
+
+
+def is_point_on_line(x1, y1, x2, y2, px, py):
+    # Check if the point is collinear
+    if (py - y1) * (x2 - x1) != (y2 - y1) * (px - x1):
+        return False
+
+    # Check if the point is within the bounds of the line segment
+    if min(x1, x2) <= px <= max(x1, x2) and min(y1, y2) <= py <= max(y1, y2):
+        return True
+
+    return False
+
+
+def rect_intersects_line(rect, x1, y1, x2, y2):
+    # Define the corners of the rectangle
+    rect_corners = [
+        (rect.left, rect.top),  # Top-left
+        (rect.right, rect.top),  # Top-right
+        (rect.right, rect.bottom),  # Bottom-right
+        (rect.left, rect.bottom)  # Bottom-left
+    ]
+
+    # Check each edge of the rectangle
+    for i in range(4):
+        p1 = rect_corners[i]
+        p2 = rect_corners[(i + 1) % 4]  # Next corner (with wrapping)
+        if do_intersect(p1, p2, (x1, y1), (x2, y2)):
+            return True
+
+    return False
+
+
+def orientation(p, q, r):
+    # Calculate the orientation of the triplet (p, q, r)
+    val = (q[1] - p[1]) * (r[0] - q[0]) - (q[0] - p[0]) * (r[1] - q[1])
+    if val == 0:
+        return 0  # Collinear
+    elif val > 0:
+        return 1  # Clockwise
+    else:
+        return 2  # Counterclockwise
+
+
+def do_intersect(p1, q1, p2, q2):
+    # Find the four orientations needed for general and special cases
+    o1 = orientation(p1, q1, p2)
+    o2 = orientation(p1, q1, q2)
+    o3 = orientation(p2, q2, p1)
+    o4 = orientation(p2, q2, q1)
+
+    # General case
+    if o1 != o2 and o3 != o4:
+        return True
+
+    # Special cases
+    if o1 == 0 and on_segment(p1, p2, q1): return True
+    if o2 == 0 and on_segment(p1, q2, q1): return True
+    if o3 == 0 and on_segment(p2, p1, q2): return True
+    if o4 == 0 and on_segment(p2, q1, q2): return True
+
+    return False
+
+def on_segment(p, q, r):
+    # Check if point q lies on line segment pr
+    if min(p[0], r[0]) <= q[0] <= max(p[0], r[0]) and min(p[1], r[1]) <= q[1] <= max(p[1], r[1]):
+        return True
+    return False
+
+
+
+def move_closer(point, target, step_size, decorations, sub_image, data, recursion):
+
+    def get_new_target(start_point, end_point, direction, distance, decorations):
+        x_A, y_A = start_point
+        x_C, y_C = end_point  # (Example; point C is not used directly in this case)
+        d_AB = distance
+
+        # Define the direction vector (from A to B)
+        direction_vector = direction
+
+        # Calculate the length of the direction vector
+        length_v = I.math.sqrt(direction_vector[0] ** 2 + direction_vector[1] ** 2)
+
+        # Normalize the direction vector
+        normalized_direction = (direction_vector[0] / length_v, direction_vector[1] / length_v)
+
+        # Calculate point B
+        x_B = x_A + d_AB * normalized_direction[0]
+        y_B = y_A + d_AB * normalized_direction[1]
+
+        return (x_B, y_B)
+    def is_valid_move(new_rect, decorations):
+        """Check if the new_rect collides with any decorations."""
+        for decoration in decorations:
+            if new_rect.colliderect(decoration):
+                return False
+        return True
+
+    diff_x = target[0] - point[0]
+    diff_y = target[1] - point[1]
+    distance = I.pg.math.Vector2(diff_x, diff_y).length()
+
+    if distance <= step_size:
+        return target
+
+    direction = I.pg.math.Vector2(diff_x, diff_y).normalize()
+    new_point = (point[0] + direction.x * step_size, point[1] + direction.y * step_size)
+
+    # Ensure the movement is at least 1 pixel in any direction
+    if abs(new_point[0] - point[0]) < 1 and new_point[0] != point[0]:
+        new_point = (round(new_point[0]), new_point[1])
+    if abs(new_point[1] - point[1]) < 1 and new_point[1] != point[1]:
+        new_point = (new_point[0], round(new_point[1]))
+
+    new_rect_left = I.pg.Rect(new_point[0] - data["Zoom_rect"].x + 3, new_point[1] - data["Zoom_rect"].y + 7 ,2, 5)
+    new_rect_right = I.pg.Rect(new_point[0] - data["Zoom_rect"].x + 13, new_point[1] - data["Zoom_rect"].y + 7 ,2, 5)
+    new_rect_top = I.pg.Rect(new_point[0] - data["Zoom_rect"].x + 8, new_point[1] - data["Zoom_rect"].y + 2 ,5, 2)
+    new_rect_bot = I.pg.Rect(new_point[0] - data["Zoom_rect"].x + 8, new_point[1] - data["Zoom_rect"].y + 15 ,5, 2)
+    # I.T.Make_rect_visible(sub_image, new_rect_left, "red")
+    # I.T.Make_rect_visible(sub_image, new_rect_right, "orange")
+    # I.T.Make_rect_visible(sub_image, new_rect_top, "black")
+    # I.T.Make_rect_visible(sub_image, new_rect_bot, "blue")
+    if not is_valid_move(new_rect_left, decorations):
+        # print("left collision move right")
+        new_point = new_point[0] + 1  * recursion, new_point[1]
+
+    if not is_valid_move(new_rect_right, decorations):
+        # print("right collision move left")
+        new_point = new_point[0] - 1  * recursion, new_point[1]
+
+    if not is_valid_move(new_rect_top, decorations):
+        # print("top collision move bottom")
+        new_point = new_point[0], new_point[1] + 1 * recursion
+
+    if not is_valid_move(new_rect_bot, decorations):
+        # print("bottom collision move top")
+        new_point = new_point[0], new_point[1] - 1 * recursion
+        # return slide_around_obstacle(point, direction, step_size, decorations)
+    if new_point == point and recursion == 2:
+        target = get_new_target(new_point, target, direction, distance, decorations)
+        new_point = move_closer(new_point, target, step_size, decorations, sub_image, data, 2)
+        I.info.FOLLOWER["current_pos"] = new_point
+    # else:
+        # pzrint("final pos:", new_point, "original_pos: ", point)
+
+    return (int(new_point[0]), int(new_point[1]))
+
+
+
+def get_most_often_tuple(input_tuple_list: list[tuple]):
+    count = {}
+    for tuple in input_tuple_list:
+        if count.get(tuple) == None:
+            count[tuple] = 0
+        count[tuple] += 1
+
+    max = 0
+    most_often_tuple = (0, 0)
+    for tuple, value in count.items():
+        if value >= max:
+            max = value
+            most_often_tuple = tuple
+
+    return most_often_tuple
+
+def count_png_files(folder_path):
+    png_files = [file for file in I.os.listdir(folder_path) if file.endswith('.png')]
+    return len(png_files)
+
+
+def add_to_backpack(item, amount, items, row=0, collumn=0):
+    if amount != 0:
+        # print(amount)
+        in_backpack = 0
+        stack = get_property(item, items, "STACK")
+        for item_name in I.info.BACKPACK_CONTENT.keys():
+            if item + "|STACK" in item_name:
+                in_backpack = 1
+                if I.info.BACKPACK_CONTENT[item_name][0] < stack:  # IF THE STACK HAS EMPTY SPACES CONTINUE
+                    in_backpack = 2
+                    if amount + I.info.BACKPACK_CONTENT[item_name][0] <= stack:  # IF THE AMOUNT OF NEW ITEMS PLUS THE ALREADY EXISTING ITEMS DOESNT OVERFLOW THE STACK
+                        # print("stack wasnt overflowed")
+                        I.info.BACKPACK_CONTENT[item_name] = I.info.BACKPACK_CONTENT[item_name][0] + amount, I.info.BACKPACK_CONTENT[item_name][1], I.info.BACKPACK_CONTENT[item_name][2]
+                        break
+                    else:  # IF THE AMOUNT OF NEW ITEMS PLUS THE ALREADY EXISTING ITEMS OVERFLOWS THE STACK CREATE A NEW ONE
+                        while True:
+                            new_addon = "|STACK" + str(int(item_name.split("|STACK")[1]) + 1)
+                            new_name = item_name.split("|")[0] + new_addon
+                            if I.info.BACKPACK_CONTENT.get(new_name) == None and int(amount + I.info.BACKPACK_CONTENT[item_name][0] - stack) != 0:
+                                break
+                            else:
+                                item_name = new_name
+                        if row == 0 and collumn == 0:
+                            row, collumn = find_open_space()
+                        if int(amount + I.info.BACKPACK_CONTENT[item_name][0] - stack) != 0:
+                            I.info.BACKPACK_CONTENT[new_name] = int(amount + I.info.BACKPACK_CONTENT[item_name][0] - stack), row, collumn  # FIRST CREATED NEW STACK CUZ THE OLD STACK VALUE WAS USED
+                            # print("stack overflowed creating new stack: ", I.info.BACKPACK_CONTENT[new_name])
+                        I.info.BACKPACK_CONTENT[item_name] = int(stack), I.info.BACKPACK_CONTENT[item_name][1], I.info.BACKPACK_CONTENT[item_name][2]  # THEN UPDATED OLD STACK
+                        break
+                # else:
+                    # print("this stack is full")
+
+        if in_backpack == 1:
+            # print("all stacks were full creating new stack")
+            for item_name in I.info.BACKPACK_CONTENT.keys():
+                if item + "|STACK" in item_name:
+                    continue
+            new_name = item_name.split("|STACK")[0] + "|STACK" + str(int(item_name.split("|STACK")[1]) + 1)
+            if row == 0 and collumn == 0:
+                row, collumn = find_open_space()
+            I.info.BACKPACK_CONTENT[new_name] = int(amount), row, collumn  # FIRST CREATED NEW STACK CUZ THE OLD STACK VALUE WAS USED
+
+        if in_backpack == 0:
+            # print("didn't find empty stacks \n")
+            if row == 0 and collumn == 0:
+                row, collumn = find_open_space()
+
+
+            if I.info.BACKPACK_CONTENT.get(item) == None:                 # if the item doesnt exist in backpack
+                I.info.BACKPACK_CONTENT[item] = (float(amount), row, collumn)
+                # DOESNT DO STACKS
+            else:                                                         # if the item already exists in backpack and there were no previous |STACK
+                # DOESNT REMOVE THE ITEM WITHOUT |STACK ON IT, ADDS TOO MANY ITEMS
+                stack = get_property(item, items, "STACK")
+                value = I.info.BACKPACK_CONTENT[item]
+                if value[0] + float(amount) > stack:
+                    del I.info.BACKPACK_CONTENT[item]
+                    repetitions = I.math.floor((float(value[0]) + float(amount)) / float(stack)) + 1  # adding one so loop works with one stack (if stack is 10 and amount is 14, then for loop needs to happen twice, this function returns one less)
+                    addon = "|STACK"
+                    for i in range(0, repetitions):
+                        if i == repetitions-1:
+                            stack = float(value[0]) + float(amount) - float(stack) * i
+                        if row == 0 and collumn == 0:
+                            row, collumn = find_open_space()
+                        if int(stack) != 0:
+                            I.info.BACKPACK_CONTENT[item + addon + str(i)] = (int(stack), int(row), int(collumn))
+                else:
+                    I.info.BACKPACK_CONTENT[item] = (float(value[0] + float(amount)), value[1], value[2])
+
+    # print("input: ", I.info.BACKPACK_CONTENT)
+
+    # merge_stacks(items)
+
+def find_open_space():
+    taken_spaces = list(I.info.BACKPACK_CONTENT.values())
+    for column in range(0, 26, 2):
+        for row in range(0, 16, 2):
+            if any((row, column) == (tpl[1], tpl[2]) for tpl in taken_spaces):
+                continue
+            return row, column
+
+def update_map_view(id: int, item_name: str, coordinates: tuple, case: str):
+    current_room = I.info.CURRENT_ROOM["name"]
+    if current_room not in I.info.MAP_CHANGE.keys():
+        I.info.MAP_CHANGE[current_room] = {"add": {},
+                                           "remove": {}}
+    if case == "add":
+        if I.info.MAP_CHANGE[current_room]["add"].get(item_name) == None:
+            I.info.MAP_CHANGE[current_room]["add"][item_name] = []
+        if id >= 0:
+            I.info.MAP_CHANGE[current_room]["add"][item_name].append((id, coordinates))
+        else:
+            print("Id too low")
+    elif case == "remove":
+        if item_name in list(I.info.MAP_CHANGE[current_room]["add"].keys()):
+            for ida, (x, y) in I.info.MAP_CHANGE[current_room]["add"][item_name]:
+                if ida == id:
+                    I.info.MAP_CHANGE[current_room]["add"][item_name].remove((id, (x, y)))
+                    if I.info.MAP_CHANGE[current_room]["remove"].get(item_name) == None:
+                        I.info.MAP_CHANGE[current_room]["remove"][item_name] = []
+                    I.info.MAP_CHANGE[current_room]["remove"][item_name].append(id)
+        else:
+            if I.info.MAP_CHANGE[current_room]["remove"].get(item_name) == None:
+                I.info.MAP_CHANGE[current_room]["remove"][item_name] = []
+            I.info.MAP_CHANGE[current_room]["remove"][item_name].append(id)
+    elif case == "get":
+        if I.info.MAP_CHANGE[current_room]["add"].get(item_name) == None:
+            return 0
+        else:
+            return len(I.info.MAP_CHANGE[current_room]["add"][item_name])
+
+def get_decor_coordinates(option, id, decorations):
+    rect = decorations.decor_dict[option][id]["rect"]
+    return rect.x, rect.y

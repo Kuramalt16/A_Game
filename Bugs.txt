@@ -28,28 +28,19 @@
 * DESC: In handle_axe_chopping(decor_rect, decor_name, decor_dict, id): the if and statement 1000 seconds is bad. wont work properly if the speed of the swing is faster than 1000. needs updating.
 * PRIORITY: MEDIUM
 
-* DESC: Trying to slide on offscreeen can teleport player to mid screen also offscreen barriers dont work at all when trying to slide
-* PRIORITY: HIGH
-
 * DESC: Mobs walk on decor when decor rects are displayed diferently (green yellow rects)
-* PRIORITY: LOW
-
-* DESC: Blunt Strike doesn't exist
 * PRIORITY: LOW
 
 * DESC: how can i make furnace cook food better?
 * PRIORITY: LOW
 
-* DESC: redo shop. also dont need the {shop} text for user
+* DESC: music fuckup on changing maps
 * PRIORITY: LOW
 
-* DESC: sign doesn't work
+* DESC: hoed down ground spawns in diferent maps
 * PRIORITY: LOW
 
-* DESC: stacked items dont switch places if c pressed on them. change with the addition of name. if the name is the same. dont change. if not, change spots
-* PRIORITY: LOW
-
-* DESC: in the INN you can exit barrier by walking between barrels and the wall
+* DESC: Folowers aren't saved yet
 * PRIORITY: LOW
 
 # Optimization

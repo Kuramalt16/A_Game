@@ -1,0 +1,47 @@
+Name: Gytis
+
+Gender: Boy
+Age: 22
+Race: Elf
+
+Eyes: (10, 50, 10, 255)
+Skin: (250, 200, 154, 255)
+Skin2: (200, 150, 100, 255)
+
+Hair: Hair_6
+Shir: Shir_2
+Pant: Pant_2
+Shoe: Shoe_3
+
+Color_Hair: (166, 169, 180, 255)
+Color_Shir: (165, 170, 0, 255)
+Color_Pant: (0, 100, 201, 255)
+Color_Shoe: (166, 170, 0, 255)
+
+Last Save: 2024/09/17 22:18
+
+
+
+Level: 2
+Experience: 195
+Health: 22
+Mana: 28
+Exhaustion: 92
+
+Gold: 58.5
+
+Alignment: Unaligned
+
+Class: Not trained
+
+Backpack: Gold__58.5__0__0,,Slime Ball__4.0__2__0,,Light Berries__13.0__4__0,,Wooden Axe__1.0__4__2,,Wooden Picaxe__1.0__8__2,,Wooden Staff__1.0__-4__8,,Stick__19.0__6__0,,Light Wood__4.0__10__0,,Obsidian__9.0__12__0,,Basalt__2.0__14__0,,Meat1__9.0__8__0,,Meat0__7.0__0__2,,Pebbles__8.0__2__2,,Wooden Hoe__1.0__-6__8,,Apple Seed__15.0__-8__8,,Apple__7.0__6__2,,
+
+Spells: 0__Magic Bolt,,2__Fire Bolt,,4__Cold Bolt,,6__Flash,,8__Spawn Skeleton,,
+
+Dialog: Luna__0,,Bear__0,,Joseph__0,,Mayor__0,,Gwen__0,,Sign__0,,
+
+Quests: ,,
+
+Containers: 
+
+Spawn: Village_10_10:510:370:0:0

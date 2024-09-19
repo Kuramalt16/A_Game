@@ -163,7 +163,11 @@ class Dialog():
         id = self.iteration
         key = self.conv_key.split("|")[0]
         response = self.text[key + str(id)].split("__")
-        response = response[1], response[2]
+        print(response)
+        if len(response) == 3:
+            response = response[1], response[2]
+        else:
+            response = ("", "")
         # print("responses:", response)
         return response
 

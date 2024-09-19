@@ -41,6 +41,10 @@ def Character_Selection(screen):
                             S.BUSY = True
                             Create_Character(screen)
 
+                            if I.info.SELECTED_CHARACTER != "":  # Runs the game without user needing to select the character again
+                                S.PLAY = True
+                                return
+
                         elif key == "Load" and clicked_button == key:
                             Ff.button_click_render(screen, value, 0, "Empty")
                             Ff.display_text(screen, key, 30,(buttons[key + "_text"].left, buttons[key + "_text"].top), "black")
@@ -152,14 +156,6 @@ def take_pictures(value, screen, side):
                        "Spawn: " + "Village_10_10:330:1:0:0"
                        )
 
-def Save_Character(character, screen):
-    save_dic = {0: "Front", 1: "Side1", 2: "Back", 3: "Side"}
-    for turn, orientation in save_dic.items():
-        cr.Character_creation(screen, "save", turn)
-        take_pictures(character, screen, orientation)
-    Ff.clothe_walkers(character, screen)
-
-    # Ff.Gif_maker('static/data/created_characters/' + character["Name"] + "/", 300, character["Name"])
 def Save_Character_Dict(d, screen, character):
     save_dic = {0: "Front", 1: "Front1", 2: "Front2", 3: "Left", 4: "Left1", 5: "Left2", 6: "Back", 7: "Back1", 8: "Back2", 9: "Right", 10: "Right1", 11: "Right2"}
     for turn, orientation in save_dic.items():
@@ -172,6 +168,7 @@ def Save_Character_Dict(d, screen, character):
         d.update_orientation(turn, 1)
         Ff.draw_character(screen, d, I.TD.Gender, I.TD.Race.split("_")[0], [])
         take_pictures(character, screen, orientation)
+    I.info.SELECTED_CHARACTER = I.TD.Name
 def Save_temp_Character(value):
     value["Skin"] = {"Eyes": I.A.DEFAULT_TEMP["Eyes"], "Skin": I.A.DEFAULT_TEMP["Skin"],"Skin2": I.A.DEFAULT_TEMP["Skin2"]}
     I.TD.Gender = value["Gender"]
@@ -185,7 +182,6 @@ def Save_temp_Character(value):
 def handle_mouse_button_down(screen, character, trait, pos):
     for key, value in character[trait].items():
         if value.collidepoint(pos) and I.pg.mouse.get_pressed()[0]:
-            path = 'static/images/' + key + ".png"
             if key not in ["ENTER", "Body"]:
                 # deals with all keys apart texted buttons
                 Ff.button_click_render_down(screen, value, 1, S.PATHS[key])
@@ -409,8 +405,8 @@ def show_load(screen):
                                     Ff.button_click_render_down(screen, buttons[key], 0, S.PATHS[key])
                                     Ff.display_text(screen, key, 30, (buttons["Delete"].left + buttons["Delete"].left / 7, buttons["Delete"].top * 1.025),"Red")
                                     cancel = True
-                                    I.info.SELECTED_CHARACTER = ""
                                     I.shutil.rmtree('static/data/created_characters/' + I.info.SELECTED_CHARACTER)
+                                    I.info.SELECTED_CHARACTER = ""
                                 elif key == I.info.SELECTED_CHARACTER:
                                     select = False
                                     S.PLAY = True

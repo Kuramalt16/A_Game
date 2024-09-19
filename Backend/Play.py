@@ -31,10 +31,7 @@ def Start(screen, clock, rooms):
             mob_name = current_mob.split(":")[0]
             cur_dict = mob_dict[mob_name]
             count = current_mob.split(":")[1]
-            mob[mob_name] = I.mob_data.Mob(name=mob_name, exp=cur_dict["exp"], hp=cur_dict["health"], allignment=cur_dict["allignment"], count=int(count), damage=cur_dict["damage"].split(":"), speed=cur_dict["speed"])
-            # "Slime_S": I.mob_data.Mob(name="Slime_S", exp=10, hp=8, allignment=5, count=10, damage=(2, "blunt"), speed=4),
-            # "Pig": I.mob_data.Mob(name="Pig", exp=5, hp=6, allignment=4, count=30, damage=(1, "blunt"), speed=6),
-
+            mob[mob_name] = I.mob_data.Mob(name=mob_name, exp=cur_dict["exp"], hp=cur_dict["health"], allignment=cur_dict["allignment"], count=int(count), damage=cur_dict["damage"].split(":"), speed=cur_dict["speed"], path=cur_dict["path"], delay=(cur_dict["delay"], cur_dict["delay"]))
     collide = [False]
     pressed = 0
 
@@ -42,8 +39,8 @@ def Start(screen, clock, rooms):
 
     data = br.Start(mob, decorations, spells, rooms, npc, items)
 
-    # br.fill_backpack(screen, data["Player"], items) only draws images
     br.update_equiped()
+
 
     I.info.LAST_ORIENTAION = (0, 0)
     songs = {"Background": I.Songs.Song("Background", I.A.background_music),
@@ -54,23 +51,27 @@ def Start(screen, clock, rooms):
     songs["Blunt"] = songs[songs["Playing"]].generate_blunt_sound()
     songs["Piercing"] = songs[songs["Playing"]].generate_stabbing_sound()
 
-    timers = handle_timers()
+    # timers = handle_timers()
+
+    I.th.start_threads(data, mob, spells, decorations, rooms, npc, gifs, songs, items)
     while S.PLAY:
         for event in I.pg.event.get():
             if event.type == I.pg.QUIT:
                 S.PLAY = False
-            if event.type in timers.values():
-                handle_timer_actions(event, timers, data, mob, spells, decorations, rooms, npc, gifs, songs)
+            # if event.type in timers.values():
+            #     handle_timer_actions(event, timers, data, mob, spells, decorations, rooms, npc, gifs, songs, items)
             if event.type == I.pg.KEYDOWN:
                 pressed = handle_keydown(event, data, spells, gifs, items, songs)
             if event.type == I.pg.KEYUP:
-                # I.T.print_coordinates(event, data["Zoom_rect"])
+                I.T.print_coordinates(event, data["Zoom_rect"])
                 pressed = handle_keyup(event, pressed, gifs, songs, screen, items, data, collide, spells, clock, rooms, npc, decorations)
 
 
         collide = br.New_Update(data, decorations, gifs, rooms, clock, screen, spells, npc, mob, songs, items) # on average 20 ms, while dead: 9 ms
         if S.WINDOW == "Settings":
             handle_esc_click(screen, clock)
+
+        I.TB.handle_hoe(collide, data, items, decorations, screen)
 
         handle_music(songs, collide, data, items) # average 0.028 ms
         update_display_text(screen, gifs, data, collide) # max 0.008 ms
@@ -81,7 +82,7 @@ def Start(screen, clock, rooms):
         clock.tick(I.info.TICK)
 
 
-def handle_keyup(event, pressed, gifs, songs, screen, items, data, collide, spells, clock, rooms, npc, decorations):
+def handle_keyup(event, pressed, gifs: dict, songs, screen, items, data, collide, spells, clock, rooms, npc, decorations):
     if event.key == pressed:
         curr_song = songs["Playing"]
         if pressed == I.pg.K_c:
@@ -89,11 +90,11 @@ def handle_keyup(event, pressed, gifs, songs, screen, items, data, collide, spel
             interract(collide, data, gifs, items, screen, songs, spells, clock, rooms, npc, decorations)
             songs[curr_song].channel0.unpause()
         elif pressed == I.pg.K_x:
-            I.info.COMBAT_RECT = (0, I.info.COMBAT_RECT[1])
+            I.info.COMBAT_RECT = [0, I.info.COMBAT_RECT[1]]
         elif pressed == I.pg.K_v:
-            I.info.AXE = (0, I.info.AXE[1])
+            I.info.AXE = [0, I.info.AXE[1]]
         elif pressed == I.pg.K_b:
-            I.info.PICAXE = (0, I.info.PICAXE[1])
+            I.info.PICAXE = [0, I.info.PICAXE[1]]
         elif pressed == I.pg.K_ESCAPE:
             handle_esc_click(screen, clock)
         return 0
@@ -131,6 +132,8 @@ def handle_esc_click(screen, clock):
                             running = False
                             S.WINDOW = ""
                             S.START_APP = True
+                            I.info.SELECTED_CHARACTER = ""
+                            S.PLAY = False
                             SP.run_game(screen, clock)
                         elif key == "Resume Game" and clicked_button == key:
                             Ff.button_click_render_down(screen, value, 0, S.PATHS["Empty_button_frame"])
@@ -152,7 +155,7 @@ def handle_esc_click(screen, clock):
                 if event.key == I.pg.K_ESCAPE:
                     running = False
 
-def handle_keydown(event, data, spells, gifs, items, songs):
+def handle_keydown(event, data, spells, gifs: dict, items, songs):
     key_to_slot = {
         I.pg.K_a: 0,
         I.pg.K_s: 2,
@@ -165,14 +168,15 @@ def handle_keydown(event, data, spells, gifs, items, songs):
         pressed = I.pg.K_ESCAPE
     if event.key == I.pg.K_c:
         pressed = I.pg.K_c
-    elif event.key == I.pg.K_x:
+    if event.key == I.pg.K_x and I.info.AXE[1] == 0 and I.info.PICAXE[1] == 0:
         if pressed != I.pg.K_x and not data["Player"]["dead"] and I.info.COMBAT_RECT[1] == 0:
             handle_combat(items, gifs)
-            I.pg.time.set_timer(I.pg.USEREVENT + 4, int(I.info.COMBAT_RECT[1]))
+            I.th.start_thread(int(I.info.COMBAT_RECT[1]), "hit", gifs)
+            # I.pg.time.set_timer(I.pg.USEREVENT + 4, int(I.info.COMBAT_RECT[1]))
 
         pressed = I.pg.K_x
-    if event.key == I.pg.K_v:
-        if I.info.EQUIPED["Axe"] != 0 and not data["Player"]["dead"] and I.info.AXE[1] == 0:
+    if event.key == I.pg.K_v and I.info.COMBAT_RECT[1] == 0 and I.info.PICAXE[1] == 0:
+        if I.info.EQUIPED["Axe"][0] != 0 and not data["Player"]["dead"] and I.info.AXE[1] == 0:
             curr_song = songs["Playing"]
             songs[curr_song].channel0.pause()
             orientation = I.info.LAST_ORIENT[0].split(".")[0]
@@ -180,14 +184,17 @@ def handle_keydown(event, data, spells, gifs, items, songs):
                                 "Back": (0, -10),
                                 "Left": (-10, 0),
                                 "Right": (10, 0)}
-            type = Ff.get_property(I.info.EQUIPED["Axe"].split("|")[0], items, "WEAPON")[3] + " Strike"
+            axe_properties = Ff.get_property(I.info.EQUIPED["Axe"][0].split("|")[0], items, "WEAPON")
+            type = axe_properties[3] + " Strike"
             gifs[type].Start_gif(type, 1)
-            I.info.AXE = (I.pg.Rect(150 + attack_direction[orientation][0] + I.info.OFFSCREEN[0] / 4, 85 + attack_direction[orientation][1] + I.info.OFFSCREEN[1] / 4, S.SCREEN_WIDTH / 100, S.SCREEN_HEIGHT / 100), 1000)
-            I.pg.time.set_timer(I.pg.USEREVENT + 9, int(I.info.AXE[1]))
+            speed = axe_properties[1]
+            I.info.AXE = [I.pg.Rect(150 + attack_direction[orientation][0] + I.info.OFFSCREEN[0] / 4, 85 + attack_direction[orientation][1] + I.info.OFFSCREEN[1] / 4, S.SCREEN_WIDTH / 100, S.SCREEN_HEIGHT / 100), float(speed) * I.info.BASE_ATTACKING_SPEED]
+            # I.pg.time.set_timer(I.pg.USEREVENT + 9, int(I.info.AXE[1]))
+            I.th.start_thread(int(I.info.AXE[1]), "axe", gifs)
             songs[curr_song].channel0.unpause()
         pressed = I.pg.K_v
-    if event.key == I.pg.K_b:
-        if I.info.EQUIPED["Picaxe"] != 0 and not data["Player"]["dead"] and I.info.PICAXE[1] == 0:
+    if event.key == I.pg.K_b and I.info.AXE[1] == 0 and I.info.COMBAT_RECT[1] == 0:
+        if I.info.EQUIPED["Picaxe"][0] != 0 and not data["Player"]["dead"] and I.info.PICAXE[1] == 0:
             curr_song = songs["Playing"]
             songs[curr_song].channel0.pause()
             orientation = I.info.LAST_ORIENT[0].split(".")[0]
@@ -195,10 +202,13 @@ def handle_keydown(event, data, spells, gifs, items, songs):
                                 "Back": (0, -10),
                                 "Left": (-10, 0),
                                 "Right": (10, 0)}
-            type = Ff.get_property(I.info.EQUIPED["Picaxe"].split("|")[0], items, "WEAPON")[3] + " Strike"
+            picaxe_properties = Ff.get_property(I.info.EQUIPED["Picaxe"][0].split("|")[0], items, "WEAPON")
+            type = picaxe_properties[3] + " Strike"
             gifs[type].Start_gif(type, 1)
-            I.info.PICAXE = (I.pg.Rect(150 + attack_direction[orientation][0] + I.info.OFFSCREEN[0] / 4, 85 + attack_direction[orientation][1] + I.info.OFFSCREEN[1] / 4, S.SCREEN_WIDTH / 100, S.SCREEN_HEIGHT / 100), 1000)
-            I.pg.time.set_timer(I.pg.USEREVENT + 9, int(I.info.PICAXE[1]))
+            speed = picaxe_properties[1]
+            I.info.PICAXE = [I.pg.Rect(150 + attack_direction[orientation][0] + I.info.OFFSCREEN[0] / 4, 85 + attack_direction[orientation][1] + I.info.OFFSCREEN[1] / 4, S.SCREEN_WIDTH / 100, S.SCREEN_HEIGHT / 100), float(speed) * I.info.BASE_ATTACKING_SPEED]
+            # I.pg.time.set_timer(I.pg.USEREVENT + 9, int(I.info.PICAXE[1]))
+            I.th.start_thread(int(I.info.PICAXE[1]), "picaxe", gifs)
             songs[curr_song].channel0.unpause()
         pressed = I.pg.K_b
     if event.key in [I.pg.K_a, I.pg.K_s, I.pg.K_d, I.pg.K_f, I.pg.K_g]:
@@ -232,11 +242,19 @@ def handle_keydown(event, data, spells, gifs, items, songs):
 
 
     return pressed
-def display_spell_bar(screen, spells, gifs):
+def display_spell_bar(screen, spells, gifs: dict):
     Ff.add_image_to_screen(screen, S.PLAYING_PATH["Spell_bar"], (S.SCREEN_WIDTH * 0.8, S.SCREEN_HEIGHT * 0.9,  S.SCREEN_WIDTH / 5,  S.SCREEN_HEIGHT / 10))
+    spell_w = S.SCREEN_WIDTH / 28
+    spell_h = S.SCREEN_HEIGHT / 12
+    spell_y = S.SCREEN_HEIGHT * 0.91
     for pos, spell in spells.selected_spell.items():
-        Ff.add_image_to_screen(screen, gifs[spell].frame_paths[0], (S.SCREEN_WIDTH * 0.803 + pos * 25, S.SCREEN_HEIGHT * 0.91,  S.SCREEN_WIDTH / 25,  S.SCREEN_HEIGHT / 10))
-
+        spell_x = S.SCREEN_WIDTH * 0.804 + pos * 25
+        Ff.add_image_to_screen(screen, gifs[spell].frame_paths[0][:-5] + "icon.png", (spell_x, spell_y, spell_w, spell_h))
+        # if spells.spell_cooloff.get(spell) != None and spells.spell_cooloff[spell] != 0 and spells.spell_cooloff[spell] != spells.spell_dict[spell]["recharge"]:
+        if spells.spell_cooloff.get(spell) != None and spells.spell_cooloff[spell] != 0:
+            cover = I.pg.Surface((spell_w, int(spell_h * spells.spell_cooloff[spell] / spells.spell_dict[spell]["recharge"])), I.pg.SRCALPHA)
+            cover.fill((0, 0, 0, 128))
+            screen.blit(cover, (spell_x, spell_y))
 def handle_mob_respawn(mob, data, rooms):
     if rooms.type in ["Village"]:
         # print("mob: ", mob)
@@ -247,149 +265,156 @@ def handle_mob_respawn(mob, data, rooms):
                 mob[monster_name].mobs.append(mob[monster_name].create_mob(id))
                 data[mob[monster_name].name] = br.generate_mobs(mob[monster_name], data["Image_rect"].size)
 
-def handle_timer_actions(event, timers, data, mob, spells, decorations, rooms, npc, gifs, song):
-    if timers["Exhaustion"] == event.type:
-        data["Player"]["Exhaustion"] = (data["Player"]["Exhaustion"][0] - 1, data["Player"]["Exhaustion"][1])
-        for npc_name in npc.keys():
-            if npc[npc_name]["dialog"].iteration == 3: # after some time if value is 4 sets to value 5
-                npc[npc_name]["dialog"].iteration = 0
-
-    if timers["Mob_respawn"] == event.type:
-        handle_mob_respawn(mob, data, rooms)
-
-    if timers["cook"] == event.type:
-        if I.info.APPLIANCE_CLICK == "Furnace":
-            I.info.APPLIANCE_CLICK = ""
-            if I.info.Temp_variable_holder[2] == "cook":
-                # print(I.info.BACKPACK_CONTENT, I.info.Temp_variable_holder)
-                if I.info.Temp_variable_holder[0] + "_Cooked" in list(I.info.BACKPACK_CONTENT.keys()):
-                    I.info.BACKPACK_CONTENT[I.info.Temp_variable_holder[0] + "_Cooked"] = I.info.BACKPACK_CONTENT[I.info.Temp_variable_holder[0] + "_Cooked"][0] + 1, I.info.BACKPACK_CONTENT[I.info.Temp_variable_holder[0] + "_Cooked"][1], I.info.BACKPACK_CONTENT[I.info.Temp_variable_holder[0] + "_Cooked"][2]
-                else:
-                    x, y = br.find_open_space()
-                    I.info.BACKPACK_CONTENT[I.info.Temp_variable_holder[0] + "_Cooked"] = (1, x, y)
-                    # insert_item_to_backpack(I.info.Temp_variable_holder[0] + "_Cooked", 1)
-                if any(char.isdigit() for char in I.info.Temp_variable_holder[0]):
-                    I.info.Temp_variable_holder[0] = I.info.Temp_variable_holder[0][:-1]
-                Ff.display_text_player("Cooked " + I.info.Temp_variable_holder[0], 3000)
-            else:
-                if "Ashes" in list(I.info.BACKPACK_CONTENT.keys()):
-                    I.info.BACKPACK_CONTENT["Ashes"] = I.info.BACKPACK_CONTENT["Ashes"][0] + 1, I.info.BACKPACK_CONTENT["Ashes"][1], I.info.BACKPACK_CONTENT["Ashes"][2]
-                else:
-                    x, y = br.find_open_space()
-                    I.info.BACKPACK_CONTENT["Ashes"] = (1, x, y)
-                    # insert_item_to_backpack("Ashes", 1)
-                Ff.display_text_player("Burned " + I.info.Temp_variable_holder[0], 3000)
-            I.info.Temp_variable_holder = []
-
-    if timers["Harvest"] == event.type:
-        harvest_timeout()
-
-    if timers["Walk"] == event.type:
-        I.info.CURRENT_STANCE += 1
-        if I.info.CURRENT_STANCE > 3:
-            I.info.CURRENT_STANCE = 0
-
-    if timers["mob_gif"] == event.type:
-        if I.info.CURRENT_ROOM["Mobs"]:
-            for key in mob.keys():
-                for current_mob in mob[key].mobs:
-                    current_mob["gif_frame"] = (current_mob["gif_frame"][0] + 1, current_mob["gif_frame"][1])
-                    if current_mob["gif_frame"][0] == current_mob["gif_frame"][1]:
-                        mob[key].move_mobs_randomly(decorations, data)
-                        current_mob["gif_frame"] = (0, current_mob["gif_frame"][1])
-        for key in spells.spell_cooloff.keys():
-            if spells.spell_cooloff[key] != 0:
-                spells.spell_cooloff[key] -= 1
-
-
-    if timers["healing"] == event.type:
-        if I.pg.time.get_ticks() - data["Player"]["Last_hit"] > 20000 and data["Player"]["Exhaustion"][0] >= 90:
-            if data["Player"]["hp"][0] < data["Player"]["hp"][1]:
-                data["Player"]["hp"] = (data["Player"]["hp"][0] + 1, data["Player"]["hp"][1])
-            if float(data["Player"]["mana"][0]) < float(data["Player"]["mana"][1]):
-                data["Player"]["mana"] = (data["Player"]["mana"][0] + 1, data["Player"]["mana"][1])
-        if I.info.CURRENT_ROOM["Type"] in ["Village"]:
-            if decorations.effected_decor != {}:
-                dict_to_burn = []
-                for old_index, effect in decorations.effected_decor.items():
-                    if effect in ["Fire"]:
-                        rect = decorations.displayed_rects[old_index]
-                        for option in decorations.decor_dict.keys():
-                            for index in decorations.decor_dict[option].keys():
-                                if isinstance(index, int):
-                                    new_rect = I.pg.Rect(decorations.decor_dict[option][index]["rect"].x - data["Zoom_rect"].x, decorations.decor_dict[option][index]["rect"].y - data["Zoom_rect"].y, decorations.decor_dict[option][index]["rect"].w, decorations.decor_dict[option][index]["rect"].h)
-                                    if new_rect == rect:
-                                        # found the index for the decorations.decor_dict.
-                                        if "True" in decorations.decor_dict[option]["health"]:  # FOUND FLAMABLE
-                                            # print("FOUND FLAMABLE")
-                                            duration = decorations.decor_dict[option]["health"].split(",,")[1]
-                                            if decorations.decor_dict[option][index]["effect"] == "":
-                                                decorations.decor_dict[option][index]["effect"] = "Fire,," + str(duration)
-                                            else:
-                                                duration = int(decorations.decor_dict[option][index]["effect"].split(",,")[1].split(",")[0])
-
-                                                duration -= 1
-                                                decorations.decor_dict[option][index]["effect"] = "Fire,," + str(duration)
-                                            if duration == 0:
-                                                dict_to_burn.append((option, index, old_index))
-                if dict_to_burn != []:
-                    for option, index, old_index in dict_to_burn:
-                        del decorations.decor_dict[option][index]
-                        del decorations.effected_decor[old_index]
-    if timers["hit"] == event.type:
-        I.info.COMBAT_RECT = (0, 0)
-        if I.info.POS_CHANGE[1] != 0:
-            gifs[I.info.POS_CHANGE[1]].start_gif = False
-            I.info.POS_CHANGE = 0, 0
-
-    if timers["axe"] == event.type:
-        I.info.AXE = (0, 0)
-        I.info.PICAXE = (0, 0)
-        if I.info.POS_CHANGE[1] != 0:
-            gifs[I.info.POS_CHANGE[1]].start_gif = False
-            I.info.POS_CHANGE = 0, 0
-
-    if timers["music"] == event.type:
-        song[song["Playing"]].next_note()
-
-
-def handle_timers():
-    timers = {}
-    EXHAUSTION_TIM = I.pg.USEREVENT + 1
-    I.pg.time.set_timer(EXHAUSTION_TIM, 300000) # 5 min
-    timers["Exhaustion"] = EXHAUSTION_TIM
-
-    Mob_Respawn = I.pg.USEREVENT + 2
-    I.pg.time.set_timer(Mob_Respawn, 600000) # 10 min
-    timers["Mob_respawn"] = Mob_Respawn
-
-    Harvest_timer = I.pg.USEREVENT + 3
-    I.pg.time.set_timer(Harvest_timer, 60000) # 1 min
-    timers["Harvest"] = Harvest_timer
-
-    timers["hit"] = I.pg.USEREVENT + 4
-
-    Walk = I.pg.USEREVENT + 5
-    I.pg.time.set_timer(Walk, 300) #0.3 sec
-    timers["Walk"] = Walk
-
-    mob_gif = I.pg.USEREVENT + 6
-    I.pg.time.set_timer(mob_gif, 100) # 0.1 sec
-    timers["mob_gif"] = mob_gif
-
-    timers["cook"] = I.pg.USEREVENT + 7
-
-    healing = I.pg.USEREVENT + 8
-    I.pg.time.set_timer(healing, 1000) # 1 sec
-    timers["healing"] = healing
-
-    timers["axe"] = I.pg.USEREVENT + 9
-
-    timers["music"] = I.pg.USEREVENT + 10
-    I.pg.time.set_timer(I.pg.USEREVENT + 10, 500) # 0.5 sec
-
-
-    return timers
+# def handle_timer_actions(event, timers, data, mob, spells, decorations, rooms, npc, gifs, song, items):
+#     if timers["Exhaustion"] == event:
+#         data["Player"]["Exhaustion"] = (data["Player"]["Exhaustion"][0] - 1, data["Player"]["Exhaustion"][1])
+#         for npc_name in npc.keys():
+#             if npc[npc_name]["dialog"].iteration == 3: # after some time if value is 4 sets to value 5
+#                 npc[npc_name]["dialog"].iteration = 0
+#
+#     if timers["Mob_respawn"] == event:
+#         handle_mob_respawn(mob, data, rooms)
+#
+#     if timers["cook"] == event:
+#         handle_cooking_food(items)
+#         I.pg.time.set_timer(timers["cook"], 0)
+#
+#     if timers["Harvest"] == event:
+#         harvest_timeout()
+#
+#     if timers["Walk"] == event:
+#         I.info.CURRENT_STANCE += 1
+#         if I.info.CURRENT_STANCE > 3:
+#             I.info.CURRENT_STANCE = 0
+#
+#     if timers["spell_cooloff"] == event:
+#         if I.info.CURRENT_ROOM["Mobs"]:
+#             for key in mob.keys():
+#                 mob[key].delay = mob[key].delay[0] - 100, mob[key].delay[1] # remove 100 ms
+#                 if mob[key].delay[0] <= 0:
+#                     for current_mob in mob[key].mobs:
+#                         current_mob["gif_frame"] = (current_mob["gif_frame"][0] + 1, current_mob["gif_frame"][1])
+#                         if current_mob["gif_frame"][0] == current_mob["gif_frame"][1]:
+#                             mob[key].move_mobs_randomly(decorations, data)
+#                             current_mob["gif_frame"] = (0, current_mob["gif_frame"][1])
+#                     mob[key].delay = mob[key].delay[1], mob[key].delay[1]
+#
+#         for key in spells.spell_cooloff.keys():
+#             if spells.spell_cooloff[key] != 0:
+#                 spells.spell_cooloff[key] -= 1
+#
+#
+#     if timers["healing"] == event:
+#         if I.pg.time.get_ticks() - data["Player"]["Last_hit"] > 20000 and data["Player"]["Exhaustion"][0] >= 90:
+#             if data["Player"]["hp"][0] < data["Player"]["hp"][1]:
+#                 data["Player"]["hp"] = (data["Player"]["hp"][0] + 1, data["Player"]["hp"][1])
+#             if float(data["Player"]["mana"][0]) < float(data["Player"]["mana"][1]):
+#                 data["Player"]["mana"] = (data["Player"]["mana"][0] + 1, data["Player"]["mana"][1])
+#         if I.info.CURRENT_ROOM["Type"] in ["Village"]:
+#             if decorations.effected_decor != {}:
+#                 dict_to_burn = []
+#                 for old_index, effect in decorations.effected_decor.items():
+#                     if effect in ["Fire"]:
+#                         rect = decorations.displayed_rects[old_index]
+#                         for option in decorations.decor_dict.keys():
+#                             for index in decorations.decor_dict[option].keys():
+#                                 if isinstance(index, int):
+#                                     new_rect = I.pg.Rect(decorations.decor_dict[option][index]["rect"].x - data["Zoom_rect"].x, decorations.decor_dict[option][index]["rect"].y - data["Zoom_rect"].y, decorations.decor_dict[option][index]["rect"].w, decorations.decor_dict[option][index]["rect"].h)
+#                                     if new_rect == rect:
+#                                         # found the index for the decorations.decor_dict.
+#                                         if "True" in decorations.decor_dict[option]["health"]:  # FOUND FLAMABLE
+#                                             # print("FOUND FLAMABLE")
+#                                             duration = decorations.decor_dict[option]["health"].split(",,")[1]
+#                                             if decorations.decor_dict[option][index]["effect"] == "":
+#                                                 decorations.decor_dict[option][index]["effect"] = "Fire,," + str(duration)
+#                                             else:
+#                                                 duration = int(decorations.decor_dict[option][index]["effect"].split(",,")[1].split(",")[0])
+#
+#                                                 duration -= 1
+#                                                 decorations.decor_dict[option][index]["effect"] = "Fire,," + str(duration)
+#                                             if duration == 0:
+#                                                 dict_to_burn.append((option, index, old_index))
+#                 if dict_to_burn != []:
+#                     for option, index, old_index in dict_to_burn:
+#                         del decorations.decor_dict[option][index]
+#                         del decorations.effected_decor[old_index]
+#
+#     if timers["hit"] == event:
+#         I.info.COMBAT_RECT = [0, 0]
+#         if I.info.POS_CHANGE[1] != 0:
+#             gifs[I.info.POS_CHANGE[1]].start_gif = False
+#             I.info.POS_CHANGE = 0, 0
+#         I.pg.time.set_timer(timers["hit"], 0)
+#
+#     if timers["axe"] == event:
+#         I.info.AXE = [0, 0]
+#         I.info.PICAXE = [0, 0]
+#         if I.info.POS_CHANGE[1] != 0:
+#             gifs[I.info.POS_CHANGE[1]].start_gif = False
+#             I.info.POS_CHANGE = 0, 0
+#         I.pg.time.set_timer(timers["axe"], 0)
+#
+#     if timers["music"] == event:
+#         song[song["Playing"]].next_note()
+#
+#     if timers["waves"] == event:
+#         for key in gifs.keys():
+#             if "Wave1" in key or "Wave4" in key:
+#                 gifs[key].pause = 0
+#         I.pg.time.set_timer(I.pg.USEREVENT + 11, 0)
+#
+#     if timers["folower"] == event:
+#         x_init = 148 + data["Zoom_rect"].x + int(I.info.OFFSCREEN[0] / 4)
+#         y_init = 72 + data["Zoom_rect"].y + int(I.info.OFFSCREEN[1] / 4)
+#         range = 50
+#         x = random.randrange(x_init - range, x_init + range)
+#         y = random.randrange(y_init - range, y_init + range)
+#         I.info.FOLLOWER["target_pos"] = x, y
+#         I.info.FOLLOWER["orientation"] = []
+#
+#
+# def handle_timers():
+#     timers = {}
+#     EXHAUSTION_TIM = I.pg.USEREVENT + 1
+#     I.pg.time.set_timer(EXHAUSTION_TIM, 300000)  # 5 min
+#     timers["Exhaustion"] = EXHAUSTION_TIM
+#
+#     Mob_Respawn = I.pg.USEREVENT + 2
+#     I.pg.time.set_timer(Mob_Respawn, 600000)  # 10 min
+#     timers["Mob_respawn"] = Mob_Respawn
+#
+#     Harvest_timer = I.pg.USEREVENT + 3
+#     I.pg.time.set_timer(Harvest_timer, 60000)  # 1 min
+#     timers["Harvest"] = Harvest_timer
+#
+#     timers["hit"] = I.pg.USEREVENT + 4
+#
+#     Walk = I.pg.USEREVENT + 5
+#     I.pg.time.set_timer(Walk, 300) #0.3 sec
+#     timers["Walk"] = Walk
+#
+#     spell_cooloff = I.pg.USEREVENT + 6
+#     I.pg.time.set_timer(spell_cooloff, 100) # 0.1 sec
+#     timers["spell_cooloff"] = spell_cooloff
+#
+#     timers["cook"] = I.pg.USEREVENT + 7
+#
+#     healing = I.pg.USEREVENT + 8
+#     I.pg.time.set_timer(healing, 1000) # 1 sec
+#     timers["healing"] = healing
+#
+#     timers["axe"] = I.pg.USEREVENT + 9
+#
+#     timers["music"] = I.pg.USEREVENT + 10
+#     I.pg.time.set_timer(I.pg.USEREVENT + 10, 500) # 0.5 sec
+#
+#     timers["waves"] = I.pg.USEREVENT + 11
+#
+#     timers["folower"] = I.pg.USEREVENT + 12
+#
+#
+#
+#     return timers
 
 def update_char_bar(screen, data, gifs, items):
     rect = Ff.add_image_to_screen(screen, S.PLAYING_PATH["Char_bar"], [0, 0, S.SCREEN_WIDTH / 8, S.SCREEN_HEIGHT / 8])
@@ -421,18 +446,23 @@ def update_char_bar(screen, data, gifs, items):
         "Axe": (66, 11),
         "Picaxe": (118, 11),
                 }
+    speeds = [I.info.COMBAT_RECT[1], I.info.AXE[1], I.info.PICAXE[1]]
     item_w = list(I.info.BACKPACK_COORDINATES_X.values())[1] - list(I.info.BACKPACK_COORDINATES_X.values())[0]
     item_h = list(I.info.BACKPACK_COORDINATES_Y.values())[1] - list(I.info.BACKPACK_COORDINATES_Y.values())[0]
-    for option in options:
-        if I.info.EQUIPED[option] != 0:
-            content = I.info.EQUIPED[option]
-            if "|" in content:
-                Ff.add_image_to_screen(screen, items.item_dict[content.split("|")[0]]["path"], [position[option][0], position[option][1], item_w, item_h])
-            else:
-                Ff.add_image_to_screen(screen, items.item_dict[content]["path"], [position[option][0], position[option][1], item_w, item_h])
+    for i in range(len(options)):
+        if I.info.EQUIPED[options[i]][0] != 0:
+            content = I.info.EQUIPED[options[i]][0]
+            Ff.add_image_to_screen(screen, items.item_dict[content.split("|")[0]]["path"], [position[options[i]][0], position[options[i]][1], item_w, item_h])
+            if speeds[i] != 0:
+                if I.info.EQUIPED[options[i]][1] == 27:
+                    I.info.EQUIPED[options[i]] = I.info.EQUIPED[options[i]][0], 26
+                cover = I.pg.Surface((item_w, I.info.EQUIPED[options[i]][1]), I.pg.SRCALPHA)
+                cover.fill((0, 0, 0, 128))
+                screen.blit(cover, (position[options[i]][0], position[options[i]][1]))
 
-def walking(dx, dy, collide, data, decorations, sub_screen, rooms):
-    if (dx, dy) in movement and not collide[0] or (dx, dy) in movement and collide[0] in ["Portal", "Barkeep"]:
+
+def walking(dx, dy, collide, data, decorations, sub_screen, rooms, screen):
+    if (dx, dy) in movement and not collide[0] or (dx, dy) in movement and collide[0] in ["Portal", "Plant bed"]:
         I.info.LAST_ORIENTAION = regular_walking(data, dx, dy)
     elif collide[0] not in ["mob_collide"]: # Collisions made specificly for mobs and decor. but currently just decor
         # I.T.Make_rect_visible(sub_screen, me, "blue")
@@ -440,15 +470,15 @@ def walking(dx, dy, collide, data, decorations, sub_screen, rooms):
             me_left = I.pg.Rect(148 + I.info.OFFSCREEN[0] / 4, 82 + I.info.OFFSCREEN[1] / 4, S.SCREEN_WIDTH / 400, S.SCREEN_HEIGHT / 150) # black
             me_right = I.pg.Rect(159 + I.info.OFFSCREEN[0] / 4, 82 + I.info.OFFSCREEN[1] / 4, S.SCREEN_WIDTH / 400, S.SCREEN_HEIGHT / 150) # purple
             me_up = I.pg.Rect(152 + I.info.OFFSCREEN[0] / 4, 80 + I.info.OFFSCREEN[1] / 4, S.SCREEN_WIDTH / 200, S.SCREEN_HEIGHT / 300) # white
-            me_down = I.pg.Rect(152 + I.info.OFFSCREEN[0] / 4, 88 + I.info.OFFSCREEN[1] / 4, S.SCREEN_WIDTH / 200, S.SCREEN_HEIGHT / 300) # orange
+            me_down = I.pg.Rect(152 + I.info.OFFSCREEN[0] / 4, 90 + I.info.OFFSCREEN[1] / 4, S.SCREEN_WIDTH / 200, S.SCREEN_HEIGHT / 300) # orange
         else:
             # me = I.pg.Rect(S.SCREEN_WIDTH / 2 - S.SCREEN_WIDTH / 24 + I.info.OFFSCREEN[0], S.SCREEN_HEIGHT / 2 - S.SCREEN_HEIGHT / 16 + I.info.OFFSCREEN[1], S.SCREEN_WIDTH / 24,S.SCREEN_HEIGHT / 12)
             x = S.SCREEN_WIDTH / 2 - S.SCREEN_WIDTH / 24 + I.info.OFFSCREEN[0]
             y = S.SCREEN_HEIGHT / 2 - S.SCREEN_HEIGHT / 16 + I.info.OFFSCREEN[1]
-            me_left = I.pg.Rect(x + 5, y + 22, S.SCREEN_WIDTH / 150, S.SCREEN_HEIGHT / 40)  # black
-            me_right = I.pg.Rect(x + 45, y + 24, S.SCREEN_WIDTH / 150, S.SCREEN_HEIGHT / 40)  # purple
+            me_left = I.pg.Rect(x + 5, y + 26, S.SCREEN_WIDTH / 150, S.SCREEN_HEIGHT / 20)  # black
+            me_right = I.pg.Rect(x + 45, y + 26, S.SCREEN_WIDTH / 150, S.SCREEN_HEIGHT / 20)  # purple
             me_up = I.pg.Rect(x + 18, y - 10, S.SCREEN_WIDTH / 50, S.SCREEN_HEIGHT / 100)  # white
-            me_down = I.pg.Rect(x + 18, y + 40, S.SCREEN_WIDTH / 50, S.SCREEN_HEIGHT / 100)  # orange
+            me_down = I.pg.Rect(x + 18, y + 50, S.SCREEN_WIDTH / 50, S.SCREEN_HEIGHT / 100)  # orange
 
         # I.T.Make_rect_visible(sub_screen, me_left, "black")
         # I.T.Make_rect_visible(sub_screen, me_right, "purple")
@@ -563,23 +593,29 @@ def keypress_handle(screen, data, song, items, spells, gifs, rooms, clock):
 def interract(collide, data, gifs, items, screen, songs, spells, clock, rooms, npc, decorations):
     if collide[0] != False:
         if collide[0] in I.info.HARVESTABLE.keys() and not data["Player"]["dead"]:
-            if any((collide[1].x, collide[1].y) == (t[0], t[1]) for t in I.info.HARVESTED_OBJECTS.get(collide[0], [])):
+            if any(collide[1] == t[0] for t in I.info.HARVESTED_OBJECTS.get(collide[0])):
+                Ff.display_text_player("Nothing found", 500)
                 pass
             else:
                 item = I.info.HARVESTABLE[collide[0]]
                 values = items.item_dict[item]["Aquire"].split(",,")
                 amount = random.randint(int(values[1]), int(values[2]))
-                br.add_to_backpack(item, amount, items)  # Adds harvested plants
+                Ff.add_to_backpack(item, amount, items)  # Adds harvested plants
                 duration = int(values[3])
                 #  Handle registering items that were taken, used in not allowing collection of too many items from single bush
+                harvested_obj_rect = decorations.decor_dict[collide[0]][collide[1]]["rect"]
                 if I.info.HARVESTED_OBJECTS.get(collide[0]) == []:
-                    I.info.HARVESTED_OBJECTS[collide[0]] = [(collide[1].x, collide[1].y, duration)]
+                    # Ff.update_map_view(collide[1], collide[0] + "_Harvested", (harvested_obj_rect.x, harvested_obj_rect.y), "add")
+                    Ff.update_map_view(collide[1], collide[0], (harvested_obj_rect.x, harvested_obj_rect.y), "remove")
+                    Ff.update_map_view(collide[1], collide[0] + "_Harvested", (harvested_obj_rect.x, harvested_obj_rect.y), "add")
+                    I.info.HARVESTED_OBJECTS[collide[0]] = [(collide[1], duration)]
+
                 else:
+                    Ff.update_map_view(collide[1], collide[0], (harvested_obj_rect.x, harvested_obj_rect.y), "remove")
+                    Ff.update_map_view(collide[1], collide[0] + "_Harvested", (harvested_obj_rect.x, harvested_obj_rect.y), "add")
                     existing_values = I.info.HARVESTED_OBJECTS.get(collide[0], [])
-
-                    existing_values.append((collide[1].x, collide[1].y, duration))
+                    existing_values.append((collide[1], duration))
                     I.info.HARVESTED_OBJECTS[collide[0]] = existing_values
-
                 Ff.display_text_player("Recieved " + str(amount) + " " + str(item), 5000)
                 return
         elif "door" in collide[0]:
@@ -592,45 +628,44 @@ def interract(collide, data, gifs, items, screen, songs, spells, clock, rooms, n
             data["Player"]["hp"] = (data["Player"]["hp"][1], data["Player"]["hp"][1])
             gifs["Ghost"].start_gif = False
         elif collide[0] == "Sign":
-            br.init_dialog("Sign", data["Player"], screen, npc, items)
+            br.init_dialog("Sign", data["Player"], screen, npc, items, decorations, data)
         elif collide[0] in npc.keys():
             # print("I.info.Conversation: ", I.info.CONVERSATION)
-            br.init_dialog(collide[0], data["Player"], screen, npc, items)
+            br.init_dialog(collide[0], data["Player"], screen, npc, items, decorations, data)
         elif decorations.decor_dict.get(collide[0]) != None:
             if "CONTAINER" in decorations.decor_dict[collide[0]]["action"]:
                 container_name = collide[0]
                 container_size = decorations.decor_dict[collide[0]]["action"].split(":")[1]
                 handle_containers(container_name, container_size, items, screen, data["Player"], decorations, collide[2])
             elif "Appliance" in decorations.decor_dict[collide[0]]["type"]:
-                appliance_name = collide[0]
-                for item in I.info.EQUIPED.values():
-                    if item != 0 and I.info.Temp_variable_holder == []:
-                        I.info.APPLIANCE_CLICK = appliance_name
-                        I.pg.time.set_timer(I.pg.USEREVENT + 7, 3000)
-                        if I.info.BACKPACK_CONTENT[item][0] == 1:
-                            del I.info.BACKPACK_CONTENT[item]
-                        else:
-                            I.info.BACKPACK_CONTENT[item] = (int(I.info.BACKPACK_CONTENT[item][0]) - 1, I.info.BACKPACK_CONTENT[item][1], I.info.BACKPACK_CONTENT[item][2])
-                        backup_item = item
-                        if "|" in backup_item:
-                            backup_item = item.split("|")[0]
-                        if "COOK" in items.item_dict[backup_item]["Properties"]:
-                            I.info.Temp_variable_holder = [backup_item, 1, "cook"]
-                        else:
-                            I.info.Temp_variable_holder = [backup_item, 1, "burn"]
-                br.update_equiped()
+                handle_appliances(collide[0], items.item_dict, items)
+            elif "PLANT" in decorations.decor_dict[collide[0]]["action"]:
+                if I.info.EQUIPED["Sword"][0] != 0 and "PLANTABLE" in items.item_dict[I.info.EQUIPED["Sword"][0]]["Properties"]:
+                    plant = items.item_dict[I.info.EQUIPED["Sword"][0]]["Properties"].replace("PLANTABLE(", "").replace(")", "").split(",,,")[0].split(",,")
+                    time = plant[1].replace("TIME:", "")
+                    plant = plant[0].replace("PLANT:", "")
+                    decorations.decor_dict[collide[0]][collide[1]]["effect"] = "PLANTED:" + plant + ":" + time + ":" + time
+                    I.th.start_thread(time, "planting", decorations)
+                    br.remove_from_backpack(I.info.EQUIPED["Sword"][0], 1)
+                    br.update_equiped()
+
+            else:
+                print("some other decor", collide)
         else:
             print("not harvestable", collide)
             print(collide)
 
-def harvest_timeout():
+def harvest_timeout(decorations):
     for harvastable in I.info.HARVESTED_OBJECTS.keys():
         if I.info.HARVESTED_OBJECTS[harvastable] != []:
             i = 0
             while True:
-                if I.info.HARVESTED_OBJECTS[harvastable][i][2] != 0:
-                    I.info.HARVESTED_OBJECTS[harvastable][i] = (I.info.HARVESTED_OBJECTS[harvastable][i][0], I.info.HARVESTED_OBJECTS[harvastable][i][1], I.info.HARVESTED_OBJECTS[harvastable][i][2] - 1)
-                if I.info.HARVESTED_OBJECTS[harvastable][i][2] == 0:
+                if I.info.HARVESTED_OBJECTS[harvastable][i][1] != 0:
+                    I.info.HARVESTED_OBJECTS[harvastable][i] = (I.info.HARVESTED_OBJECTS[harvastable][i][0], I.info.HARVESTED_OBJECTS[harvastable][i][1] - 1)
+                if I.info.HARVESTED_OBJECTS[harvastable][i][1] == 0:
+                    Ff.update_map_view(I.info.HARVESTED_OBJECTS[harvastable][i][0], harvastable + "_Harvested", (0, 0), "remove")
+                    coordinates = Ff.get_decor_coordinates(harvastable + "_Harvested", I.info.HARVESTED_OBJECTS[harvastable][i][0], decorations)
+                    Ff.update_map_view(I.info.HARVESTED_OBJECTS[harvastable][i][0], harvastable, coordinates, "add")
                     I.info.HARVESTED_OBJECTS[harvastable].pop(i)
                 else:
                     i += 1
@@ -638,7 +673,7 @@ def harvest_timeout():
                     break
 
 
-def update_display_text(screen, gifs, data, collide):
+def update_display_text(screen, gifs: dict, data, collide):
     if I.info.TEXT:  # Check if the dictionary is not empty
         if I.info.CURRENT_ROOM["Type"] in ["Village"]:
             color = "black"
@@ -679,10 +714,10 @@ def handle_combat(items, gifs):
                         "Back": (0, -10),
                         "Left": (-10, 0),
                         "Right": (10, 0)}
-    if I.info.EQUIPED["Sword"] != 0:
-        damage, speed, knockback, type = Ff.get_property(I.info.EQUIPED["Sword"], items, "WEAPON")
+    if I.info.EQUIPED["Sword"][0] != 0:
+        damage, speed, knockback, type = Ff.get_property(I.info.EQUIPED["Sword"][0], items, "WEAPON")
     gifs[type + " Strike"].Start_gif(type + " Strike", 1)
-    I.info.COMBAT_RECT = (I.pg.Rect(150 + attack_direction[orientation][0] + I.info.OFFSCREEN[0] / 4, 85 + attack_direction[orientation][1] + I.info.OFFSCREEN[1] / 4, S.SCREEN_WIDTH / 100, S.SCREEN_HEIGHT / 100), float(speed) * I.info.BASE_ATTACKING_SPEED)  # Player rect (if it gets hit with other rect. colide is set to True
+    I.info.COMBAT_RECT = [I.pg.Rect(150 + attack_direction[orientation][0] + I.info.OFFSCREEN[0] / 4, 80 + attack_direction[orientation][1] + I.info.OFFSCREEN[1] / 4, S.SCREEN_WIDTH / 100, S.SCREEN_HEIGHT / 80), float(speed) * I.info.BASE_ATTACKING_SPEED]  # Player rect (if it gets hit with other rect. colide is set to True
 
 def handle_music(song, collide, data, items):
     # print(song["Playing"])
@@ -703,8 +738,8 @@ def handle_music(song, collide, data, items):
         song[curr_song].play_effect(thump)
     elif I.info.COMBAT_RECT[0] != 0: # NO BLUNT SOUND
 
-        if I.info.EQUIPED["Sword"] != 0:
-            type = Ff.get_property(I.info.EQUIPED["Sword"], items, "WEAPON")[3]
+        if I.info.EQUIPED["Sword"][0] != 0:
+            type = Ff.get_property(I.info.EQUIPED["Sword"][0], items, "WEAPON")[3]
         else:
             type = "Blunt"
             # type = "Piercing"
@@ -713,7 +748,7 @@ def handle_music(song, collide, data, items):
     # else:
     #     duration = song[curr_song].music[song[curr_song].current_note][1]
     #     I.pg.time.set_timer(I.pg.USEREVENT + 10, duration)
-    #     print(duration)
+    # print(duration)
 
     if I.pg.time.get_ticks() - song[curr_song].effect_time > 500: # HARDCODED TO ONLY PLAY 500 ms OF EFFECT
         song[curr_song].channel1.stop()
@@ -769,9 +804,8 @@ def handle_containers(container_name, container_size, items, screen, player, dec
     container_coordinates = get_container_coordinates(container_size)
 
     remove_from_container = []
-
-
     path = S.PLAYING_PATH["Backpack_Tile"]
+
     while running:
         for event in I.pg.event.get():
             if event.type == I.pg.KEYDOWN:
@@ -779,127 +813,21 @@ def handle_containers(container_name, container_size, items, screen, player, dec
                     pressed = I.pg.K_i
                 elif event.key == I.pg.K_ESCAPE:
                     pressed = I.pg.K_ESCAPE
+                elif event.key == I.pg.K_x:
+                    pressed = I.pg.K_x
                 elif event.key == I.pg.K_c:
                     pressed = I.pg.K_c
                     if selected == 0:
-                        # print("If selected == 0", selected)
                         if block[0] >= 0:
-                            # print("if block[0] is more than or equal to 0", block[0])
-                            selected = I.pg.Rect(list(I.info.BACKPACK_COORDINATES_X.values())[block[0]],
-                                                 list(I.info.BACKPACK_COORDINATES_Y.values())[block[1]], item_w, item_h)
+                            selected = I.pg.Rect(list(I.info.BACKPACK_COORDINATES_X.values())[block[0]], list(I.info.BACKPACK_COORDINATES_Y.values())[block[1]], item_w, item_h)
                             pickup = (br.find_item_by_slot(block[0], block[1]), block[0], block[1])
-                            # print("then selected is: ", selected)
-                            # print("then pickup is: ", pickup)
-
                         else:
-                            # print("if block[0] is less than 0", block[0])
                             selected = I.pg.Rect(container_coordinates[block][0], container_coordinates[block][1], item_w, item_h)
                             pickup = (br.find_item_by_slot_containers(block[0], block[1], container_name, id), block[0], block[1])
-                            # print("then selected is: ", selected)
-                            # print("then pickup is: ", pickup)
                     else:
                         # print("if selected is not 0: ", selected)
                         if pickup[0] != 0 and pickup[0] != None:
-                            # print("if pickup was not none: ", pickup)
-                            if I.info.BACKPACK_CONTENT.get(pickup[0]) != None:
-                                # print("if the picked up item is in backpack: ", I.info.BACKPACK_CONTENT.get(pickup[0]))
-                                # IF THE ITEM IN PICKUP[0] EXISTS IN BACKPACK THEN CONTINUE
-                                if selected[0] < 633:
-                                    # print("if the selected item is from container: ")
-                                    # IF SELECTED RECT IS LESS THAN SMALLEST RECT X POS OF BACKPACK THEN ITS FROM CONTAINER
-                                    value = I.info.CONTAINERS[container_name, id][pickup[1:3]]
-                                    value = value[1], pickup[1], pickup[2]
-                                    # print("then the value is: ", value)
-                                    if br.find_item_by_slot_containers(block[0], block[1], container_name, id) == None:
-                                        # print("if the item exists in container: add it to the deleting list")
-                                        remove_from_container.append(pickup[1:3])
-                                else:
-                                    value = I.info.BACKPACK_CONTENT[pickup[0]]
-                                    # print("if the selected item is from backpack, then the value is: ", value)
-
-                            else:
-                                # print("if the picked up item doesn't exist in the backpack")
-                                # IF THE ITEM DOESNT EXIST IN THE BACKPACK, CHECK THE CONTAINER
-                                value = I.info.CONTAINERS[container_name, id][pickup[1:3]]
-                                value = value[1], pickup[1], pickup[2]
-                                # print("then we add it to backpack and remove it from the container")
-                                remove_from_container.append(pickup[1:3])
-
-
-                            taken_spaces = list(I.info.BACKPACK_CONTENT.values())
-                            if not any((block[0], block[1]) == (tpl[1], tpl[2]) for tpl in taken_spaces):
-                                # print("if the new possision is not in a taken space")
-                                #  IF THE SPOT WE WANT TO ASSIGN IS NOT TAKEN CONTINUE
-                                if block[0] < 0:
-                                    # print("if the new possision is in the container:")
-                                    handle_container_storage(pickup[0], container_name, block, container_size, container_coordinates, screen, decorations, (item_w, item_h), id, selected)
-                                else:
-                                    # print("if the new possision is in the backpack")
-                                    # FIRST LET's CHECK IF THE VALUE DIDN'T ALREADY EXIST:
-                                    if I.info.BACKPACK_CONTENT.get(pickup[0]) != None and selected[0] < 633:
-                                        # print("if the picked up item already existed in the backpack and it was selected from the container")
-                                        # PICKUP[0] item did exist. lets merge them.
-                                        I.info.BACKPACK_CONTENT[pickup[0]] = (I.info.BACKPACK_CONTENT[pickup[0]][0] + value[0], block[0], block[1])
-                                    else:
-                                        # print("if the picked up item didnt exist in the backpack or was picked up from the backpack")
-                                        I.info.BACKPACK_CONTENT[pickup[0]] = (value[0], block[0], block[1])  # set the new possision value
-                            else:
-                                # print("if the new possision is on another item")
-                                # ITEM PLACE WAS TAKEN, SWITCHING PLACES
-                                existing_item = br.find_item_by_slot(block[0], block[1])  # get existing item name
-                                if "STACK" in existing_item and "STACK" in pickup[0] and selected[0] >= 633:
-                                    # print("if the possisions` item has stack in it and the item was in backpack")
-                                    # BOTH OF THESE ITEMS ARE STACKS
-                                    stack = Ff.get_property(existing_item.split("|")[0], items, "STACK")
-                                    if float(I.info.BACKPACK_CONTENT[existing_item][0]) + float(
-                                            I.info.BACKPACK_CONTENT[pickup[0].split("|")[0]][0]) <= stack:
-                                        # print("if the existing item added up with the new picked up item is still less tahn the amount allowed by the stack")
-                                        # MERGING TWO STACKS INTO ONE
-                                        sum = float(I.info.BACKPACK_CONTENT[existing_item][0]) + float(
-                                            I.info.BACKPACK_CONTENT[pickup[0]][0])
-                                        I.info.BACKPACK_CONTENT[existing_item] = sum, \
-                                        I.info.BACKPACK_CONTENT[existing_item][1], \
-                                        I.info.BACKPACK_CONTENT[existing_item][2]
-                                        del I.info.BACKPACK_CONTENT[pickup[0]]
-                                        # print("then we add up the items and remove the picked up item from the backpack")
-
-                                    elif float(I.info.BACKPACK_CONTENT[existing_item][0]) < stack and float(
-                                            I.info.BACKPACK_CONTENT[pickup[0]][0]) < stack and selected[0] >= 633:
-                                        # print("if the existing item and the picked up item both are less than the stack allows and the item was in backpack")
-                                        # MERGING VALUES OF STACKS WITH REMAINDER
-                                        remainder = float(I.info.BACKPACK_CONTENT[existing_item][0]) + float(
-                                            I.info.BACKPACK_CONTENT[pickup[0]][0]) - stack
-                                        I.info.BACKPACK_CONTENT[pickup[0]] = remainder, \
-                                        I.info.BACKPACK_CONTENT[pickup[0]][1], I.info.BACKPACK_CONTENT[pickup[0]][2]
-                                        I.info.BACKPACK_CONTENT[existing_item] = stack, \
-                                        I.info.BACKPACK_CONTENT[existing_item][1], \
-                                        I.info.BACKPACK_CONTENT[existing_item][2]
-                                        # print("then we add up the items but leave a remainder")
-
-                                else:
-                                    # print("if the existing item didn't have a stack")
-                                    # CHECKING IF IT'S POSSIBLE TO JUST ADD THE TWO DIFERENT ITEMS INTO ONE ONLY IN BACKPACK
-                                    stack = Ff.get_property(existing_item.split("|")[0], items, "STACK")
-                                    if existing_item.split("|")[0] == pickup[0].split("|")[0] and I.info.BACKPACK_CONTENT[existing_item][0] + 1 < stack:
-                                        # print("if the existing items name is the same as the name of pickup and if the existing item is less than stack")
-                                        I.info.BACKPACK_CONTENT[existing_item] = I.info.BACKPACK_CONTENT[existing_item][0] + 1, block[0], block[1]
-                                        # print("then we add one to the existing item")
-                                    elif existing_item.split("|")[0] == pickup[0].split("|")[0]:
-                                        # print("if the existing item names are the same and the stack got overflowed. then we only add one item to a new stack")
-                                        br.add_to_backpack(pickup[0], 1, items)
-                                    else:
-                                        # print("if the names aren't the same")
-                                        if selected[0] >= 633:
-                                            # print("if the item was selected from the backpack")
-                                            I.info.BACKPACK_CONTENT[existing_item] = I.info.BACKPACK_CONTENT[existing_item][0], pickup[1], pickup[2]
-                                            I.info.BACKPACK_CONTENT[pickup[0]] = I.info.BACKPACK_CONTENT[pickup[0]][0], block[0], block[1]
-                                            # print("then we switch the places of those items")
-                                        else:
-                                            # print("if the selected item was from the container, erase the deleting list")
-                                            remove_from_container = []
-                                            
-
-
+                            remove_from_container = handle_container_backpack_switching(pickup, selected, container_name, id, block, items)
                         pickup = (0, 0, 0)
                         selected = 0
                 elif event.key == I.pg.K_UP:
@@ -919,48 +847,75 @@ def handle_containers(container_name, container_size, items, screen, player, dec
             elif event.type == I.pg.KEYUP:
                 if pressed == I.pg.K_i or pressed == I.pg.K_ESCAPE:
                     running = False  # exits backpack view
+                if event.key == I.pg.K_x and pressed == I.pg.K_x:
+                    if block[0] < 0:
+                        # IF SELECTED IN CONTAINER, REMOVE THE ITEM AND ADD IT TO BACKPACK
+                        selected = I.pg.Rect(container_coordinates[block][0], container_coordinates[block][1], item_w, item_h)
+                        pickup = (br.find_item_by_slot_containers(block[0], block[1], container_name, id), block[0], block[1])
+                        remove_from_container.append(pickup[1:3])
+                        Ff.add_to_backpack(pickup[0], 1, items)
+                    else:
+                        # IF SELECTED IN BACKPACK, REMOVE THE ITEM AND ADD IT TO CONTAINER
+                        selected = I.pg.Rect(list(I.info.BACKPACK_COORDINATES_X.values())[block[0]], list(I.info.BACKPACK_COORDINATES_Y.values())[block[1]], item_w, item_h)
+                        pickup = (br.find_item_by_slot(block[0], block[1]), block[0], block[1])
+                        new_block = (-2, 0)
+                        cancel = False
+                        for key, value in I.info.CONTAINERS.items():
+                            for sub_key, sub_value in value.items():
+                                if new_block == sub_key:
+                                    new_block = new_block[0] - 2, new_block[1]
+                                    if new_block[0] < -2 - container_size[1]:  # handles switching to lower container levels (Y axis)
+                                        new_block = -2, new_block[1] + 2
+                                        if new_block[1] > container_size[0] * 2 - 2: # Handles not overfilling the container. if the new block Y pos is higher than the size of container multiplied by 2 ( block format is in twos) and removed -2 (block format starts from 0) then dont add
+                                            cancel = True
+                        if not cancel:
+                            handle_container_storage(pickup[0], container_name, new_block, id, selected)
 
 
-            br.display_backpack(screen, player, items, screen.get_rect(), "half")
+                    selected = 0
+                    pickup = (0, 0, 0)
 
-            Ff.add_image_to_screen(screen, decorations.decor_dict[container_name]["path"], [275, 175, 150, 200])
+
+        br.display_backpack(screen, player, items, screen.get_rect(), "half")
+
+
+        # DISPLAY CONTAINER GRID
+        Ff.add_image_to_screen(screen, decorations.decor_dict[container_name]["path"], [275, 175, 150, 200])
+        start_row = 312
+        start_collumn = 225
+
+        for i in range(0, int(container_size[0])):
+            for a in range(0, int(container_size[1])):
+                Ff.add_image_to_screen(screen, path, [start_row, start_collumn, 42, 40])
+                start_row += 36
             start_row = 312
-            start_collumn = 225
-
-            for i in range(0, int(container_size[0])):
-                for a in range(0, int(container_size[1])):
-                    Ff.add_image_to_screen(screen, path, [start_row, start_collumn, 42, 40])
-                    start_row += 36
-                start_row = 312
-                start_collumn += 36
+            start_collumn += 36
 
 
 
-            if block[0] < 0:
-                # container_block = get_container_block(block, container_size)
-                # print("container block", container_block)
-                if block[0] < -2 * container_size[1]:
-                    block = -2 * container_size[1], block[1]
-                if block[1] > 2 * (container_size[0] - 1):
-                    block = block[0], 2 * (container_size[0] - 1)
-                rect = I.pg.Rect(container_coordinates[block][0], container_coordinates[block][1], item_w, item_h)
-            else:
-                rect = I.pg.Rect(list(I.info.BACKPACK_COORDINATES_X.values())[block[0]], list(I.info.BACKPACK_COORDINATES_Y.values())[block[1]], item_w, item_h)
+        if block[0] < 0:
+            if block[0] < -2 * container_size[1]:
+                block = -2 * container_size[1], block[1]
+            if block[1] > 2 * (container_size[0] - 1):
+                block = block[0], 2 * (container_size[0] - 1)
+            rect = I.pg.Rect(container_coordinates[block][0], container_coordinates[block][1], item_w, item_h)
+        else:
+            rect = I.pg.Rect(list(I.info.BACKPACK_COORDINATES_X.values())[block[0]], list(I.info.BACKPACK_COORDINATES_Y.values())[block[1]], item_w, item_h)
 
-            if remove_from_container != []:
-                for i in remove_from_container:
-                    del I.info.CONTAINERS[container_name, id][i[0], i[1]]
-                remove_from_container = []
+        if remove_from_container != []:
+            for i in remove_from_container:
+                del I.info.CONTAINERS[container_name, id][i[0], i[1]]
+            remove_from_container = []
 
-            if I.info.CONTAINERS.get((container_name, id)) != None:
-                for pos, (name, amount) in I.info.CONTAINERS[(container_name, id)].items():
-                    Ff.add_image_to_screen(screen, items.item_dict[name.split("|")[0]]["path"], [container_coordinates[pos][0], container_coordinates[pos][1], item_w, item_h])
+        if I.info.CONTAINERS.get((container_name, id)) != None:
+            for pos, (name, amount) in I.info.CONTAINERS[(container_name, id)].items():
+                Ff.add_image_to_screen(screen, items.item_dict[name.split("|")[0]]["path"], [container_coordinates[pos][0], container_coordinates[pos][1], item_w, item_h])
 
-            I.pg.draw.rect(screen, color, rect, border)
-            if selected != 0:
-                I.pg.draw.rect(screen, "Yellow", selected, 2)
+        I.pg.draw.rect(screen, color, rect, border)
+        if selected != 0:
+            I.pg.draw.rect(screen, "Yellow", selected, 2)
 
-            I.pg.display.flip()
+        I.pg.display.flip()
 
 def get_container_coordinates(size):
     start_row = 390
@@ -979,7 +934,7 @@ def get_container_coordinates(size):
 
 
 def get_container_block(input_tuple, size_tuple):
-    print(input_tuple, size_tuple)
+    # print(input_tuple, size_tuple)
 
     first, second = input_tuple
     collumns, rows = size_tuple
@@ -993,38 +948,8 @@ def get_container_block(input_tuple, size_tuple):
         output2 = collumns - 1
 
     return int(output2), int(output1)
-    # Unpack the size tuple
-    # rows, cols = size_tuple
-    #
-    # # Unpack the input tuple
-    # input1, input2 = input_tuple
-    #
-    # # Process the first number (input1)
-    # # Determine the max value for the first number
-    # max_value1 = -2 * (cols - 1)
-    #
-    # # Calculate the output for the first number
-    # output1 = (input1 - max_value1) // -2
-    #
-    # # Ensure output1 is within the valid range
-    # output1 = max(0, min(output1, cols - 1))
-    #
-    # # Process the second number (input2)
-    # # Determine the max value for the second number
-    # max_value2 = 28  # This is constant based on the problem statement
-    #
-    # # Calculate the fraction size based on the number of rows
-    # fraction = max_value2 / rows
-    #
-    # # Calculate the output for the second number
-    # output2 = int(input2 // fraction)
-    #
-    # # Ensure output2 is within the valid range
-    # output2 = max(0, min(output2, rows - 1))
-    #
-    # return (output2, output1)
 
-def handle_container_storage(item_name, container, possision, container_size, container_coordinates, screen, decorations, size, id, rect):
+def handle_container_storage(item_name, container, possision, id, rect):
     if I.info.CONTAINERS.get((container, id)) == None:
         # print("first")
         # THIS MEANS NO DATA ABOUT THIS CONTAINER EXISTS
@@ -1052,3 +977,152 @@ def handle_container_storage(item_name, container, possision, container_size, co
         I.info.BACKPACK_CONTENT[item_name] = I.info.BACKPACK_CONTENT[item_name][0] - 1, I.info.BACKPACK_CONTENT[item_name][1], I.info.BACKPACK_CONTENT[item_name][2]
         if I.info.BACKPACK_CONTENT[item_name][0] == 0:
             del I.info.BACKPACK_CONTENT[item_name]
+
+def handle_appliances(appliance_name, item_dict, items):
+    item = I.info.EQUIPED["Sword"][0]
+    if item != 0 and I.info.APPLIANCE_CLICK == [""]:
+        if "COOK" in item_dict[item]["Properties"] and appliance_name == "Furnace": # checks if the chosen item can be cooked or smelted else burn it
+            I.info.APPLIANCE_CLICK = [appliance_name, item.split("|")[0], 1, "cook"]
+            # I.pg.time.set_timer(I.pg.USEREVENT + 7, 3000)  # Set timer for the appliance
+            I.th.start_thread(3000, "cook", items)
+            br.remove_from_backpack(item, 1)  # removes the item
+        elif "SMELT" in item_dict[item]["Properties"] and appliance_name == "Blast Furnace":
+            I.info.APPLIANCE_CLICK = [appliance_name, item.split("|")[0], 1, "smelt"]
+            if I.info.BACKPACK_CONTENT[item][0] >= 2:
+                br.remove_from_backpack(item, 2)  # removes the item
+                # I.pg.time.set_timer(I.pg.USEREVENT + 7, 2800)  # Set timer for the appliance
+                I.th.start_thread(3000, "cook", items)
+
+                # I.pg.time.set_timer(I.pg.USEREVENT + 7, 10000)  # Set timer for the appliance
+            else:
+                Ff.display_text_player("Not enough material to smelt", 3000)
+                I.info.APPLIANCE_CLICK = [""] # didnt have enough items
+
+        elif appliance_name == "Furnace":
+            I.info.APPLIANCE_CLICK = [appliance_name, item.split("|")[0], 1, "burn"]
+            # I.pg.time.set_timer(I.pg.USEREVENT + 7, 3000)  # Set timer for the appliance
+            I.th.start_thread(3200, "cook", items)
+
+            br.remove_from_backpack(item, 1)  # removes the item
+        elif appliance_name == "Blast Furnace":
+            Ff.display_text_player(str(item.split("|"[0].replace("0", "").replace("1",""))[0]) + " can not be smelt", 3000)
+
+    br.update_equiped()
+
+def handle_cooking_food(items):
+    if I.info.APPLIANCE_CLICK[0] == "Furnace":
+        I.info.APPLIANCE_CLICK[0] = ""
+        if I.info.APPLIANCE_CLICK[3] == "cook":
+            Ff.add_to_backpack(I.info.APPLIANCE_CLICK[1] + "_Cooked", 1, items)
+            if any(char.isdigit() for char in I.info.APPLIANCE_CLICK[1]):  # if name has a number. like Meat1 or Meat0
+                I.info.APPLIANCE_CLICK[1] = I.info.APPLIANCE_CLICK[1][:-1]
+            Ff.display_text_player("Cooked " + I.info.APPLIANCE_CLICK[1], 5000)
+        else:
+            Ff.add_to_backpack("Ashes", 1, items)
+            Ff.display_text_player("Burned " + I.info.APPLIANCE_CLICK[1], 3000)
+    elif I.info.APPLIANCE_CLICK[0] == "Blast Furnace":
+        I.info.APPLIANCE_CLICK[0] = ""
+        if I.info.APPLIANCE_CLICK[3] == "smelt":
+            item = get_smelted_item(I.info.APPLIANCE_CLICK[1], items)
+            Ff.add_to_backpack(item, 1, items)
+            Ff.display_text_player("Smelted " + I.info.APPLIANCE_CLICK[1], 5000)
+        # else:
+        #     Ff.display_text_player("This item can not be smelted", 5000)
+    I.info.APPLIANCE_CLICK = [""]
+
+def get_smelted_item(item_name, items):
+    probabilities, outcomes = Ff.get_property(item_name, items, "SMELT")
+    item = random.choices(outcomes, probabilities)[0]
+    return item
+
+def handle_container_backpack_switching(pickup, selected, container_name, id, block, items):
+    remove_from_container = []
+
+    # HANDLE OLD POSSISION, (Delete if it's from the container, get value if its from the backpack)
+    if I.info.BACKPACK_CONTENT.get(pickup[0]) != None:
+        # IF THE ITEM IN PICKUP[0] EXISTS IN BACKPACK THEN CONTINUE
+        if selected[0] < 633:
+            # FROM CONTAINER
+            value = I.info.CONTAINERS[container_name, id][pickup[1:3]]
+            value = value[1], pickup[1], pickup[2]
+            # print("then the value is: ", value)
+            if br.find_item_by_slot_containers(block[0], block[1], container_name, id) == None:
+                # print("if the item exists in container: add it to the deleting list")
+                remove_from_container.append(pickup[1:3])
+        else:
+            # FROM BACKPACK
+            value = I.info.BACKPACK_CONTENT[pickup[0]]
+            # print("if the selected item is from backpack, then the value is: ", value)
+    else:
+        # print("if the picked up item doesn't exist in the backpack")
+        # IF THE ITEM DOESNT EXIST IN THE BACKPACK, CHECK THE CONTAINER
+        value = I.info.CONTAINERS[container_name, id][pickup[1:3]]
+        value = value[1], pickup[1], pickup[2]
+        # print("then we add it to backpack and remove it from the container")
+        remove_from_container.append(pickup[1:3])
+
+    # HANDLE NEW POSSISION
+    taken_spaces = list(I.info.BACKPACK_CONTENT.values())
+    if not any((block[0], block[1]) == (tpl[1], tpl[2]) for tpl in taken_spaces):
+        # print("if the new possision is not in a taken space")
+        #  IF THE SPOT WE WANT TO ASSIGN IS NOT TAKEN CONTINUE
+        if block[0] < 0:
+            # print("if the new possision is in the container:")
+            handle_container_storage(pickup[0], container_name, block, id, selected)
+        else:
+            # print("if the new possision is in the backpack")
+            # FIRST LET's CHECK IF THE VALUE DIDN'T ALREADY EXIST:
+            if I.info.BACKPACK_CONTENT.get(pickup[0]) != None and selected[0] < 633:
+                # print("if the picked up item already existed in the backpack and it was selected from the container")
+                # PICKUP[0] item did exist. lets merge them.
+                I.info.BACKPACK_CONTENT[pickup[0]] = (
+                I.info.BACKPACK_CONTENT[pickup[0]][0] + value[0], block[0], block[1])
+            else:
+                # print("if the picked up item didnt exist in the backpack or was picked up from the backpack")
+                I.info.BACKPACK_CONTENT[pickup[0]] = (value[0], block[0], block[1])  # set the new possision value
+    else:
+        # print("if the new possision is on another item")
+        # ITEM PLACE WAS TAKEN, SWITCHING PLACES
+        existing_item = br.find_item_by_slot(block[0], block[1])  # get existing item name
+        if "STACK" in existing_item and "STACK" in pickup[0] and selected[0] >= 633:
+            # print("if the possisions` item has stack in it and the item was in backpack")
+            # BOTH OF THESE ITEMS ARE STACKS
+            stack = Ff.get_property(existing_item.split("|")[0], items, "STACK")
+            if float(I.info.BACKPACK_CONTENT[existing_item][0]) + float(I.info.BACKPACK_CONTENT[pickup[0].split("|")[0]][0]) <= stack:
+                # print("if the existing item added up with the new picked up item is still less tahn the amount allowed by the stack")
+                # MERGING TWO STACKS INTO ONE
+                sum = float(I.info.BACKPACK_CONTENT[existing_item][0]) + float(I.info.BACKPACK_CONTENT[pickup[0]][0])
+                I.info.BACKPACK_CONTENT[existing_item] = sum, I.info.BACKPACK_CONTENT[existing_item][1], I.info.BACKPACK_CONTENT[existing_item][2]
+                del I.info.BACKPACK_CONTENT[pickup[0]]
+                # print("then we add up the items and remove the picked up item from the backpack")
+
+            elif float(I.info.BACKPACK_CONTENT[existing_item][0]) < stack and float(I.info.BACKPACK_CONTENT[pickup[0]][0]) < stack and selected[0] >= 633:
+                # print("if the existing item and the picked up item both are less than the stack allows and the item was in backpack")
+                # MERGING VALUES OF STACKS WITH REMAINDER
+                remainder = float(I.info.BACKPACK_CONTENT[existing_item][0]) + float(I.info.BACKPACK_CONTENT[pickup[0]][0]) - stack
+                I.info.BACKPACK_CONTENT[pickup[0]] = remainder, I.info.BACKPACK_CONTENT[pickup[0]][1], I.info.BACKPACK_CONTENT[pickup[0]][2]
+                I.info.BACKPACK_CONTENT[existing_item] = stack, I.info.BACKPACK_CONTENT[existing_item][1], I.info.BACKPACK_CONTENT[existing_item][2]
+                # print("then we add up the items but leave a remainder")
+        else:
+            # print("if the existing item didn't have a stack")
+            # CHECKING IF IT'S POSSIBLE TO JUST ADD THE TWO DIFERENT ITEMS INTO ONE ONLY IN BACKPACK
+            stack = Ff.get_property(existing_item.split("|")[0], items, "STACK")
+            if existing_item.split("|")[0] == pickup[0].split("|")[0] and I.info.BACKPACK_CONTENT[existing_item][0] + 1 < stack and selected[0:2] != [list(I.info.BACKPACK_COORDINATES_X.values())[block[0]], list(I.info.BACKPACK_COORDINATES_Y.values())[block[1]]]:
+                # print("if the existing items name is the same as the name of pickup and if the existing item is less than stack and if the selected new spot is not the same as the old spot IN BACKPACK")
+                I.info.BACKPACK_CONTENT[existing_item] = I.info.BACKPACK_CONTENT[existing_item][0] + 1, block[0], block[1]
+                # print("then we add one to the existing item")
+            elif existing_item.split("|")[0] == pickup[0].split("|")[0] and selected[0:2] != [list(I.info.BACKPACK_COORDINATES_X.values())[block[0]], list(I.info.BACKPACK_COORDINATES_Y.values())[block[1]]]:
+                # print("if the existing item names are the same and the stack got overflowed. then we only add one item to a new stack")
+                Ff.add_to_backpack(pickup[0], 1, items)
+            else:
+                # print("if the names aren't the same")
+                if selected[0] >= 633:
+                    # print("if the item was selected from the backpack")
+                    I.info.BACKPACK_CONTENT[existing_item] = I.info.BACKPACK_CONTENT[existing_item][0], pickup[1], pickup[2]
+                    I.info.BACKPACK_CONTENT[pickup[0]] = I.info.BACKPACK_CONTENT[pickup[0]][0], block[0], block[1]
+                    # print("then we switch the places of those items")
+                else:
+                    # print("if the selected item was from the container, erase the deleting list")
+                    remove_from_container = []
+    return remove_from_container
+

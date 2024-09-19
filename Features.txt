@@ -223,22 +223,40 @@
 * PRIORITY: LOW
 * NEEDS: smelter
 
+* DESC: when in containers, each item has to have it's specific containing size, aka if there are 6 spots you cant expect to fit the same amount of pebbles and the same amount of armor or weapons.
+* PRIORITY: LOW
+* NEEDS: willpower
+
+* DESC: Make pet levels a thing. will increese damage, knockback, speed, rideability. search for "# based on pet's level in mob_data.py"
+* PRIORITY: LOW
+* NEEDS: levelup for character, pet raise mastery, stat block for pet.
+
+* DESC: Make pet sometimes find something and bring it to owner
+* PRIORITY: LOW
+* NEEDS: levelup for character, pet raise mastery, stat block for pet.
+
+* DESC: can collect grass type plants only with a sythe or maybe just using a sythe is wayyy easyer
+* PRIORITY: LOW
+* NEEDS: plants
+
+
 UNTILL FULL ALPHA:
 * 20 QUESTS (19 Remain)
-* Make Levelup
+* Make Levelup (music remains)
 * Stat changes
 * Allignment changes
-* Rock mining
-* 10 Areas ( 7 remaining)
+* Rock mining (only pebbles can be mined)
+* 10 Areas ( 6 remaining)
 * Fishing
-* Smelting
-* Followers
+* Smelting (Done)
+* Smithing
+* Followers (Done)
 * Savable interractions
 * Tree respawning
 * Planting plants
 * Hoe for seed beds
-* Blunt strikes
-* 10 spells (6 remaining)
+* Blunt strikes (Done)
+* 10 spells (5 remaining)
 * Bow and arrows
 * Add masteries (fishing, smelting, mining, axing, hoeing, planting, hunter, wizard, glassblowing)
 * 20 mobs (18 remaining)

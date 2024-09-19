@@ -39,8 +39,8 @@ def read_txt_file(path):
     return data_dict
 def Start(mob, decorations, spells, rooms, npc, items):
     data = {}
-    data["Player"] = read_txt_file('static/data/created_characters/' + I.info.SELECTED_CHARACTER + "/" + I.info.SELECTED_CHARACTER + ".txt")
-    data["Player"] = update_character(data["Player"], spells, npc, items)
+    txt_data = read_txt_file('static/data/created_characters/' + I.info.SELECTED_CHARACTER + "/" + I.info.SELECTED_CHARACTER + ".txt")
+    data["Player"] = update_character(txt_data, spells, npc, items)
     if I.info.CURRENT_ROOM["Mobs"]:
         monster_count = {}
         for key, current_mob in mob.items():
@@ -116,7 +116,6 @@ def handle_stepping_on_rect(me, rect, data, screen, clock, extra, action, rooms,
         if me.collidelistall(rect):
             colision_id = me.collidelistall(rect) # returns list of rect id's
             extra = ("border", rect[colision_id[0]].left, rect[colision_id[0]].top)
-            npc_or_decorations.displayed_rects.append(rect[colision_id[0]])
         return extra
     # if "Conversation" in action:
     #     for option in rect.keys():
@@ -126,61 +125,74 @@ def handle_stepping_on_rect(me, rect, data, screen, clock, extra, action, rooms,
     #                     npc_rect = rect[option][decor_key]["rect"]
     #                     big_npc_rect = I.pg.Rect(npc_rect.x - npc_rect.w / 2, npc_rect.y - npc_rect.h / 2, npc_rect.w * 2, npc_rect.h * 2)
     #                     if me.colliderect(big_npc_rect):
-    #                         print("hi")
     #                         return extra
     #     return extra
         # if rect
 
 
-def handle_mob_visualisation(collide, sub_image, data, mob_dict, gifs, song, decorations, items):
+def handle_mob_visualisation(collide, sub_image, data, mob_dict, gifs, song, decorations, items, rooms, spells):
     for mob in mob_dict.values():
         for current_mob in mob.mobs:
             mob_gif = current_mob["gif_frame"][0]
+            if mob_gif >= len(current_mob["rect"]):
+                continue
             mob_rect = current_mob["rect"][mob_gif]
             mob_x = mob_rect.x - data["Zoom_rect"].x
             mob_y = mob_rect.y - data["Zoom_rect"].y
             rect = I.pg.Rect(mob_x, mob_y, mob_rect.w, mob_rect.h)
-            if mob_y - mob_rect.h / 2 <= 79:
+            mob_collision = rect.collidelistall(decorations.displayed_rects_full)
+            if mob_collision != []:
+                # if mob_y - mob_rect.h / 2 <= decor_rect.y:
+                if rect.y <= decorations.displayed_rects_full[mob_collision[0]].y + decorations.displayed_rects_full[mob_collision[0]].h / 2:
+                    update_health(rect, current_mob, sub_image[0])
+                    image = current_mob["image"][mob_gif]
+                    sub_image[0].blit(image, (mob_x, mob_y))
+                    handle_physical_damaging_mobs(rect, song, mob, data, gifs, current_mob, items)
+                    handle_damage_type_visualisation(sub_image[0], current_mob, gifs, (mob_x, mob_y), data, mob, decorations, items)
+                else:
+                    update_health(rect, current_mob, sub_image[1])
+                    image = current_mob["image"][mob_gif]
+                    sub_image[1].blit(image, (mob_x, mob_y))
+                    handle_physical_damaging_mobs(rect, song, mob, data, gifs, current_mob, items)
+                    handle_damage_type_visualisation(sub_image[1], current_mob, gifs, (mob_x, mob_y), data, mob, decorations, items)
+            else:
                 update_health(rect, current_mob, sub_image[0])
-                if current_mob["flip"]:
-                    image = I.pg.transform.flip(current_mob["image"][mob_gif], True, False)
-                else:
-                    image = current_mob["image"][mob_gif]
+                image = current_mob["image"][mob_gif]
                 sub_image[0].blit(image, (mob_x, mob_y))
-
                 handle_physical_damaging_mobs(rect, song, mob, data, gifs, current_mob, items)
-
                 handle_damage_type_visualisation(sub_image[0], current_mob, gifs, (mob_x, mob_y), data, mob, decorations, items)
-            if mob_y + mob_rect.h / 2 >= 84:
-                update_health(rect, current_mob, sub_image[1])
-                if current_mob["flip"]:
-                    image = I.pg.transform.flip(current_mob["image"][mob_gif], True, False)
-                else:
-                    image = current_mob["image"][mob_gif]
-                sub_image[1].blit(image, (mob_x, mob_y))
 
-                handle_physical_damaging_mobs(rect, song, mob, data, gifs, current_mob, items)
-
-                handle_damage_type_visualisation(sub_image[1], current_mob, gifs, (mob_x, mob_y), data, mob, decorations,items)
             if I.info.Player_rect.colliderect(rect):
                 collide = ('mob', mob_rect)
-            if I.info.Player_rect.colliderect(rect) and current_mob["allignment"] in [6, 8, 9]:
+            if I.info.Player_rect.colliderect(rect) and current_mob["allignment"] in [6, 8, 9] and not data["Player"]["dead"]:
                 collide = ('mob_collide', current_mob, mob_rect.x, mob_rect.y)
                 data["Player"]["Last_hit"] = I.pg.time.get_ticks()
                 data["Player"]["hp"] = data["Player"]["hp"][0] - int(current_mob["damage"][0]), data["Player"]["hp"][1]
 
-            handle_mob_speed(data, current_mob, decorations, mob)
+            handle_mob_speed(data, current_mob, decorations, mob, mob_dict, items, gifs, spells)
     return collide
-def handle_mob_speed(data, current_mob, decorations, mob):
+def handle_mob_speed(data, current_mob, decorations, mob, mob_dict, items, gifs, spells):
 
     speed = current_mob["speed"][0]  # MOB SPEED
     if current_mob["speed"][1] == 0:  # IF MOB SPEED SECOND VALUE IS SET TO 0 IT CAN MOVE
         current_mob["speed"] = speed, speed # RESET SPEED
         current_frame = current_mob["gif_frame"][0] # GET THE NEXT GIF FRAME
-        # frame_count = current_mob["gif_frame"][1]
         target_pos = (I.info.Player_rect.x + data["Zoom_rect"].x, I.info.Player_rect.y + data["Zoom_rect"].y) # GET THE PLAYER POSSISION
         mob_rect = current_mob["rect"][current_frame] # GET THE CURRENT MOB POSSISION
-        if not data["Player"]["dead"] and current_mob["allignment"] in [6, 8]: # IF THE PLAYER ISN'T DEAD AND THE MOB IS Neutral evil OR Chaotic neutral THEN GO TO THE PLAYER
+        if not data["Player"]["dead"] and current_mob["allignment"] == 7:
+            target_pos, target = closest_mob(mob_dict, mob_rect, mob.name)
+            mob_rect.x, mob_rect.y, current_mob["visible"] = Ff.move_towards(target_pos, current_mob, speed, decorations.displayed_rects, data["Zoom_rect"]) # GET THE NEW POSISION OF THE MOB THAT IS CHASING YOU
+            if target != "" and target[2].colliderect(mob_rect):
+                if spells.spawn_counter.get("Spawn " + mob.name) != None and mob_dict[target[0]].hp != 0:
+                    print(mob_dict[target[0]].mobs, target[1])
+                    mob_dict[target[0]].deal_damage(mob_dict[target[0]].mobs[target[1]], data["Player"], spells.spell_dict["Spawn " + mob.name], items, gifs)
+
+            mob.update_position(mob_rect.x, mob_rect.y, current_mob)  # UPDATE THE POSSISIONS OF THE MOB
+
+
+
+
+        elif not data["Player"]["dead"] and current_mob["allignment"] in [6, 8]: # IF THE PLAYER ISN'T DEAD AND THE MOB IS Neutral evil OR Chaotic neutral THEN GO TO THE PLAYER
             mob_rect.x, mob_rect.y, current_mob["visible"] = Ff.move_towards(target_pos, current_mob, speed, decorations.displayed_rects, data["Zoom_rect"]) # GET THE NEW POSISION OF THE MOB THAT IS CHASING YOU
             mob.update_position(mob_rect.x, mob_rect.y, current_mob)  # UPDATE THE POSSISIONS OF THE MOB
             if current_mob["allignment"] == 8:  # IF THE ALLIGNMENT WAS Chaotic neutral AS IN ATTACKS AND THEN RUNS AWAY THEN SET THE ALLIGNMENT ACORDINGLY TO START RUNNING AWAY
@@ -203,6 +215,7 @@ def handle_mob_speed(data, current_mob, decorations, mob):
 
         else: # IF NOT CHASING ME AND NOT RUNNING AWAY FROM ME THEN MOB IS NOT VISIBLE
             current_mob["visible"] = False
+
     else:
         # IF MOB SPEED SECOND VALUE IS NOT 0 THEN REMOVE ONE
         current_mob["speed"] = current_mob["speed"][0], current_mob["speed"][1] - 1
@@ -221,6 +234,7 @@ def handle_damage_type_visualisation(sub_image, current_mob, gifs, pos, data, mo
                     gifs["Fire"].start_gif = False
                     gifs["Fire"].repeat = 0
                     current_mob["speed"] = (0, current_mob["speed"][1])
+
             else:
                 frame = gifs[key].next_frame(1)  # made specifically for damage displaying on mobs displays piercing, blunt
             sub_image.blit(frame, (pos[0], pos[1]))
@@ -266,36 +280,50 @@ def handle_damage_type_visualisation(sub_image, current_mob, gifs, pos, data, mo
 #             I.info.COMBAT_RECT = 0, I.info.COMBAT_RECT[1]
 
 def handle_physical_damaging_mobs(rect, song, mob, data, gifs, current_mob, items):
-    if I.info.COMBAT_RECT[0] != 0:
+    rects = {"Sword": I.info.COMBAT_RECT[0],
+             "Axe": I.info.AXE[0],
+             "Picaxe": I.info.PICAXE[0]
+             }
+    if any(r != 0 for r in rects.values()):
         damage_type = "Blunt"
-        if I.info.EQUIPED["Sword"] != 0:
-            weapon_data = Ff.get_property(I.info.EQUIPED["Sword"], items, "WEAPON")
-            damage_type = weapon_data[3]
-        if I.info.COMBAT_RECT[0] != 0 and I.info.COMBAT_RECT[0].colliderect(rect) and not gifs[damage_type].start_gif:
+        for key ,weapon in I.info.EQUIPED.items():
+            if weapon[0] != 0 and rects[key] != 0:
+                weapon_data = Ff.get_property(weapon[0], items, "WEAPON")
+                damage_type = weapon_data[3]
+                break
+        if any(r != 0 and r.colliderect(rect) and not gifs[damage_type].start_gif for r in rects.values()):
+        # if I.info.COMBAT_RECT[0] != 0 and I.info.COMBAT_RECT[0].colliderect(rect) and not gifs[damage_type].start_gif:
             curr_song = song["Playing"]
             effect = song[curr_song].generate_thump_sound()
             song[curr_song].play_effect(effect)
             gifs[damage_type].Start_gif(damage_type, current_mob)
             mob.deal_damage(current_mob, data["Player"], "", items, gifs)
+            if current_mob["hp"][0] > 0:
+                set_follower_mob_target(current_mob, mob)
 
-def handle_death_visualisation(sub_image, data, gifs, collide):
+
+def set_follower_mob_target(mob, mob_class):
+    I.info.FOLLOWER["aggressive"]["mob"] = mob
+    I.info.FOLLOWER["aggressive"]["class"] = mob_class
+    I.info.FOLLOWER["aggressive"]["mob_pos"] = mob["current_pos"]
+    I.info.FOLLOWER["aggressive"]["attack"] = True
+
+def handle_death_visualisation(sub_image, data, gifs, collide, decorations):
     if data["Player"]["dead"]:
         me = I.pg.Rect(150, 85, S.SCREEN_WIDTH / 100, S.SCREEN_HEIGHT / 100)  # Player rect (if it gets hit with other rect. colide is set to True
         dead_disc = {"Portal": display_gif_on_subimage(sub_image, (S.SCREEN_WIDTH / 16, S.SCREEN_HEIGHT / 10), (I.info.SPAWN_POINT[0] * 1.8 - data["Zoom_rect"].x , I.info.SPAWN_POINT[1] + 10 * 16 - data["Zoom_rect"].y), gifs["Portal"]),
                      "Sign": display_on_subimage(sub_image, (S.SCREEN_WIDTH / 90, S.SCREEN_HEIGHT / 40), S.PLAYING_PATH["Sign"],(I.info.SPAWN_POINT[0] * 1.6 - data["Zoom_rect"].x, I.info.SPAWN_POINT[1] + 10 * 10 - data["Zoom_rect"].y)),
                      "Grave": display_on_subimage(sub_image, (S.SCREEN_WIDTH / 60, S.SCREEN_HEIGHT / 30), S.PLAYING_PATH["Grave"], (data["Player"]["dead"].x - data["Zoom_rect"].x + me.x, data["Player"]["dead"].y - data["Zoom_rect"].y + me.y)),
                      }
+        decorations.displayed_rects.append(dead_disc["Sign"])
+        decorations.displayed_rects.append(dead_disc["Grave"])
         dead_list = list(dead_disc.values())
         if I.info.Player_rect.collidelistall(dead_list):
             keys = list(dead_disc.keys())
             key = keys[I.info.Player_rect.collidelistall(dead_list)[0]]
             collide = (key, dead_disc[key])
     return collide
-# def handle_npc_visualisation(sub_image, data, gifs, rooms):
-#     if rooms.type == "Village":
-#         npc = {"Luna": display_gif_on_subimage(sub_image, (17,18), (330 * 1.6 - data["Zoom_rect"].x , 1 + 10 * 43 - data["Zoom_rect"].y), gifs["Luna"]),
-#                "Bear": display_gif_on_subimage(sub_image, (17,18), (330 * 1.7 - data["Zoom_rect"].x , 1 + 10 * 43 - data["Zoom_rect"].y), gifs["Bear"])}
-    # elif rooms.type == "House":
+
 def handle_interior_visualisation(decorations, sub_image, data, gifs):
     me = I.pg.Rect(S.SCREEN_WIDTH / 2 - S.SCREEN_WIDTH / 24 + I.info.OFFSCREEN[0],S.SCREEN_HEIGHT / 2 - S.SCREEN_HEIGHT / 16 + I.info.OFFSCREEN[1], S.SCREEN_WIDTH / 24, S.SCREEN_HEIGHT / 12)
     # I.T.Make_rect_visible(sub_image, me, "blue")
@@ -313,13 +341,13 @@ def handle_interior_visualisation(decorations, sub_image, data, gifs):
             rect = I.pg.Rect(decor["rect"].x, decor["rect"].y, decor["rect"].w, decor["rect"].h)
             image_rect = decor["image"].get_rect()
             # handle display
-            if I.info.APPLIANCE_CLICK == "":
-                if option in list(gifs.keys()) and option != "Furnace":
+            if I.info.APPLIANCE_CLICK[0] == "":
+                if option in list(gifs.keys()) and option not in ["Furnace", "Blast Furnace"]:
                     display_gif_on_subimage(sub_image, (image_rect.w, image_rect.h), (rect.x, rect.y), gifs[option])
                 else:
                     sub_image.blit(decor["image"], (rect.x, rect.y))
 
-            elif I.info.APPLIANCE_CLICK == "Furnace":
+            elif I.info.APPLIANCE_CLICK[0] in ["Furnace", "Blast Furnace"]:
                 if option in list(gifs.keys()):
                     display_gif_on_subimage(sub_image, (image_rect.w, image_rect.h), (rect.x, rect.y), gifs[option])
                 else:
@@ -363,7 +391,7 @@ def handle_interior_visualisation(decorations, sub_image, data, gifs):
 #                     if I.info.DOOR_CLICK[0] == gifs[I.info.DOOR_CLICK[1]].frame_count:
 #                         building = I.info.DOOR_CLICK[1].split("_")[0]
 #                         I.info.DOOR_CLICK = 90, "" # RESET I.info.DOOR_CLICK
-#                         print("im trying to see coordinates of house: ", building)
+#                       # print("im trying to see coordinates of house: ", building)
 #                         rooms.select_room(building)
 #                         I.info.CURRENT_ROOM = {"name": building, "Spells": True, "Backpack": True, "Running": True, "Mobs": rooms.mobs, "Type": "House"}
 #                         I.info.ENTRY_POS = (1, 1)
@@ -394,7 +422,7 @@ def handle_interior_visualisation(decorations, sub_image, data, gifs):
 
 def display_strikes(screen, gifs, lock):
     # types = ["Slashing", "Blunt", "Piercing"]
-    types = ["Slashing", "Piercing"]
+    types = ["Slashing", "Piercing", "Blunt"]
     for type in types:
         if gifs[type + " Strike"].start_gif:
             if I.info.POS_CHANGE[0] == 0 or I.info.POS_CHANGE[0] == I.info.LAST_ORIENT[0]:
@@ -402,12 +430,18 @@ def display_strikes(screen, gifs, lock):
                 pos = {"Slashing":
                            {"Front.png": (560 + I.info.OFFSCREEN[0], 340 + I.info.OFFSCREEN[1], 0, 1, 100, 50),
                             "Back.png": (560 + I.info.OFFSCREEN[0], 280 + I.info.OFFSCREEN[1], 0, 0, 100, 50),
-                            "Left.png": (540 + I.info.OFFSCREEN[0], 280 + I.info.OFFSCREEN[1], 0, 0, 50, 50),
-                            "Right.png": (640 + I.info.OFFSCREEN[0], 280 + I.info.OFFSCREEN[1], 1, 0, 50, 50)
+                            "Left.png": (540 + I.info.OFFSCREEN[0], 310 + I.info.OFFSCREEN[1], 0, 0, 50, 50),
+                            "Right.png": (640 + I.info.OFFSCREEN[0], 310 + I.info.OFFSCREEN[1], 1, 0, 50, 50)
                             },
                        "Piercing":
                            {"Front.png": (590 + I.info.OFFSCREEN[0], 340 + I.info.OFFSCREEN[1], 0, 1, 50, 100),
                             "Back.png": (590 + I.info.OFFSCREEN[0], 280 + I.info.OFFSCREEN[1], 0, 0, 50, 100),
+                            "Left.png": (550 + I.info.OFFSCREEN[0], 310 + I.info.OFFSCREEN[1], 0, 0, 50, 50),
+                            "Right.png": (630 + I.info.OFFSCREEN[0], 310 + I.info.OFFSCREEN[1], 1, 0, 50, 50)
+                            },
+                       "Blunt":
+                           {"Front.png": (590 + I.info.OFFSCREEN[0], 340 + I.info.OFFSCREEN[1], 0, 1, 50, 50),
+                            "Back.png": (590 + I.info.OFFSCREEN[0], 280 + I.info.OFFSCREEN[1], 0, 0, 50, 50),
                             "Left.png": (550 + I.info.OFFSCREEN[0], 310 + I.info.OFFSCREEN[1], 0, 0, 50, 50),
                             "Right.png": (630 + I.info.OFFSCREEN[0], 310 + I.info.OFFSCREEN[1], 1, 0, 50, 50)
                             },
@@ -425,6 +459,54 @@ def display_strikes(screen, gifs, lock):
                     screen.blit(scaled_image, pos[type][I.info.LAST_ORIENT[0]][0:2])
                 I.info.POS_CHANGE = I.info.LAST_ORIENT[0], type + " Strike"
 
+
+def display_folower(sub_image, gifs, data, decorations, mob, items):
+    if I.info.FOLLOWER["Name"] != "":
+        # folower default hp 20, default damage = 1, default speed = 2
+        # mob[I.info.FOLLOWER[0]] = I.mob_data.Mob(name=I.info.FOLLOWER[0], exp=0, hp=20, allignment=4, count=1, damage=1, speed=1)
+        dxdy = (0, 0)
+        orientation = {
+            (0, 0): "",
+            (1, 0): "_Right",
+            (-1, 0): "_Left",
+            (0, 1): "_Front",
+            (0, -1): "_Back",
+            (1, -1): "_Back",
+            (-1, -1): "_Back",
+            (1, 1): "_Front",
+            (-1, 1): "_Front"
+        }
+        # folower_path = "static/images/Playing/NPC/" + I.info.FOLLOWER[0] + "_walk/" + I.info.FOLLOWER[0] + orientation[dxdy] + ".png"
+        end_pos = I.info.FOLLOWER["target_pos"]
+        initial_pos = I.info.FOLLOWER["current_pos"]
+
+        if end_pos != (0, 0):
+            if I.info.FOLLOWER["aggressive"]["attack"]:
+                end_pos = I.info.FOLLOWER["aggressive"]["mob_pos"][0:2]
+                if initial_pos == end_pos:
+                    """Folower hits mob"""
+                    if I.info.FOLLOWER["aggressive"]["mob"]["hp"][0] > 0:
+                        """ only deals damage if the mob isnt dead """
+                        I.info.FOLLOWER["aggressive"]["class"].deal_damage(I.info.FOLLOWER["aggressive"]["mob"], data["Player"], "Follower", items, gifs )
+                    I.info.FOLLOWER["aggressive"]["attack"] = False
+
+            I.info.FOLLOWER["current_pos"] = Ff.move_closer(initial_pos, end_pos, 1, decorations.displayed_rects, sub_image, data, 1)
+
+            # print(initial_pos, end_pos, I.info.FOLLOWER[1])
+            dxdy = (initial_pos[0] - I.info.FOLLOWER["current_pos"][0]) * -1, (initial_pos[1] - I.info.FOLLOWER["current_pos"][1]) * -1
+            dxdy = max(-1, min(int(dxdy[0]), 1)), max(-1, min(int(dxdy[1]), 1))
+            I.info.FOLLOWER["orientation"].append(dxdy)
+            if len(I.info.FOLLOWER["orientation"]) > 10:
+                I.info.FOLLOWER["orientation"] = I.info.FOLLOWER["orientation"][1:]
+                dxdy = Ff.get_most_often_tuple(I.info.FOLLOWER["orientation"])
+
+
+        if orientation[dxdy] in ["_Right", "_Left"]:
+            rect = I.pg.Rect(I.info.FOLLOWER["current_pos"][0] - data["Zoom_rect"].x, I.info.FOLLOWER["current_pos"][1] - data["Zoom_rect"].y, 24, 24)
+        else:
+            rect = I.pg.Rect(I.info.FOLLOWER["current_pos"][0] - data["Zoom_rect"].x, I.info.FOLLOWER["current_pos"][1] - data["Zoom_rect"].y, 18, 18)
+        # I.T.Make_rect_visible(sub_image, rect, "red")
+        display_gif_on_subimage(sub_image, (rect.w, rect.h), (rect.x, rect.y), gifs[I.info.FOLLOWER["Name"] + orientation[dxdy]])
 
 
 def display_char(dx, dy, screen, gifs, data, decorations):
@@ -479,8 +561,8 @@ def display_char(dx, dy, screen, gifs, data, decorations):
             character_center_pos = [S.SCREEN_WIDTH / 2 - S.SCREEN_WIDTH / 20 + I.info.OFFSCREEN[0], S.SCREEN_HEIGHT / 2 - S.SCREEN_HEIGHT / 20 * 2 + I.info.OFFSCREEN[1], S.SCREEN_WIDTH / 14, S.SCREEN_HEIGHT / 7]  # STANDING STILL
 
         if S.GOD_MODE:
-            decor = "Stone_S_1"
-            Ff.add_image_to_screen(screen, decorations.decor_dict[decor]["path"],[S.SCREEN_WIDTH / 2 - S.SCREEN_WIDTH / 20 + I.info.OFFSCREEN[0], S.SCREEN_HEIGHT / 2 - S.SCREEN_HEIGHT / 20 * 2 + I.info.OFFSCREEN[1], decorations.decor_dict[decor][0]["rect"].w * 4, decorations.decor_dict[decor][0]["rect"].h * 4])  # walking possision could be legs spread
+            decor = "Wave1"
+            Ff.add_image_to_screen(screen, decorations.decor_dict[decor]["path"] + "4.png",[S.SCREEN_WIDTH / 2 - S.SCREEN_WIDTH / 20 + I.info.OFFSCREEN[0], S.SCREEN_HEIGHT / 2 - S.SCREEN_HEIGHT / 20 * 2 + I.info.OFFSCREEN[1], decorations.decor_dict[decor][0]["rect"].w * 4, decorations.decor_dict[decor][0]["rect"].h * 4])  # walking possision could be legs spread
         else:
             orient = orientation[dxdy]
             if orient in orientation_images:
@@ -495,89 +577,23 @@ def display_char(dx, dy, screen, gifs, data, decorations):
             else:
                 Ff.add_image_to_screen(screen, character_path + I.info.LAST_ORIENT[0], character_center_pos) # STANDING STILL
 
-def generate_decor(num_of_items, background_size, path):
-    items = {}
-    for i in range(num_of_items):
-        x = random.randint(0, background_size[0]-100)
-        y = random.randint(0, background_size[1]-100)
-        image = I.pg.image.load(path).convert_alpha()
-        rect = image.get_rect(topleft=(x, y))
-        items[i] = {"image": image, "rect": rect}
-    return items
+# def generate_decor(num_of_items, background_size, path):
+#     items = {}
+#     for i in range(num_of_items):
+#         x = random.randint(0, background_size[0]-100)
+#         y = random.randint(0, background_size[1]-100)
+#         image = I.pg.image.load(path).convert_alpha()
+#         rect = image.get_rect(topleft=(x, y))
+#         items[i] = {"image": image, "rect": rect}
+#     return items
 def generate_mobs(mob, background_size):
-    path = S.MOB_PATH[mob.name][0]
-    mob_gif_count = S.MOB_PATH[mob.name][1]
-    mob.spawn_mobs(background_size, path, mob_gif_count)
+    mob_gif_count = Ff.count_png_files(mob.path)
+    mob.spawn_mobs(background_size, mob.path, mob_gif_count)
     return mob.mobs
 
-def add_to_backpack(item, amount, items):
-    if amount != 0:
-        # print(amount)
-        in_backpack = 0
-        stack = Ff.get_property(item, items, "STACK")
-        for item_name in I.info.BACKPACK_CONTENT.keys():
-            if item + "|STACK" in item_name:
-                in_backpack = 1
-                if I.info.BACKPACK_CONTENT[item_name][0] < stack:  # IF THE STACK HAS EMPTY SPACES CONTINUE
-                    in_backpack = 2
-                    if amount + I.info.BACKPACK_CONTENT[item_name][0] <= stack:  # IF THE AMOUNT OF NEW ITEMS PLUS THE ALREADY EXISTING ITEMS DOESNT OVERFLOW THE STACK
-                        # print("stack wasnt overflowed")
-                        I.info.BACKPACK_CONTENT[item_name] = I.info.BACKPACK_CONTENT[item_name][0] + amount, I.info.BACKPACK_CONTENT[item_name][1], I.info.BACKPACK_CONTENT[item_name][2]
-                        break
-                    else:  # IF THE AMOUNT OF NEW ITEMS PLUS THE ALREADY EXISTING ITEMS OVERFLOWS THE STACK CREATE A NEW ONE
-                        while True:
-                            new_addon = "|STACK" + str(int(item_name.split("|STACK")[1]) + 1)
-                            new_name = item_name.split("|")[0] + new_addon
-                            if I.info.BACKPACK_CONTENT.get(new_name) == None and int(amount + I.info.BACKPACK_CONTENT[item_name][0] - stack) != 0:
-                                break
-                            else:
-                                item_name = new_name
-                        row, collumn = find_open_space()
-                        if int(amount + I.info.BACKPACK_CONTENT[item_name][0] - stack) != 0:
-                            I.info.BACKPACK_CONTENT[new_name] = int(amount + I.info.BACKPACK_CONTENT[item_name][0] - stack), row, collumn  # FIRST CREATED NEW STACK CUZ THE OLD STACK VALUE WAS USED
-                            # print("stack overflowed creating new stack: ", I.info.BACKPACK_CONTENT[new_name])
-                        I.info.BACKPACK_CONTENT[item_name] = int(stack), I.info.BACKPACK_CONTENT[item_name][1], I.info.BACKPACK_CONTENT[item_name][2]  # THEN UPDATED OLD STACK
-                        break
-                # else:
-                    # print("this stack is full")
-
-        if in_backpack == 1:
-            # print("all stacks were full creating new stack")
-            for item_name in I.info.BACKPACK_CONTENT.keys():
-                if item + "|STACK" in item_name:
-                    continue
-            new_name = item_name.split("|STACK")[0] + "|STACK" + str(int(item_name.split("|STACK")[1]) + 1)
-            row, collumn = find_open_space()
-            I.info.BACKPACK_CONTENT[new_name] = int(amount), row, collumn  # FIRST CREATED NEW STACK CUZ THE OLD STACK VALUE WAS USED
-
-        if in_backpack == 0:
-            # print("didn't find empty stacks \n")
-            row, collumn = find_open_space()
 
 
-            if I.info.BACKPACK_CONTENT.get(item) == None:                 # if the item doesnt exist in backpack
-                I.info.BACKPACK_CONTENT[item] = (float(amount), row, collumn)
-                # DOESNT DO STACKS
-            else:                                                         # if the item already exists in backpack and there were no previous |STACK
-                # DOESNT REMOVE THE ITEM WITHOUT |STACK ON IT, ADDS TOO MANY ITEMS
-                stack = Ff.get_property(item, items, "STACK")
-                value = I.info.BACKPACK_CONTENT[item]
-                if value[0] + float(amount) > stack:
-                    del I.info.BACKPACK_CONTENT[item]
-                    repetitions = I.math.floor((float(value[0]) + float(amount)) / float(stack)) + 1  # adding one so loop works with one stack (if stack is 10 and amount is 14, then for loop needs to happen twice, this function returns one less)
-                    addon = "|STACK"
-                    for i in range(0, repetitions):
-                        if i == repetitions-1:
-                            stack = float(value[0]) + float(amount) - float(stack) * i
-                        posx, posy = find_open_space()
-                        if int(stack) != 0:
-                            I.info.BACKPACK_CONTENT[item + addon + str(i)] = (int(stack), int(posx), int(posy))
-                else:
-                    I.info.BACKPACK_CONTENT[item] = (float(value[0] + float(amount)), value[1], value[2])
 
-    # print("input: ", I.info.BACKPACK_CONTENT)
-
-    # merge_stacks(items)
 
 def remove_from_backpack(item, amount):
     if amount != 0:
@@ -586,24 +602,28 @@ def remove_from_backpack(item, amount):
         else:
             del I.info.BACKPACK_CONTENT[item]
     else:
-        pass
-        # print("amount not a normal number")
+        print("amount not a normal number")
 
 def update_equiped():
     if I.info.BACKPACK_CONTENT == {}:
         for option in I.info.EQUIPED.keys():
-            I.info.EQUIPED[option] = 0
+            I.info.EQUIPED[option] = 0, I.info.EQUIPED[option][1]
     else:
-        if I.info.Temp_variable_holder != []:
-            if I.info.Temp_variable_holder[2] in ["cook", "burn"]:
+        if I.info.APPLIANCE_CLICK != [""]:
+            if I.info.APPLIANCE_CLICK[3] in ["cook", "burn", "smelt"]:
                 for key in I.info.EQUIPED.keys():
-                    if I.info.EQUIPED[key] == I.info.Temp_variable_holder[0]:
-                        if I.info.BACKPACK_CONTENT.get(I.info.Temp_variable_holder[0]) == None:
-                            I.info.EQUIPED[key] = 0
+                    if I.info.EQUIPED[key][0] == I.info.APPLIANCE_CLICK[1]:
+                        if I.info.BACKPACK_CONTENT.get(I.info.APPLIANCE_CLICK[1]) == None:
+                            I.info.EQUIPED[key] = 0, I.info.EQUIPED[key][1]
         else:
             for item, (amount, posx, posy) in I.info.BACKPACK_CONTENT.items():
                 if posx < 0:
-                    I.info.EQUIPED[I.info.equipment[(posx, posy)]] = item
+                    I.info.EQUIPED[I.info.equipment[(posx, posy)]] = item, I.info.EQUIPED[I.info.equipment[(posx, posy)]][1]
+
+
+    for key, item in I.info.EQUIPED.items():
+        if I.info.BACKPACK_CONTENT.get(item[0]) == None:
+            I.info.EQUIPED[key] = 0, I.info.EQUIPED[key][1]
 
 
 def BackPack(screen, items, player):
@@ -640,7 +660,7 @@ def BackPack(screen, items, player):
                             selected = I.pg.Rect(list(I.info.BACKPACK_COORDINATES_X.values())[block[0]], list(I.info.BACKPACK_COORDINATES_Y.values())[block[1]], item_w, item_h)
                         else:
                             selected = I.pg.Rect(coordinates[block][0], coordinates[block][1], item_w, item_h)
-                            I.info.EQUIPED[I.info.equipment[block]] = 0
+                            I.info.EQUIPED[I.info.equipment[block]] = 0, I.info.EQUIPED[I.info.equipment[block]][1]
                         pickup = (find_item_by_slot(block[0], block[1]), block[0], block[1])
 
                     else:
@@ -659,14 +679,14 @@ def BackPack(screen, items, player):
                                     if float(I.info.BACKPACK_CONTENT[existing_item][0]) + float(I.info.BACKPACK_CONTENT[pickup[0]][0]) <= stack:
                                         # MERGING TWO STACKS INTO ONE
                                         sum = float(I.info.BACKPACK_CONTENT[existing_item][0]) + float(I.info.BACKPACK_CONTENT[pickup[0]][0])
-                                        I.info.BACKPACK_CONTENT[existing_item] = sum, I.info.BACKPACK_CONTENT[existing_item][1], I.info.BACKPACK_CONTENT[existing_item][2]
+                                        I.info.BACKPACK_CONTENT[existing_item] = int(sum), I.info.BACKPACK_CONTENT[existing_item][1], I.info.BACKPACK_CONTENT[existing_item][2]
                                         del I.info.BACKPACK_CONTENT[pickup[0]]
 
                                     elif float(I.info.BACKPACK_CONTENT[existing_item][0]) < stack and float(I.info.BACKPACK_CONTENT[pickup[0]][0]) < stack:
                                         # MERGING VALUES OF STACKS WITH REMAINDER
                                         remainder = float(I.info.BACKPACK_CONTENT[existing_item][0]) + float(I.info.BACKPACK_CONTENT[pickup[0]][0]) - stack
-                                        I.info.BACKPACK_CONTENT[pickup[0]] = remainder, I.info.BACKPACK_CONTENT[pickup[0]][1], I.info.BACKPACK_CONTENT[pickup[0]][2]
-                                        I.info.BACKPACK_CONTENT[existing_item] = stack, I.info.BACKPACK_CONTENT[existing_item][1], I.info.BACKPACK_CONTENT[existing_item][2]
+                                        I.info.BACKPACK_CONTENT[pickup[0]] = int(remainder), I.info.BACKPACK_CONTENT[pickup[0]][1], I.info.BACKPACK_CONTENT[pickup[0]][2]
+                                        I.info.BACKPACK_CONTENT[existing_item] = int(stack), I.info.BACKPACK_CONTENT[existing_item][1], I.info.BACKPACK_CONTENT[existing_item][2]
 
                                 else:
                                     I.info.BACKPACK_CONTENT[existing_item] = I.info.BACKPACK_CONTENT[existing_item][0], pickup[1], pickup[2]
@@ -759,30 +779,31 @@ def get_equipment_coordinates(block):
     }
     return coordinates
 def handle_consumption(items, player, use):
-    if "|" in use:
-        property_list = items.item_dict[use.split("|")[0]]["Properties"].split(",,,")
-    else:
-        property_list = items.item_dict[use]["Properties"].split(",,,")
-
+    property_list = items.item_dict[use.split("|")[0]]["Properties"].split(",,,")
     for property in property_list:
         if "CONSUMABLE" in property:
             consumable = property[11:-1] # from CONSUMABLE(valuesss) gets only the values inside
-    # print(consumable)
     consumable = consumable.split(",,")
     for consume in consumable:
         points, atribute = consume.split("-")
-        if player[atribute][0] < player[atribute][1]:
-            if "/" in points:
-                points = points[1:]
-                player[atribute] = (player[atribute][0] - int(points), player[atribute][1])
-            else:
-                player[atribute] = (player[atribute][0] + int(points), player[atribute][1])
-        elif player[atribute][0] >= player[atribute][1]:
-            if "/" in points:
-                points = points[1:]
-                player[atribute] = (player[atribute][0] - int(points), player[atribute][1])
-            else:
-                player[atribute] = (player[atribute][1], player[atribute][1])
+        if atribute in list(player.keys()):
+            if player[atribute][0] < player[atribute][1]:
+                if "/" in points:
+                    points = points[1:]
+                    player[atribute] = (player[atribute][0] - int(points), player[atribute][1])
+                else:
+                    player[atribute] = (player[atribute][0] + int(points), player[atribute][1])
+            elif player[atribute][0] >= player[atribute][1]:
+                if "/" in points:
+                    points = points[1:]
+                    player[atribute] = (player[atribute][0] - int(points), player[atribute][1])
+                else:
+                    player[atribute] = (player[atribute][1], player[atribute][1])
+        else:
+            if "ITEM" in atribute:
+                item = atribute.replace("ITEM:", "")
+                amount = I.random.randint(int(points.split(":")[0]), int(points.split(":")[1]))
+                Ff.add_to_backpack(item, amount, items)
     value = I.info.BACKPACK_CONTENT[use]
     if value[0] > 1:
         I.info.BACKPACK_CONTENT[use] = (value[0] - 1, value[1], value[2])
@@ -810,22 +831,15 @@ def display_backpack(screen, player, items, rect, word):
         row = I.info.BACKPACK_CONTENT[content][1]
         collumn = I.info.BACKPACK_CONTENT[content][2]
         if row < 0:
-            coordinates = get_equipment_coordinates((row,collumn))
-            # HANDLE MULTIPLE STACKS
-            if "|" in content:
-                Ff.add_image_to_screen(screen, items.item_dict[content.split("|")[0]]["path"], [coordinates[row, collumn][0], coordinates[row, collumn][1], item_w, item_h])
+            if word == "half":
+                continue
             else:
-                # handle one stack
-                Ff.add_image_to_screen(screen, items.item_dict[content]["path"], [coordinates[row, collumn][0], coordinates[row, collumn][1], item_w, item_h])
-            Ff.display_text(screen, str(I.info.BACKPACK_CONTENT[content][0]), 2, [coordinates[row, collumn][0], coordinates[row, collumn]][1], "white")
+                coordinates = get_equipment_coordinates((row,collumn))
+                Ff.add_image_to_screen(screen, items.item_dict[content.split("|")[0]]["path"], [coordinates[row, collumn][0], coordinates[row, collumn][1], item_w, item_h])
+                Ff.display_text(screen, str(int(I.info.BACKPACK_CONTENT[content][0])), 2, [coordinates[row, collumn][0], coordinates[row, collumn]][1], "white")
         else:
             # HANDLE MULTIPLE STACKS
-            if "|" in content:
-                Ff.add_image_to_screen(screen, items.item_dict[content.split("|")[0]]["path"],[list(I.info.BACKPACK_COORDINATES_X.values())[row],list(I.info.BACKPACK_COORDINATES_Y.values())[collumn], item_w, item_h])
-            else:
-                # handle one stack
-                Ff.add_image_to_screen(screen, items.item_dict[content]["path"], [list(I.info.BACKPACK_COORDINATES_X.values())[row], list(I.info.BACKPACK_COORDINATES_Y.values())[collumn], item_w, item_h])
-
+            Ff.add_image_to_screen(screen, items.item_dict[content.split("|")[0]]["path"],[list(I.info.BACKPACK_COORDINATES_X.values())[row], list(I.info.BACKPACK_COORDINATES_Y.values())[collumn], item_w, item_h])
             if content == "Gold":
                 Ff.display_text(screen, str(I.info.BACKPACK_CONTENT[content][0]), 2, [list(I.info.BACKPACK_COORDINATES_X.values())[row], list(I.info.BACKPACK_COORDINATES_Y.values())[collumn]], "white")
             else:
@@ -846,10 +860,10 @@ def display_backpack(screen, player, items, rect, word):
         I.pg.draw.rect(screen, "Green", (bag.w * 0.604, bag.h * 0.857, bag.w * 0.115 * remainder, bag.h * 0.012))
         Ff.display_text(screen, "Exh", 1, (bag.w * 0.55, bag.h * 0.85), "black")
 
-        Ff.add_image_to_screen(screen,
-                               'static/data/created_characters/' + I.info.SELECTED_CHARACTER + "/" + I.info.SELECTED_CHARACTER + "Front.png",
+        Ff.add_image_to_screen(screen,'static/data/created_characters/' + I.info.SELECTED_CHARACTER + "/" + I.info.SELECTED_CHARACTER + "Front.png",
                                [rect.center[0] * 0.64 ,rect.center[1] * 0.4, S.SCREEN_WIDTH / 8, S.SCREEN_HEIGHT / 4])
 
+        Ff.display_text(screen, "Level: " + str(player["Level"]) , 5, (bag.w * 0.65, bag.h * 0.25), "black")
 
         I.pg.draw.rect(screen, "black", (bag.w * 0.626, bag.h * 0.71, bag.w * 0.3, bag.h * 0.025))
         remainder = player["Experience"] / exp_till_lvup(player)
@@ -905,7 +919,8 @@ def bag_coordinates(screen, bag):
                 coordinates_x[cube] = left
                 left += 1
                 color1 = screen.get_at((left, top))
-                # screen.set_at((left, top), (0,0,0,255))
+                screen.set_at((left, top), (0,0,0,255))
+                # I.T.pause_pygame()
             if color1 == (204, 130, 98, 255):
                 cube += 1
                 while color1 == (204, 130, 98, 255):
@@ -959,54 +974,56 @@ def update_health(rect, current_mob, sub_image):
         reduced_health_bar = I.pg.Rect(rect.x, rect.y, rect.w * remainder, 1)
         I.pg.draw.rect(sub_image, "green", reduced_health_bar)
 
-def update_character(player_disc, spells, npc, items):
-    spell_str = player_disc["Spells"]
+def update_character(txt_data, spells, npc, items):
+    player_disc = {}
+    spell_str = txt_data["Spells"]
     spell_list = spell_str.split(",,")
     for slot_spell in spell_list:
         if slot_spell != '' and slot_spell != "Empty":
             slot, spell = slot_spell.split("__")
             spells.selected_spell[int(slot)] = spell
+
     I.info.BACKPACK_CONTENT = {}
-    backpack_str = player_disc["Backpack"]
+    backpack_str = txt_data["Backpack"]
     backpack_str_list = backpack_str.split(",,")
     for backpack_data in backpack_str_list:
         if backpack_data != {} and backpack_data != "Empty" and backpack_data != '':
             item, amount, posx, posy = backpack_data.split("__")
-            add_to_backpack(item, amount, items)  # adds items from txt
-
+            Ff.add_to_backpack(item, amount, items, int(posx), int(posy))  # adds items from txt
     hp_by_race = {"Elf": 11,
                   "Human": 10}
 
     mana_by_race = {"Elf": 14,
                     "Human": 10}
 
-    race = player_disc["Race"]
-    level = player_disc["Level"]
-    player_disc["hp"] = (player_disc["Health"], hp_by_race[race] * level)
-    player_disc["mana"] = (player_disc["Mana"], mana_by_race[race] * level)
+    race = txt_data["Race"]
+    level = txt_data["Level"]
+    player_disc["hp"] = (txt_data["Health"], hp_by_race[race] * level)
+    player_disc["mana"] = (txt_data["Mana"], mana_by_race[race] * level)
 
     player_disc["dead"] = False
-
-    player_disc["Exhaustion"] = (player_disc["Exhaustion"], 100)
+    player_disc["Gold"] = txt_data["Gold"]
+    player_disc["Experience"] = txt_data["Experience"]
+    player_disc["Level"] = txt_data["Level"]
+    player_disc["Exhaustion"] = (txt_data["Exhaustion"], 100)
 
     player_disc["Last_hit"] = I.pg.time.get_ticks()  # required to know when to start regenerating hp and mana
 
-    quest_tuple = player_disc["Quests"].split(",,")
+    quest_tuple = txt_data["Quests"].split(",,")
     if quest_tuple != ['', '']:
         quest_tuple = quest_tuple[0].split("__")
         I.info.QUESTS = quest_tuple
         check_quest_completion()
-    dialog_id = player_disc["Dialog"].split(",,")
+    dialog_id = txt_data["Dialog"].split(",,")
     for value in dialog_id:
         if value != "":
             key, id = value.split("__")
             npc[key]["dialog"].iteration = int(id)
-    print(player_disc["Spawn"])
-    I.info.ENTRY_POS = int(player_disc["Spawn"].split(":")[1]), int(player_disc["Spawn"].split(":")[2])
-    I.info.OFFSCREEN = int(player_disc["Spawn"].split(":")[3]), int(player_disc["Spawn"].split(":")[4])
+    I.info.ENTRY_POS = int(txt_data["Spawn"].split(":")[1]), int(txt_data["Spawn"].split(":")[2])
+    I.info.OFFSCREEN = int(txt_data["Spawn"].split(":")[3]), int(txt_data["Spawn"].split(":")[4])
 
     I.info.CONTAINERS = {}
-    keys = player_disc["Containers"].split(":::")
+    keys = txt_data["Containers"].split(":::")
     keys = keys[:-1]
     for i in range(0, len(keys), 2):
         output_key = Ff.str_to_tuple(keys[i])
@@ -1019,7 +1036,6 @@ def update_character(player_disc, spells, npc, items):
             output_key1 = Ff.str_to_tuple(key1)
             output_value = Ff.str_to_tuple(value2)
             I.info.CONTAINERS[output_key][output_key1] = output_value
-
 
 
     return player_disc
@@ -1075,18 +1091,16 @@ def spell_book(screen, data, spells, gifs):
                 block = (8, block[1])
             if block[0] < 0:
                 block = (0, block[1])
-            rect = I.pg.Rect(list(I.info.SPELLBOOK_COORDINATES_X.values())[block[0]], list(I.info.SPELLBOOK_COORDINATES_Y.values())[11] + list(I.info.SPELLBOOK_COORDINATES_Y.values())[0], item_w, item_h)
+            rect_selected = I.pg.Rect(list(I.info.SPELLBOOK_COORDINATES_X.values())[block[0]], list(I.info.SPELLBOOK_COORDINATES_Y.values())[11] + list(I.info.SPELLBOOK_COORDINATES_Y.values())[0], item_w, item_h)
         else:
-            rect = I.pg.Rect(list(I.info.SPELLBOOK_COORDINATES_X.values())[block[0]],list(I.info.SPELLBOOK_COORDINATES_Y.values())[block[1]], item_w, item_h)
-        I.pg.draw.rect(screen, color, rect, border)
+            rect_selected = I.pg.Rect(list(I.info.SPELLBOOK_COORDINATES_X.values())[block[0]],list(I.info.SPELLBOOK_COORDINATES_Y.values())[block[1]], item_w, item_h)
+
 
         if spells.selected_spell != {}:
             for pos, spell in spells.selected_spell.items():
                 rect = I.pg.Rect(list(I.info.SPELLBOOK_COORDINATES_X.values())[int(pos)],list(I.info.SPELLBOOK_COORDINATES_Y.values())[11] +list(I.info.SPELLBOOK_COORDINATES_Y.values())[0], item_w, item_h)
-                Ff.add_image_to_screen(screen, gifs[spell].frame_paths[0], rect)
-
-
-
+                Ff.add_image_to_screen(screen, gifs[spell].frame_paths[0][:-5] + "icon.png", rect)
+        I.pg.draw.rect(screen, color, rect_selected, border)
         I.pg.display.flip()
 
 def fill_spellbook(screen, gifs):
@@ -1100,7 +1114,7 @@ def fill_spellbook(screen, gifs):
     item_h = list(I.info.SPELLBOOK_COORDINATES_Y.values())[1] - list(I.info.SPELLBOOK_COORDINATES_Y.values())[0]
     for content in I.info.SPELLBOOK_CONTENT.keys():
         row, collumn = I.info.SPELLBOOK_CONTENT[content]
-        Ff.add_image_to_screen(screen, gifs[content].frame_paths[0], [list(I.info.SPELLBOOK_COORDINATES_X.values())[row], list(I.info.SPELLBOOK_COORDINATES_Y.values())[collumn], item_w, item_h])
+        Ff.add_image_to_screen(screen, gifs[content].frame_paths[0][:-5] + "icon.png", [list(I.info.SPELLBOOK_COORDINATES_X.values())[row], list(I.info.SPELLBOOK_COORDINATES_Y.values())[collumn], item_w, item_h])
 
 def display_gif_on_subimage(sub_image, size, pos, gif):
     frame = gif.next_frame(-1)
@@ -1112,19 +1126,25 @@ def cast_spell_handle(sub_image, data, spells, gifs, mob, song, decorations, ite
     if not data["Player"]["dead"]:
         for slot, spell_name in spells.selected_spell.items():
             if gifs[spell_name].start_gif:
-                if spell_name == "Flash":
+                spells.spell_cooloff[spell_name] = spells.spell_dict[spell_name]["recharge"]
+                # I.th.start_thread(0, "spell_cooloff", spells)
+                if "Spawn" in spell_name:
+                    handle_spawn_spell(data, spells, gifs, decorations, sub_image, rooms, spell_name, mob)
+                elif spell_name == "Flash":
                     handle_flash_spell(data, spells, gifs, decorations, sub_image, rooms)
+                elif "Heal" in spell_name:
+                    handle_heal_spell(data, spells, gifs, spell_name, sub_image, rooms)
                 else:
                     bolt_spell_handle(spells, gifs, spell_name, decorations, song, data["Zoom_rect"], mob, items, sub_image, data["Player"], rooms)
             else:
                 # RESET DIRECTION OF FIRE
                 spells.direction[spell_name] = 0
                 spells.init_cast[spell_name] = 0
-def init_dialog(name, player, screen, npc, items):
+def init_dialog(name, player, screen, npc, items, decorations, data):
     dialog_obj = npc[name]["dialog"]
     dialog_obj.name = name
     check_quest_completion()
-    handdle_sign_display(screen, dialog_obj, player, items)
+    handdle_sign_display(screen, dialog_obj, player, items, decorations, data)
     # dialog.id[dialog.type] = 1
     handle_dialog_outcome(dialog_obj, player, screen, items)
 
@@ -1135,8 +1155,6 @@ def bolt_spell_handle(spells, gifs, spell_name, decorations, song, zoom_rect, mo
     sound_type = {"Force": song[curr_song].generate_magic_sound(),
                   "Fire": song[curr_song].generate_fire_sound(),
                   "Cold": song[curr_song].generate_cold_sound()}
-
-    spells.spell_cooloff[spell_name] = spells.spell_dict[spell_name]["recharge"]
     frame = gifs[spell_name].next_frame(1)
 
     if rooms.type in ["Village"]:
@@ -1173,6 +1191,7 @@ def bolt_spell_handle(spells, gifs, spell_name, decorations, song, zoom_rect, mo
         else:
             rect = I.pg.Rect(spells.init_cast[spell_name].x - dir[0] * gifs[spell_name].current_frame * 12 * 2,
                              spells.init_cast[spell_name].y - dir[1] * gifs[spell_name].current_frame * 12 * 2, size[0], size[1])
+
         sub_image.blit(frame, rect)
         if I.info.CURRENT_ROOM["Type"] == "Village":
             if rect.collidelist(decorations.displayed_rects) != -1:  # if hits any decor
@@ -1192,10 +1211,66 @@ def bolt_spell_handle(spells, gifs, spell_name, decorations, song, zoom_rect, mo
                             gifs[type].Start_gif(type, current_mob)
                             song[curr_song].play_effect(sound_type[type])
 
-def handle_flash_spell(data, spells, gifs, decorations, sub_image, rooms):
-    spells.spell_cooloff["Flash"] = spells.spell_dict["Flash"]["recharge"]
-    distance = 50
+def handle_heal_spell(data, spells, gifs, name, sub_image, rooms):
+    healing_power = 0
 
+    frame = gifs[name].next_frame(1)
+    if "Minor" in name and healing_power == 0:
+        healing_power = 0.06
+    if rooms.type in ["Village"]:
+        rect = I.pg.Rect(I.info.Player_rect.x - 20,I.info.Player_rect.y - 25, I.info.Player_rect.w, I.info.Player_rect.h )
+    else:
+        rect = I.pg.Rect(I.info.OFFSCREEN[0] + 530, I.info.OFFSCREEN[1] + 250, I.info.Player_rect.w, I.info.Player_rect.h)
+        frame = I.pg.transform.scale(frame, (I.info.Player_rect.w * 14, I.info.Player_rect.h * 12))
+    data["Player"]["hp"] = data["Player"]["hp"][0] + healing_power, data["Player"]["hp"][1]
+    if data["Player"]["hp"][0] > data["Player"]["hp"][1]:
+        data["Player"]["hp"] = data["Player"]["hp"][1], data["Player"]["hp"][1]
+    sub_image.blit(frame, rect)
+
+def handle_spawn_spell(data, spells, gifs, decorations, sub_image, rooms, name, mobs):
+    frame = gifs[name].next_frame(1)
+    mob_name = name.split(" ")[1]
+    if rooms.type in ["Village"]:
+        frame = I.pg.transform.scale(frame, (I.info.Player_rect.w * 5, I.info.Player_rect.h * 5))
+        rect = I.pg.Rect(I.info.Player_rect.x - 20, I.info.Player_rect.y - 25, I.info.Player_rect.w, I.info.Player_rect.h)
+    else:
+        rect = I.pg.Rect(I.info.OFFSCREEN[0] + 530, I.info.OFFSCREEN[1] + 250, I.info.Player_rect.w, I.info.Player_rect.h)
+        frame = I.pg.transform.scale(frame, (I.info.Player_rect.w * 14, I.info.Player_rect.h * 12))
+    if spells.spawn_counter.get(name) == None:
+        """ no skeletons spawned """
+        mob_dict = I.mob_data.read_db()
+        cur_dict = mob_dict[mob_name]
+        frame_count = Ff.count_png_files(cur_dict["path"])
+
+        mobs[mob_name + " Mine"] = I.mob_data.Mob(name=mob_name + " Mine", exp=cur_dict["exp"], hp=cur_dict["health"], allignment=7, count=3, damage=cur_dict["damage"].split(":"), speed=cur_dict["speed"], path=cur_dict["path"], delay=(cur_dict["delay"], cur_dict["delay"]))
+
+        mobs[mob_name + " Mine"].spawn_mob_acurate(cur_dict["path"], frame_count, 0, data["Zoom_rect"].x + 180, data["Zoom_rect"].y + 60)
+        mobs[mob_name + " Mine"].spawn_mob_acurate(cur_dict["path"], frame_count, 1, data["Zoom_rect"].x + 140, data["Zoom_rect"].y + 80)
+        mobs[mob_name + " Mine"].spawn_mob_acurate(cur_dict["path"], frame_count, 2, data["Zoom_rect"].x + 160, data["Zoom_rect"].y + 100)
+        I.th.start_thread(30000, "spawn", (spells, mobs))
+        spells.init_cast[name] = 3
+        spells.spawn_counter[name] = 3
+    elif spells.spawn_counter[name] >= 3 and spells.init_cast[name] != 3:
+        mob_dict = I.mob_data.read_db()
+        cur_dict = mob_dict[mob_name]
+        frame_count = Ff.count_png_files(cur_dict["path"])
+
+        # mobs[mob_name + " Mine"] = I.mob_data.Mob(name=mob_name + " Mine", exp=cur_dict["exp"], hp=cur_dict["health"], allignment=6, count=6, damage=cur_dict["damage"].split(":"), speed=cur_dict["speed"], path=cur_dict["path"], delay=(cur_dict["delay"], cur_dict["delay"]))
+        mobs[mob_name + " Mine"].allignment = 6
+        mobs[mob_name + " Mine"].count = (3 + mobs[mob_name + " Mine"].count[0], 3 + mobs[mob_name + " Mine"].count[1])
+        mobs[mob_name + " Mine"].mobs.append(mobs[mob_name + " Mine"].create_mob(3))
+        mobs[mob_name + " Mine"].mobs.append(mobs[mob_name + " Mine"].create_mob(4))
+        mobs[mob_name + " Mine"].mobs.append(mobs[mob_name + " Mine"].create_mob(5))
+        mobs[mob_name + " Mine"].spawn_mob_acurate(cur_dict["path"], frame_count, 3, data["Zoom_rect"].x + 180, data["Zoom_rect"].y + 60)
+        mobs[mob_name + " Mine"].spawn_mob_acurate(cur_dict["path"], frame_count, 4, data["Zoom_rect"].x + 140, data["Zoom_rect"].y + 80)
+        mobs[mob_name + " Mine"].spawn_mob_acurate(cur_dict["path"], frame_count, 5, data["Zoom_rect"].x + 160, data["Zoom_rect"].y + 100)
+        spells.init_cast[name] = 3 + spells.init_cast[name]
+        spells.spawn_counter[name] = 3 + spells.spawn_counter[name]
+
+    sub_image.blit(frame, rect)
+def handle_flash_spell(data, spells, gifs, decorations, sub_image, rooms):
+
+    distance = 50
     gifs["Flash"].next_frame(1)
     gifs["Flash"].start_gif = False
     i = 1
@@ -1209,10 +1284,12 @@ def handle_flash_spell(data, spells, gifs, decorations, sub_image, rooms):
         }
         if rooms.type == "Village":
             me = I.pg.Rect(150 + pos[I.info.LAST_ORIENT[0]][0] * i + I.info.OFFSCREEN[0] / 4, 85 + pos[I.info.LAST_ORIENT[0]][1] * i + I.info.OFFSCREEN[1] / 4, S.SCREEN_WIDTH / 100, S.SCREEN_HEIGHT / 100)
+            I.T.Make_rect_visible(sub_image, I.pg.Rect(150 - pos[I.info.LAST_ORIENT[0]][0] * i + I.info.OFFSCREEN[0] / 4, 80 - pos[I.info.LAST_ORIENT[0]][1] * i + I.info.OFFSCREEN[1] / 4, S.SCREEN_WIDTH / 100, S.SCREEN_HEIGHT / 50), "yellow")
         else:
             me = I.pg.Rect(S.SCREEN_WIDTH / 2 - S.SCREEN_WIDTH / 24 + I.info.OFFSCREEN[0], S.SCREEN_HEIGHT / 2 - S.SCREEN_HEIGHT / 16 + I.info.OFFSCREEN[1], S.SCREEN_WIDTH / 24, S.SCREEN_HEIGHT / 12)
-
+            I.T.Make_rect_visible(sub_image, me, "yellow")
         if me.collidelist(decorations.displayed_rects) != -1:
+            print("collide")
             break
         if I.info.OFFSCREEN[0] == 0 and I.info.LAST_ORIENT[0] in ["Right.png", "Left.png"] and int(data["Zoom_rect"].x + pos[I.info.LAST_ORIENT[0]][0]) > 0 and int(data["Zoom_rect"].x + pos[I.info.LAST_ORIENT[0]][0]) < 680:
             data["Zoom_rect"] = I.pg.Rect(data["Zoom_rect"].x + pos[I.info.LAST_ORIENT[0]][0], data["Zoom_rect"].y, data["Zoom_rect"].w, data["Zoom_rect"].h)
@@ -1222,7 +1299,6 @@ def handle_flash_spell(data, spells, gifs, decorations, sub_image, rooms):
             data["Zoom_rect"] = I.pg.Rect(data["Zoom_rect"].x, data["Zoom_rect"].y + pos[I.info.LAST_ORIENT[0]][1], data["Zoom_rect"].w, data["Zoom_rect"].h)
         elif I.info.LAST_ORIENT[0] in ["Back.png", "Front.png"]:
             I.info.OFFSCREEN = (I.info.OFFSCREEN[0], I.info.OFFSCREEN[1] + pos[I.info.LAST_ORIENT[0]][1] * 3)
-
         i += 1
 
 def handle_dialog_outcome(dialog, player, screen, items):
@@ -1251,11 +1327,11 @@ def handle_dialog_outcome(dialog, player, screen, items):
         #     remove_from_backpack(I.info.COMPLETED_QUESTS[3], int(I.info.COMPLETED_QUESTS[2]))
         #     I.info.QUESTS = 0
         #     dialog.id[dialog.type] = 4
-        #     print("you have", dialog.data[1] + "d", dialog.data[2], dialog.data[3])
+        #    #print("you have", dialog.data[1] + "d", dialog.data[2], dialog.data[3])
         #     if dialog.data[3] == "Gold":
         #         player["Gold"] += float(dialog.data[2]) # Adds gold to backpack that was recieved from the quest
         #     else:
-        #         add_to_backpack(dialog.data[3], int(dialog.data[2])) # Adds item to backpack that was recieved from the quest
+        #         Ff.add_to_backpack(dialog.data[3], int(dialog.data[2])) # Adds item to backpack that was recieved from the quest
         #
         #     Ff.display_text_player("Received " + dialog.data[2] + " " + dialog.data[3], 5000)
         #     Ff.display_text_player("Removed " + I.info.COMPLETED_QUESTS[2] + " " + I.info.COMPLETED_QUESTS[3], 10000)
@@ -1266,7 +1342,7 @@ def handle_dialog_outcome(dialog, player, screen, items):
             if dialog.data[1] == "buy":
                 # print("Buying ", dialog.data[3], "for ", dialog.data[2])
                 player["Gold"] = float(player["Gold"]) - float(dialog.data[2])
-                add_to_backpack(dialog.data[3], 1, items)  # Adds bought items through conversation
+                Ff.add_to_backpack(dialog.data[3], 1, items)  # Adds bought items through conversation
                 Ff.display_text_player("Received 1 " + dialog.data[3], 5000)
                 Ff.display_text_player("Removed " + str(dialog.data[2]) + " Gold", 5000)
                 dialog.data = (None, None, None, None)
@@ -1274,21 +1350,19 @@ def handle_dialog_outcome(dialog, player, screen, items):
                 # print("got ", dialog.data[3], "for free")
                 dialog.data = (None, None, None, None)
             # dialog.id[dialog.type] += 1 # Switches to next conversation
-def handdle_sign_display(screen, dialog, player, items):
+def handdle_sign_display(screen, dialog, player, items, decorations, data):
     # print(dialog.type, dialog.data, dialog.conv_key)
 
     text = dialog.get_text()
     response = dialog.select_response()
     running = True
     if "{" in text:
-        # print("action text: ", text, "responses: ", response)
         if "COST" in text[text.index("{")+1:text.index("}")]:
             word, item = text[text.index("{") + 1:text.index("}")].split("|")
             cost = items.item_dict[item]["Cost"]
             text = text.replace(text[text.index("{"):text.index("}")+1], str(cost))
         elif response[1] != '':
             # handles other actions
-
             dialog.data = response[1].split("|")
             response = response[0], ""
             if dialog.data[0] == "random":
@@ -1296,7 +1370,7 @@ def handdle_sign_display(screen, dialog, player, items):
                 # dialog.conv_key += "-" + rand_addon
                 dialog.conv_key = dialog.conv_key.split("|")[0] + "-" + rand_addon
                 dialog.data = (None, None, None, None)
-                handdle_sign_display(screen, dialog, player, items)
+                handdle_sign_display(screen, dialog, player, items, decorations, data)
                 running = False
                 # text = dialog.get_text()
                 # response = dialog.select_response()
@@ -1308,9 +1382,28 @@ def handdle_sign_display(screen, dialog, player, items):
                 dialog.data = (None, None, None, None)
                 text = dialog.get_text()
                 response = dialog.select_response()
-
-
-
+            if "{SHOP}" in text:
+                running = False
+                dialog.data = ("shop", "Armory", None, None)
+                return
+            if "folower" in dialog.data[1]:
+                x = decorations.decor_dict[dialog.data[2]][0]["rect"].x
+                y = decorations.decor_dict[dialog.data[2]][0]["rect"].y
+                I.info.FOLLOWER = {
+                    "Name": dialog.data[2],
+                    "current_pos": (x, y),
+                    "target_pos": (0, 0),
+                    "orientation": [],
+                    "aggressive": {
+                        "attack": False,
+                        "mob": 0,
+                        "mob_pos": (0,0),
+                        "class": 0
+                    }
+                }
+                del decorations.decor_dict[dialog.data[2]][0]
+                # I.pg.time.set_timer(I.pg.USEREVENT + 12, 2000)  # 5 sec
+                I.th.start_thread(2000, "folower", data)
 
 
     Ff.add_image_to_screen(screen, S.PLAYING_PATH["Text_bar"], (0, S.SCREEN_HEIGHT / 2, S.SCREEN_WIDTH, S.SCREEN_HEIGHT / 2))
@@ -1328,7 +1421,8 @@ def handdle_sign_display(screen, dialog, player, items):
                 if a > len(text):
                     running = False
                     dialog.conv_key = response[0]
-                    dialog.friendlyness += int(response[0].split("|")[1])
+                    if response[0] != "": # when talking to a sign there are no responses
+                        dialog.friendlyness += int(response[0].split("|")[1])
             if event.type == I.pg.KEYDOWN and event.key == I.pg.K_z:
                 for i in range(20):
                     if a + i >= len(text):
@@ -1362,66 +1456,66 @@ def handdle_sign_display(screen, dialog, player, items):
 
     if not running:
         if not dialog.has_conversation_ended():
-            handdle_sign_display(screen, dialog, player, items)
+            handdle_sign_display(screen, dialog, player, items, decorations, data)
 
-def display_border(border_image_name, decorations, data):
-    path = decorations.decor_dict[border_image_name]["path"]
-    image = I.pg.image.load(path).convert_alpha()
-    rect = image.get_rect()
-    tree_amount = 0
-    row = 0
-    while True:
-        # building on the x axis (virsus ir apacia)
-        # virsui pirma juosta
-        # apacioj pirma
-        # virsui antra
-        # apacioj antra
-        tree_image1, tree_rect1 = decorations.place_decor_by_coordinates(row, 0, path, (0.8, 0.8), (1, 0.3))
-        tree_image2, tree_rect2 = decorations.place_decor_by_coordinates(row, data["Image_rect"].h - (rect.h * 0.8), path, (0.8, 0.8), (1, 0.5))
-
-        tree_image3, tree_rect3 = decorations.place_decor_by_coordinates(row + rect.w/4, rect.h * 0.3, path, (0.8, 0.8), (0.8, 0.8))
-        tree_image4, tree_rect4 = decorations.place_decor_by_coordinates(row + rect.w/4, data["Image_rect"].h - (rect.h * 1.3), path, (0.8, 0.8), (0.8, 0.5))
-        if data["Image_rect"].w <= tree_rect3.x + tree_rect3.w:
-            break
-        decorations.decor_dict[border_image_name][tree_amount] = {"name": border_image_name, "id": tree_amount, "image": tree_image1, "rect": tree_rect1, "effect": ""}
-        tree_amount += 1
-        decorations.decor_dict[border_image_name][tree_amount] = {"name": border_image_name, "id": tree_amount, "image": tree_image2, "rect": tree_rect2, "effect": ""}
-        tree_amount += 1
-
-        decorations.decor_dict[border_image_name][tree_amount] = {"name": border_image_name, "id": tree_amount, "image": tree_image3, "rect": tree_rect3, "effect": ""}
-        tree_amount += 1
-        decorations.decor_dict[border_image_name][tree_amount] = {"name": border_image_name, "id": tree_amount, "image": tree_image4, "rect": tree_rect4, "effect": ""}
-        tree_amount += 1
-
-        row += rect.w * 0.5
-
-    column = rect.h * 0.5
-    while True:
-        # building on the y axis (kaire ir desine)
-        # kairei pirma juosta
-        # desinei pirma
-        # kairei antra
-        # desinei antra
-
-        tree_image1, tree_rect1 = decorations.place_decor_by_coordinates(0, column, path, (0.8, 0.8), (0.4, 0.5))
-        tree_image2, tree_rect2 = decorations.place_decor_by_coordinates(data["Image_rect"].w - rect.w, column, path, (0.8, 0.8), (0.8, 0.7))
-
-        tree_image3, tree_rect3 = decorations.place_decor_by_coordinates(rect.w * 0.4, column + rect.h/4, path, (0.8, 0.8), (0.8, 0.7))
-        tree_image4, tree_rect4 = decorations.place_decor_by_coordinates(data["Image_rect"].w - (rect.w * 1.3), column + rect.h/4, path, (0.8, 0.8), (0.3, 0.7))
-        if data["Image_rect"].h <= (tree_rect3.y + tree_rect3.h):
-            break
-
-        decorations.decor_dict[border_image_name][tree_amount] = {"image": tree_image1, "rect": tree_rect1}
-        tree_amount += 1
-        decorations.decor_dict[border_image_name][tree_amount] = {"image": tree_image2, "rect": tree_rect2}
-        tree_amount += 1
-
-        decorations.decor_dict[border_image_name][tree_amount] = {"image": tree_image3, "rect": tree_rect3}
-        tree_amount += 1
-        decorations.decor_dict[border_image_name][tree_amount] = {"image": tree_image4, "rect": tree_rect4}
-        tree_amount += 1
-
-        column += rect.w * 0.5
+# def display_border(border_image_name, decorations, data):
+#     path = decorations.decor_dict[border_image_name]["path"]
+#     image = I.pg.image.load(path).convert_alpha()
+#     rect = image.get_rect()
+#     tree_amount = 0
+#     row = 0
+#     while True:
+#         # building on the x axis (virsus ir apacia)
+#         # virsui pirma juosta
+#         # apacioj pirma
+#         # virsui antra
+#         # apacioj antra
+#         tree_image1, tree_rect1 = decorations.place_decor_by_coordinates(row, 0, path, (0.8, 0.8), (1, 0.3))
+#         tree_image2, tree_rect2 = decorations.place_decor_by_coordinates(row, data["Image_rect"].h - (rect.h * 0.8), path, (0.8, 0.8), (1, 0.5))
+#
+#         tree_image3, tree_rect3 = decorations.place_decor_by_coordinates(row + rect.w/4, rect.h * 0.3, path, (0.8, 0.8), (0.8, 0.8))
+#         tree_image4, tree_rect4 = decorations.place_decor_by_coordinates(row + rect.w/4, data["Image_rect"].h - (rect.h * 1.3), path, (0.8, 0.8), (0.8, 0.5))
+#         if data["Image_rect"].w <= tree_rect3.x + tree_rect3.w:
+#             break
+#         decorations.decor_dict[border_image_name][tree_amount] = {"name": border_image_name, "id": tree_amount, "image": tree_image1, "rect": tree_rect1, "effect": ""}
+#         tree_amount += 1
+#         decorations.decor_dict[border_image_name][tree_amount] = {"name": border_image_name, "id": tree_amount, "image": tree_image2, "rect": tree_rect2, "effect": ""}
+#         tree_amount += 1
+#
+#         decorations.decor_dict[border_image_name][tree_amount] = {"name": border_image_name, "id": tree_amount, "image": tree_image3, "rect": tree_rect3, "effect": ""}
+#         tree_amount += 1
+#         decorations.decor_dict[border_image_name][tree_amount] = {"name": border_image_name, "id": tree_amount, "image": tree_image4, "rect": tree_rect4, "effect": ""}
+#         tree_amount += 1
+#
+#         row += rect.w * 0.5
+#
+#     column = rect.h * 0.5
+#     while True:
+#         # building on the y axis (kaire ir desine)
+#         # kairei pirma juosta
+#         # desinei pirma
+#         # kairei antra
+#         # desinei antra
+#
+#         tree_image1, tree_rect1 = decorations.place_decor_by_coordinates(0, column, path, (0.8, 0.8), (0.4, 0.5))
+#         tree_image2, tree_rect2 = decorations.place_decor_by_coordinates(data["Image_rect"].w - rect.w, column, path, (0.8, 0.8), (0.8, 0.7))
+#
+#         tree_image3, tree_rect3 = decorations.place_decor_by_coordinates(rect.w * 0.4, column + rect.h/4, path, (0.8, 0.8), (0.8, 0.7))
+#         tree_image4, tree_rect4 = decorations.place_decor_by_coordinates(data["Image_rect"].w - (rect.w * 1.3), column + rect.h/4, path, (0.8, 0.8), (0.3, 0.7))
+#         if data["Image_rect"].h <= (tree_rect3.y + tree_rect3.h):
+#             break
+#
+#         decorations.decor_dict[border_image_name][tree_amount] = {"image": tree_image1, "rect": tree_rect1}
+#         tree_amount += 1
+#         decorations.decor_dict[border_image_name][tree_amount] = {"image": tree_image2, "rect": tree_rect2}
+#         tree_amount += 1
+#
+#         decorations.decor_dict[border_image_name][tree_amount] = {"image": tree_image3, "rect": tree_rect3}
+#         tree_amount += 1
+#         decorations.decor_dict[border_image_name][tree_amount] = {"image": tree_image4, "rect": tree_rect4}
+#         tree_amount += 1
+#
+#         column += rect.w * 0.5
 
 def render_house(screen, data, rooms):
     screen.fill("black")
@@ -1503,13 +1597,7 @@ def update_character_stats(file_path, player_data, selected_spells, npc):
     with open(file_path, 'w') as file:
         file.writelines(lines)
 
-def find_open_space():
-    taken_spaces = list(I.info.BACKPACK_CONTENT.values())
-    for column in range(0, 26, 2):
-        for row in range(0, 16, 2):
-            if any((row, column) == (tpl[1], tpl[2]) for tpl in taken_spaces):
-                continue
-            return row, column
+
 
 def find_item_by_slot(x, y):
     for key, value in I.info.BACKPACK_CONTENT.items():
@@ -1529,22 +1617,26 @@ def find_item_by_slot_containers(x, y, container, id):
 
 def update_equipment_var(key, value):
     if key[0] < 0:
-        I.info.EQUIPED[I.info.equipment[key]] = value
+        I.info.EQUIPED[I.info.equipment[key]] = value, I.info.EQUIPED[I.info.equipment[key]][1]
 
-def interior_border_rect(left, top, width, height):
+def interior_border_rect(left, top, width, height, decorations):
     right = left + width
     bottom = top + height
     top_rect = I.pg.Rect(left, top, right - left, 5) # top
     right_rect = I.pg.Rect(right,top, 5, bottom - top) # right
     left_rect = I.pg.Rect(left, top, 5, bottom - top) # left
     bottom_rect = I.pg.Rect(left, bottom, right - left, 5) # bottom
+    decorations.displayed_rects.append(top_rect)
+    decorations.displayed_rects.append(right_rect)
+    decorations.displayed_rects.append(left_rect)
+    decorations.displayed_rects.append(bottom_rect)
     return [top_rect, right_rect, left_rect, bottom_rect]
 
 def decorate_from_db(rooms, decorations):
     for decor_name in rooms.decor:
         path = decorations.decor_dict[decor_name]["path"]
         health = decorations.decor_dict[decor_name]["health"]
-        if decor_name == "Furnace":
+        if decor_name in ["Furnace", "Blast Furnace"]:
             path += "out.png"
         elif path[-1] == "_":
             path += "0.png"
@@ -1590,20 +1682,23 @@ def check_quest_completion():
 
 def handle_shop(case, player, screen, items):
     if case == "Armory":
-        fill_shop(screen, case, items)
-        item_w = list(I.info.SHOP_COORDINATES_X.values())[1] - list(I.info.SHOP_COORDINATES_X.values())[0]
-        item_h = list(I.info.SHOP_COORDINATES_Y.values())[1] - list(I.info.SHOP_COORDINATES_Y.values())[0]
         block = (0, 0)
         color = "yellow"
         border = 1
         pressed = 0
-        display_text = []
+        mode = 0
         running = True
         selected = 0
+        display_text = []
+        fill_shop(screen, case, items, mode, player)
+        item_w = list(I.info.SHOP_COORDINATES_X.values())[1] - list(I.info.SHOP_COORDINATES_X.values())[0]
+        item_h = list(I.info.SHOP_COORDINATES_Y.values())[1] - list(I.info.SHOP_COORDINATES_Y.values())[0]
         while running:
             for event in I.pg.event.get():
                 if event.type == I.pg.KEYDOWN:
                     if event.key == I.pg.K_c:
+                        if mode == 2:
+                            running = False
                         pressed = I.pg.K_c
                     elif event.key == I.pg.K_UP:
                         if selected == 0:
@@ -1623,7 +1718,7 @@ def handle_shop(case, player, screen, items):
                             if block[0] < 0 and selected == 0:
                                 block = (28, block[1])
                         else:
-                            block = (block[0] - 10, block[1])
+                            block = (block[0] - 15, block[1])
                             if block[0] < 0 and selected != 0:
                                 block = (20, block[1])
                     elif event.key == I.pg.K_RIGHT:
@@ -1635,32 +1730,64 @@ def handle_shop(case, player, screen, items):
                             block = (block[0] + 10, block[1])
                             if block[0] > 28:
                                 block = (0, block[1])
+                    elif event.key == I.pg.K_q and selected == 0:
+                        # so that only be able to switch rows when no item is selected
+                        mode -= 1
+                        if mode < 0:
+                            mode = 0
+                    elif event.key == I.pg.K_e and selected == 0:
+                        # so that only be able to switch rows when no item is selected
+                        mode += 1
+                        if mode > 2:
+                            mode = 2
                 if event.type == I.pg.KEYUP:
                     if pressed == I.pg.K_ESCAPE:
                         running = False
                     if event.key == I.pg.K_c and pressed == I.pg.K_c:
                         if selected == 0:
-                            for item, (row, collum) in I.info.SHOP_CONTENT.items():
-                                if block == (row, collum):
-                                    selected = item
-                                    border = 2
-                                    display_text = [items.item_dict[selected]["describtion"], 10, [390, 500]]
-
+                            if mode == 0:
+                                for item, (row, collum) in I.info.SHOP_CONTENT.items():
+                                    if block == (row, collum):
+                                        selected = item
+                                        border = 2
+                            elif mode == 1:
+                                for item, (amount, row, collum) in I.info.BACKPACK_CONTENT.items():
+                                    if block == (row, collum):
+                                        selected = item
+                                        border = 2
                         else:
-                            if block[0] == 0:
-                                if items.item_dict[selected]["Cost"] > player["Gold"]:
-                                    display_text = ["Not enough Gold", 40, [420, 520]]
-                                    # Ff.display_text(screen, "Not enough Gold", 40, [300, 500], "black")
+                            if mode == 0:
+                                if block[0] == 0:
+                                    # If selected item in buying and pressed "buy"
+                                    if items.item_dict[selected]["Cost"] > player["Gold"] * 10:
+                                        display_text = ["Not enough Gold", 40, [420, 520]]
+                                    else:
+                                        display_text = ["Bought", 40, [420, 520]]
+                                        Ff.add_to_backpack(selected, 1, items)  # Adds bought item through shop
+                                        player["Gold"] -= items.item_dict[selected]["Cost"] / 10
+                                        block = I.info.SHOP_CONTENT[selected]
+                                        selected = 0
                                 else:
-                                    display_text = ["Bought", 40, [420, 520]]
-                                    add_to_backpack(selected, 1, items)  # Adds bought item through shop
-                                    player["Gold"] -= items.item_dict[selected]["Cost"]
+                                    # If selected item in buying and pressed "Back"
+                                    block = I.info.SHOP_CONTENT[selected]
                                     selected = 0
-                            elif block[0] == 10:
-                                display_text = ["Not implemented", 40, [420, 520]]
-                            elif block[0] == 20:
-                                display_text = ["Exit", 40, [420, 520]]
-                                running = False
+                            elif mode == 1:
+                                # if selected item in selling
+                                if block[0] == 0:
+                                    # selling this item
+                                    player["Gold"] += items.item_dict[selected]["Cost"] / 10 * 0.8
+                                    amount, blockx, blocky = I.info.BACKPACK_CONTENT[selected]
+                                    block = blockx, blocky
+                                    remove_from_backpack(selected, 1)
+                                    selected = 0
+                                else:
+                                    # going back
+                                    amount, blockx, blocky = I.info.BACKPACK_CONTENT[selected]
+                                    block = blockx, blocky
+                                    selected = 0
+                            if block[0] == 20:
+                                selected = 0
+
                     if event.key == I.pg.K_x:
                         selected = 0
                         display_text = []
@@ -1669,15 +1796,29 @@ def handle_shop(case, player, screen, items):
             if selected != 0:
                 if block[0] < 10:
                     block = 0, block[1]
-                elif block[0] < 20:
-                    block = 10, block[1]
+                    rect = I.pg.Rect(list(I.info.SHOP_COORDINATES_X.values())[block[0]],list(I.info.SHOP_COORDINATES_Y.values())[16] + item_h * 1.8, item_w * 6, item_h)
                 elif block[0] < 28:
                     block = 20, block[1]
-                rect = I.pg.Rect(list(I.info.SHOP_COORDINATES_X.values())[block[0]],list(I.info.SHOP_COORDINATES_Y.values())[16] + item_h * 1.8, item_w * 6, item_h)
+                    rect = I.pg.Rect(list(I.info.SHOP_COORDINATES_X.values())[block[0]] + 12,list(I.info.SHOP_COORDINATES_Y.values())[16] + item_h * 1.8, item_w * 6 - 4, item_h)
             else:
                 rect = I.pg.Rect(list(I.info.SHOP_COORDINATES_X.values())[block[0]],list(I.info.SHOP_COORDINATES_Y.values())[block[1]], item_w, item_h)
 
-            fill_shop(screen, case, items)
+            fill_shop(screen, case, items, mode, player)
+
+            if mode == 0:
+                for item, (row, collum) in I.info.SHOP_CONTENT.items():
+                    if block == (row, collum) and selected == 0:
+                        display_text = [items.item_dict[item]["describtion"], 10, [390, 500]]
+                        break
+            elif mode == 1:
+                for item, (amount, row, collum) in I.info.BACKPACK_CONTENT.items():
+                    if item == "Gold":
+                        continue
+                    if block == (row, collum) and selected == 0:
+                        display_text = [items.item_dict[item]["describtion"], 10, [390, 500]]
+                        break
+            elif mode == 2:
+                display_text = []
 
             if display_text != []:
                 if "\\n" in display_text[0]:
@@ -1686,17 +1827,39 @@ def handle_shop(case, player, screen, items):
                         Ff.display_text(screen, lines[i], display_text[1], (display_text[2][0], display_text[2][1] + i * 20), "black")
                 else:
                     Ff.display_text(screen, display_text[0], display_text[1], display_text[2], "black")
-            I.pg.draw.rect(screen, color, rect, border)
 
-
+            if mode != 2:
+                I.pg.draw.rect(screen, color, rect, border)
             I.pg.display.flip()
 
-def fill_shop(screen, type, items):
+def fill_shop(screen, type, items, mode, player):
     rect = screen.get_rect()
-    shop = Ff.add_image_to_screen(screen, S.PLAYING_PATH["Shop_Empty"], [rect.center[0] * 0.5, rect.center[1] * 0.25, S.SCREEN_WIDTH / 2, S.SCREEN_HEIGHT * 0.75])
-    Ff.display_text(screen, "Buy", 16, (420, 442), "black")
-    Ff.display_text(screen, "Sell", 16, (610, 442), "black")
-    Ff.display_text(screen, "Exit", 16, (780, 442), "black")
+    path = S.PLAYING_PATH["Shop_Empty"]
+    color = ("black", "brown4", "brown4")
+
+    if mode == 1:
+        path = path[:-4] + "_Sell.png"
+        color = ("brown4", "black", "brown4")
+    elif mode == 2:
+        path = path[:-4] + "_Exit.png"
+        color = ("brown4", "brown4", "black")
+
+    gold = player["Gold"]
+
+    shop = Ff.add_image_to_screen(screen, path, [rect.center[0] * 0.5, rect.center[1] * 0.25, S.SCREEN_WIDTH / 2, S.SCREEN_HEIGHT * 0.75])
+    if mode == 0:
+        Ff.display_text(screen, "Buy", 16, (420, 452), "black")
+    elif mode == 1:
+        Ff.display_text(screen, "Sell", 16, (420, 452), "black")
+    elif mode == 2:
+        Ff.display_text(screen, "Exit - hit [C]", 30, (500, 280), "black")
+
+    Ff.add_image_to_screen(screen, items.item_dict["Gold"]["path"], (555, 450, 34, 30))
+    Ff.display_text(screen, "Gold: " + str(gold), 16, (600, 452), "black")
+    Ff.display_text(screen, "Buy", 8, (400, 119), color[0])
+    Ff.display_text(screen, "Sell", 8, (540, 119), color[1])
+    Ff.display_text(screen, "Exit", 8, (670, 118), color[2])
+    Ff.display_text(screen, "Back", 16, (780, 452), "black")
 
     if I.info.SHOP_COORDINATES_X == {}:
         I.info.SHOP_COORDINATES_X, I.info.SHOP_COORDINATES_Y = bag_coordinates(screen, shop)
@@ -1708,22 +1871,38 @@ def fill_shop(screen, type, items):
     collumn = 0
     if I.info.SHOP_CONTENT == {}:
         for item in items.item_dict.keys():
-            if "WEAPON" in items.item_dict[item]["Properties"]:
+            if "WEAPON" in items.item_dict[item]["Properties"] or "HOE" in items.item_dict[item]["Properties"]:
                 I.info.SHOP_CONTENT[item] = row, collumn
                 row += 2
                 if row == 28:
                     collumn += 2
                     row = 0
+    if mode == 0:
+        for content in I.info.SHOP_CONTENT.keys():
+            row, collumn = I.info.SHOP_CONTENT[content]
+            Ff.add_image_to_screen(screen, items.item_dict[content]["path"], [list(I.info.SHOP_COORDINATES_X.values())[row], list(I.info.SHOP_COORDINATES_Y.values())[collumn], item_w, item_h])
+    elif mode == 1:
+        for content in I.info.BACKPACK_CONTENT.keys():
+            amount, row, collumn = I.info.BACKPACK_CONTENT[content]
+            if content == "Gold":
+                continue
+            if row >= 0:
+                Ff.add_image_to_screen(screen, items.item_dict[content]["path"], [list(I.info.SHOP_COORDINATES_X.values())[row], list(I.info.SHOP_COORDINATES_Y.values())[collumn], item_w, item_h])
 
-    for content in I.info.SHOP_CONTENT.keys():
-        row, collumn = I.info.SHOP_CONTENT[content]
-        Ff.add_image_to_screen(screen, items.item_dict[content]["path"], [list(I.info.SHOP_COORDINATES_X.values())[row], list(I.info.SHOP_COORDINATES_Y.values())[collumn], item_w, item_h])
 
 
-def display_lower_upper_decor(option, gifs, new_subimage, rect, rooms, clock, screen, decor, decorations, decor_x, decor_y, data, spells, npc):
+def display_lower_upper_decor(option, gifs, new_subimage, rect, rooms, clock, screen, decor, decorations, data, spells, npc):
     if option in list(gifs.keys()):
-        if "door" not in option:
+        if "door" not in option and "Wave" not in option:
+            # Display all gifs appart from door and wave.
             display_gif_on_subimage(new_subimage, (rect.w, rect.h), (rect.x, rect.y), gifs[option])
+        elif "Wave" in option:
+            if gifs[option].pause == 0:
+                display_gif_on_subimage(new_subimage, (rect.w, rect.h), (rect.x, rect.y), gifs[option])
+            if gifs[option].current_frame == 0 and gifs[option].pause == 0 and option in ["Wave1", "Wave4"]:
+                gifs[option].pause = 1
+                # I.pg.time.set_timer(I.pg.USEREVENT + 11, 2000)
+                I.th.start_thread(5000, "waves", gifs)
         elif I.info.DOOR_CLICK != (90, "") and I.info.DOOR_CLICK[0] < gifs[I.info.DOOR_CLICK[1]].frame_count:
             if I.pg.time.get_ticks() - gifs[I.info.DOOR_CLICK[1]].frame_time > gifs[I.info.DOOR_CLICK[1]].delay:
                 I.info.DOOR_CLICK = I.info.DOOR_CLICK[0] + 1, I.info.DOOR_CLICK[1]
@@ -1741,88 +1920,43 @@ def display_lower_upper_decor(option, gifs, new_subimage, rect, rooms, clock, sc
     else:
         size = decor["image"].get_rect()
         decor["image"] = I.pg.transform.scale(decor["image"], (size.w, size.h))
-        new_subimage.blit(decor["image"], (decor_x, decor_y))
+        new_subimage.blit(decor["image"], (rect.x, rect.y))
 
-def New_Update(data, decorations, gifs, rooms, clock, screen, spells, npc, mob, songs, items):
+def New_Update(data, decorations, gifs: dict, rooms, clock, screen, spells, npc, mob, songs, items):
     data["Zoom_rect"].x = max(0, min(data["Zoom_rect"].x, data["Image_rect"].width - data["Zoom"][0]))
     data["Zoom_rect"].y = max(0, min(data["Zoom_rect"].y, data["Image_rect"].height - data["Zoom"][1]))
-    I.info.Player_rect = I.pg.Rect(148 + I.info.OFFSCREEN[0] / 4, 80 + I.info.OFFSCREEN[1] / 4, S.SCREEN_WIDTH / 100, S.SCREEN_HEIGHT / 75)  # Player rect (if it gets hit with other rect. colide is set to True
+    I.info.Player_rect = I.pg.Rect(148 + I.info.OFFSCREEN[0] / 4, 80 + I.info.OFFSCREEN[1] / 4, S.SCREEN_WIDTH / 100, S.SCREEN_HEIGHT / 60)  # Player rect (if it gets hit with other rect. colide is set to True
     removable_list = []
+    collide = [False]
+    sub_image = data["Image"].subsurface(data["Zoom_rect"]).copy()
+    new_subimage = I.pg.Surface([data["Zoom_rect"][2], data["Zoom_rect"][3]], I.pg.SRCALPHA, 32).convert_alpha()
+    sub_image = (sub_image, new_subimage)
+
+    if mob != {}:
+        collide = handle_mob_visualisation(collide, sub_image, data, mob, gifs, songs, decorations, items, rooms, spells)
+
     if I.info.CURRENT_ROOM["Type"] in ["Village"]:
-        sub_image = data["Image"].subsurface(data["Zoom_rect"]).copy()
-        new_subimage = I.pg.Surface([data["Zoom_rect"][2], data["Zoom_rect"][3]], I.pg.SRCALPHA, 32).convert_alpha()
-        sub_image = (sub_image, new_subimage)
-        collide = [False]
-        # I.T.Make_rect_visible(sub_image[0], I.info.Player_rect, "red")
-
-        decorations.displayed_rects = []  # List to keep track of displayed rectangles
-
-        decor_options = decorations.decor_dict.keys()
-
-        for option in decor_options:
-            for id in decorations.decor_dict[option].keys():
-                if isinstance(id, str):
-                    continue
-
-                decor = decorations.decor_dict[option][id]
-                if int(decor["health"].split(",,")[1].split(",")[0]) == 0: # if decor is without health dont display it.
-                    removable_list.append((option, id))
-                    handle_axe_rewards(decorations, option, items)
-                    continue
-                # Gets x, y position of decoration
-                decor_x = decor["rect"].x - data["Zoom_rect"].x
-                decor_y = decor["rect"].y - data["Zoom_rect"].y
-
-                rect = I.pg.Rect(decor_x, decor_y, decor["rect"].w, decor["rect"].h)
-
-                handle_axe_chopping(rect, option, decorations.decor_dict, id)
-
-                handle_picaxe_chopping(rect, option, decorations.decor_dict, id)
-
-                # Check and process decorations in the upper part of the screen
-                if decor_y - rect.h / 2 <= 79 + I.info.OFFSCREEN[1] / 4:
-                    # I.pg.draw.line(sub_image[0], "black", [0,79 + I.info.OFFSCREEN[1] / 4], [300,79 + I.info.OFFSCREEN[1] / 4])
-                    display_lower_upper_decor(option, gifs, sub_image[0], rect, rooms, clock, screen, decor, decorations, decor_x, decor_y, data, spells, npc)
-                    adjusted_rect = I.pg.Rect(rect.x, rect.y + rect.h / 2, rect.w, rect.h - rect.h / 2)
-                    if decorations.decor_dict[option]["type"] == "House":
-                        adjusted_rect = I.pg.Rect(rect.x, rect.y + rect.h / 2, rect.w, rect.h - rect.h / 2 - 1)
-                    if decor["image"].get_rect().h == adjusted_rect.h:
-                        adjusted_rect = I.pg.Rect(adjusted_rect.x, adjusted_rect.y - adjusted_rect.h, adjusted_rect.w,adjusted_rect.h * 2)
-                    # I.T.Make_rect_visible(sub_image[0], adjusted_rect, "green")
-                    if I.info.Player_rect.colliderect(adjusted_rect):
-                        collide = (option, adjusted_rect)
-
-                # Check and process decorations in the lower part of the screen
-                if decor_y + rect.h / 2 >= 84 + I.info.OFFSCREEN[1] / 4:
-                    # I.pg.draw.line(sub_image[1], "black", [0,84 + I.info.OFFSCREEN[1] / 4], [300,84 + I.info.OFFSCREEN[1] / 4])
-                    display_lower_upper_decor(option, gifs, sub_image[1], rect, rooms, clock, screen, decor, decorations, decor_x, decor_y, data, spells, npc)
-                    adjusted_rect = I.pg.Rect(rect.x, rect.y + rect.h / 2, rect.w, rect.h - rect.h / 2)
-                    if decor["image"].get_rect().h == adjusted_rect.h:
-                        adjusted_rect = I.pg.Rect(adjusted_rect.x, adjusted_rect.y - adjusted_rect.h, adjusted_rect.w,adjusted_rect.h * 2)
-                    # I.T.Make_rect_visible(sub_image[1], adjusted_rect, "yellow")
-                    if I.info.Player_rect.colliderect(adjusted_rect):
-                        collide = (option, adjusted_rect)
-
-                decorations.displayed_rects.append(adjusted_rect)  # Add to the list of displayed rectangles
-                # I.T.Make_rect_visible(sub_image[0], I.info.Player_rect, "red")
-                # I.T.Make_rect_visible(sub_image[1], I.info.Player_rect, "blue")
-
-
+        collide = handle_outside_display(data, decorations, removable_list, items, spells, npc, screen, clock, gifs, rooms, collide, sub_image, mob, songs)
     else:
         sub_image = (screen, screen)
         door = render_house(sub_image[0], data, rooms)
         collide = handle_interior_visualisation(decorations, sub_image[0], data, gifs)
-        house_border_rect = interior_border_rect(S.SCREEN_WIDTH * 0.1, S.SCREEN_HEIGHT * 0.05, S.SCREEN_WIDTH * 0.8, S.SCREEN_HEIGHT * 0.85)
+        house_border_rect = interior_border_rect(S.SCREEN_WIDTH * 0.1, S.SCREEN_HEIGHT * 0.05, S.SCREEN_WIDTH * 0.8, S.SCREEN_HEIGHT * 0.85, decorations)
+        # I.T.Make_rect_visible(screen, house_border_rect[0], "green")
+        # I.T.Make_rect_visible(screen, house_border_rect[1], "green")
+        # I.T.Make_rect_visible(screen, house_border_rect[2], "green")
+        # I.T.Make_rect_visible(screen, house_border_rect[3], "green")
         me = I.pg.Rect(S.SCREEN_WIDTH / 2 - S.SCREEN_WIDTH / 25 + I.info.OFFSCREEN[0], S.SCREEN_HEIGHT / 2 - S.SCREEN_HEIGHT / 10 + I.info.OFFSCREEN[1], S.SCREEN_WIDTH / 22, S.SCREEN_HEIGHT / 8)
         handle_stepping_on_rect(me, door, data, sub_image[0], clock, spells, "Return", rooms, npc)
         collide = handle_stepping_on_rect(me, house_border_rect, data, 0, 0, collide, "Collide_list", rooms, decorations)
 
-    if mob != {}:
-        collide = handle_mob_visualisation(collide, sub_image, data, mob, gifs, songs, decorations, items)
+    collide = handle_death_visualisation(sub_image[0], data, gifs, collide, decorations)
 
-    collide = handle_death_visualisation(sub_image[0], data, gifs, collide)
+    collide = display_bacground_decor(sub_image[0], decorations, data, collide)
 
     cast_spell_handle(sub_image[0], data, spells, gifs, mob, songs, decorations, items, rooms)
+
+    display_folower(sub_image[0], gifs, data, decorations, mob, items)
 
     scaled_image = I.pg.transform.scale(sub_image[0], data["Window size"])
     screen.blit(scaled_image, (0, 0))
@@ -1831,10 +1965,18 @@ def New_Update(data, decorations, gifs, rooms, clock, screen, spells, npc, mob, 
 
     if S.GOD_MODE:
         collide = (0, 0)
-    Play.walking(dx, dy, collide, data, decorations, sub_image[1], rooms)
+
+    Play.walking(dx, dy, collide, data, decorations, sub_image[1], rooms, screen)
     display_strikes(screen, gifs, 0)
 
     display_char(dx, dy, screen, gifs, data, decorations)
+
+    if gifs["Level up"].start_gif:
+        frame = gifs["Level up"].next_frame(1)
+        rect = frame.get_rect()
+        # I.T.Make_rect_visible(screen, I.pg.Rect(S.SCREEN_WIDTH / 2 - S.SCREEN_WIDTH / 20 + I.info.OFFSCREEN[0], S.SCREEN_HEIGHT / 2 - S.SCREEN_HEIGHT / 20 * 2 + I.info.OFFSCREEN[1], rect.w * 2, rect.h * 2), "red")
+        frame = I.pg.transform.scale(frame, (rect.w * 4, rect.h * 4))
+        screen.blit(frame, [S.SCREEN_WIDTH / 2 - S.SCREEN_WIDTH / 10 + I.info.OFFSCREEN[0], S.SCREEN_HEIGHT / 2 - S.SCREEN_HEIGHT / 10 * 2 + I.info.OFFSCREEN[1]])
 
     display_strikes(screen, gifs, 1)
 
@@ -1847,13 +1989,21 @@ def New_Update(data, decorations, gifs, rooms, clock, screen, spells, npc, mob, 
 
     if removable_list != []:
         for option, id in removable_list:
-            # print("Remove: ", option, id)
             del decorations.decor_dict[option][id]
 
     handle_map_walk(data, rooms, screen, clock, spells, npc)
 
     return collide
 
+def handle_giant_tree(name, decorations, rect, sub_image, collide):
+    adjusted_rect = I.pg.Rect(rect.x, rect.y + rect.h * 0.75, rect.w, rect.h * 0.15)
+    second_rect = I.pg.Rect(rect.x + rect.w * 0.35, rect.y + rect.h * 0.5, rect.w * 0.3, rect.h * 0.3)
+    # I.T.Make_rect_visible(sub_image[0], second_rect, "red")
+    # I.T.Make_rect_visible(sub_image[0], adjusted_rect, "blue")
+    decorations.displayed_rects.append(second_rect)
+    if I.info.Player_rect.colliderect(second_rect):
+        collide = (name, adjusted_rect)
+    return collide, adjusted_rect
 def handle_map_walk(data, rooms, screen, clock, spells, npc):
     if rooms.type in ["Village"]:
         room_change = 0, 0
@@ -1885,97 +2035,258 @@ def handle_map_walk(data, rooms, screen, clock, spells, npc):
             Play.Start(screen, clock, rooms)
 
 
-def handle_picaxe_chopping(decor_rect, decor_name, decor_dict, id):
-    if I.info.PICAXE[0] != 0 and I.info.PICAXE[1] == 1000: # WILL CAUSE ISSUES WITH FASTER SWINGING AXES
-        if "Picaxe" in I.info.EQUIPED["Picaxe"]:
-            if I.info.PICAXE[0].colliderect(decor_rect):
-                type = I.info.EQUIPED["Picaxe"].split("|")[0].split(" ")[0]
-                if type == "Wooden":
-                    breakable = ["Stone_T_1"]
-                    damage = 1
-                elif type == "Stone":
-                    breakable = ["Stone_T_1", "Stone_S_1"]
-                    damage = 2
-                if decor_name in breakable:
-                    bool_var, health = decor_dict[decor_name][id]["health"].split(",,")
-                    health = int(health.split(",")[0]) - damage
-                    I.info.PICAXE = I.info.PICAXE[0], I.info.PICAXE[1] - 1 # it is no longer 1000 so it wont be comming back here for a second
-                    if health < 0:
-                        health = 0
-                    elif health < float(decor_dict[decor_name][id]["health"].split(",,")[1].split(",")[1]) / 2: # change texture once half is chopped off.
-                        path = decor_dict[decor_name]["path"]
-                        path_list = path.split(decor_name)
-                        path = path_list[0] + decor_name + "_Chop" + path_list[1]
-                        image = I.pg.image.load(path)
-                        decor_dict[decor_name][id]["image"] = image
 
 
-                    decor_dict[decor_name][id]["health"] = bool_var + ",," + str(health) + "," + decor_dict[decor_name][id]["health"].split(",,")[1].split(",")[1] # Removes 1 hp from wood. later change to amount of damage axe does
-                    print(decor_dict[decor_name][id])
-
-def handle_axe_chopping(decor_rect, decor_name, decor_dict, id):
-    if I.info.AXE[0] != 0 and I.info.AXE[1] == 1000: # WILL CAUSE ISSUES WITH FASTER SWINGING AXES
-        if "Axe" in I.info.EQUIPED["Axe"]:
-            if I.info.AXE[0].colliderect(decor_rect):
-                type = I.info.EQUIPED["Axe"].split("|")[0].split(" ")[0]
-                if type == "Wooden":
-                    choppable = ["Tree_T_1"]
-                    damage = 1
-                elif type == "Stone":
-                    choppable = ["Tree_T_1", "Tree_M_1"]
-                    damage = 2
-                if decor_name in choppable:
-                    bool_var, health = decor_dict[decor_name][id]["health"].split(",,")
-                    health = int(health.split(",")[0]) - damage
-                    I.info.AXE = I.info.AXE[0], I.info.AXE[1] - 1 # it is no longer 1000 so it wont be comming back here for a second
-                    if health < 0:
-                        health = 0
-                    elif health < float(decor_dict[decor_name][id]["health"].split(",,")[1].split(",")[1]) / 2: # change texture once half is chopped off.
-                        path = decor_dict[decor_name]["path"]
-                        path_list = path.split(decor_name)
-                        path = path_list[0] + decor_name + "_Chop" + path_list[1]
-                        image = I.pg.image.load(path)
-                        decor_dict[decor_name][id]["image"] = image
 
 
-                    decor_dict[decor_name][id]["health"] = bool_var + ",," + str(health) + "," + decor_dict[decor_name][id]["health"].split(",,")[1].split(",")[1] # Removes 1 hp from wood. later change to amount of damage axe does
-                    # print(decor_dict[decor_name][id])
 
-def handle_axe_rewards(decorations, tree_name, items):
-    if "PICAXE" in decorations.decor_dict[tree_name]["action"]:
-        action_list = decorations.decor_dict[tree_name]["action"].split(",,")
-        for action in action_list:
-            if "PICAXE" in action:
-                action = action[7:]
-                possible_rewards = action.split(",")
-                loot_list = []
-                amount_list = []
-                print(action, possible_rewards)
-                for reward in possible_rewards:
-                    loot, chance_min, chance_max = reward.split(":")
+def display_decor_hp(decor, rect, sub_image):
+    if decor["health"].split(",,")[1].split(",")[0] < decor["health"].split(",,")[1].split(",")[1]:
+        hp_rect = (rect.x, rect.y - rect.h * 0.2, rect.w, 1)
+        I.pg.draw.rect(sub_image, "red", hp_rect)
+        remainder_hp = float(decor["health"].split(",,")[1].split(",")[0]) / float(decor["health"].split(",,")[1].split(",")[1])
+        hp_rect = (rect.x, rect.y - rect.h * 0.2, rect.w * remainder_hp, 1)
+        I.pg.draw.rect(sub_image, "green", hp_rect)
 
-                    amount = int(random.uniform(float(chance_min), float(chance_max)))
-                    if amount != 0:
-                        loot_list.append(loot)
-                        amount_list.append(amount)
-                    print(amount, loot_list, amount_list)
 
-    elif "AXE" in decorations.decor_dict[tree_name]["action"]:
-        action_list = decorations.decor_dict[tree_name]["action"].split(",,")
-        for action in action_list:
-            if "AXE" in action:
-                action = action[4:]
-                possible_rewards = action.split(",")
-                loot_list = []
-                amount_list = []
-                for reward in possible_rewards:
-                    loot, chance_min, chance_max = reward.split(":")
+def process_decor(option, gifs, sub_image, rect, rooms, clock, screen, decor, decorations, data, spells, npc, collide, id):
+    display_lower_upper_decor(option, gifs, sub_image, rect, rooms, clock, screen, decor, decorations, data, spells, npc)
 
-                    amount = int(random.uniform(float(chance_min), float(chance_max)))
-                    if amount != 0:
-                        loot_list.append(loot)
-                        amount_list.append(amount)
+    adjusted_rect = I.pg.Rect(rect.x, rect.y + rect.h / 2, rect.w, rect.h - rect.h / 2)
 
-    for i in range(0, len(loot_list)):
-        add_to_backpack(loot_list[i], amount_list[i], items)
-        Ff.display_text_player("Acquired " + str(amount_list[i]) + " " + loot_list[i], 5000)
+    if option == "Tree_SB_1":
+        collide, adjusted_rect = handle_giant_tree(option, decorations, rect, sub_image, collide)
+
+
+    if decorations.decor_dict[option]["type"] == "House":
+        adjusted_rect = I.pg.Rect(rect.x, rect.y + rect.h / 2, rect.w, rect.h - rect.h / 2 - 1)
+
+    if decor["image"].get_rect().h == adjusted_rect.h:
+        adjusted_rect = I.pg.Rect(adjusted_rect.x, adjusted_rect.y - adjusted_rect.h, adjusted_rect.w,
+                                  adjusted_rect.h * 2)
+    display_decor_hp(decor, rect, sub_image)
+
+    if "Wave" not in option:
+        decorations.displayed_rects.append(adjusted_rect)  # Add to the list of displayed rectangles
+
+    if I.info.Player_rect.colliderect(adjusted_rect):
+        if option in I.info.HARVESTABLE:
+            collide = (option, id)
+        else:
+            collide = (option, adjusted_rect)
+
+    return collide
+
+
+def handle_outside_display(data, decorations, removable_list, items, spells, npc, screen, clock, gifs, rooms, collide, sub_image, mob, songs):
+
+
+    # I.T.Make_rect_visible(sub_image[0], I.info.Player_rect, "red")
+
+    decorations.displayed_rects = []  # List to keep track of displayed rectangles
+    decorations.displayed_rects_full = []  # List to keep track of displayed rectangles
+
+    decor_options = decorations.decor_dict.keys()
+    #{'action': 'AXE:Light Wood', 'health': 'True,,15,15', 'type': 'Nature', 'path': 'static/images/Background/Trees/Tree_M_3.png', 0: {'name': 'Tree_M_3', 'id': 0, 'image': <Surface(28x44x32 SW)>, 'rect': <rect(45, 517, 28, 44)>, 'effect': '', 'health': 'True,,15,15'}, 1: {'name': 'Tree_M_3', 'id': 1, 'image': <Surface(28x44x32 SW)>, 'rect': <rect(30, 558, 28, 44)>, 'effect': '', 'health': 'True,,15,15'}, 2: {'name': 'Tree_M_3', 'id': 2, 'image': <Surface(28x44x32 SW)>, 'rect': <rect(28, 700, 28, 44)>, 'effect': '', 'health': 'True,,15,15'}, 3: {'name': 'Tree_M_3', 'id': 3, 'image': <Surface(28x44x32 SW)>, 'rect': <rect(71, 759, 28, 44)>, 'effect': '', 'health': 'True,,15,15'}, 4: {'name': 'Tree_M_3', 'id': 4, 'image': <Surface(28x44x32 SW)>, 'rect': <rect(103, 802, 28, 44)>, 'effect': '', 'health': 'True,,15,15'}, 5: {'name': 'Tree_M_3', 'id': 5, 'image': <Surface(28x44x32 SW)>, 'rect': <rect(173, 848, 28, 44)>, 'effect': '', 'health': 'True,,15,15'}, 6: {'name': 'Tree_M_3', 'id': 6, 'image': <Surface(28x44x32 SW)>, 'rect': <rect(74, 854, 28, 44)>, 'effect': '', 'health': 'True,,15,15'}, 7: {'name': 'Tree_M_3', 'id': 7, 'image': <Surface(28x44x32 SW)>, 'rect': <rect(221, 869, 28, 44)>, 'effect': '', 'health': 'True,,15,15'}, 8: {'name': 'Tree_M_3', 'id': 8, 'image': <Surface(28x44x32 SW)>, 'rect': <rect(80, 876, 28, 44)>, 'effect': '', 'health': 'True,,15,15'}, 9: {'name': 'Tree_M_3', 'id': 9, 'image': <Surface(28x44x32 SW)>, 'rect': <rect(211, 894, 28, 44)>, 'effect': '', 'health': 'True,,15,15'}, 10: {'name': 'Tree_M_3', 'id': 10, 'image': <Surface(28x44x32 SW)>, 'rect': <rect(372, 923, 28, 44)>, 'effect': '', 'health': 'True,,15,15'}, 11: {'name': 'Tree_M_3', 'id': 11, 'image': <Surface(28x44x32 SW)>, 'rect': <rect(150, 965, 28, 44)>, 'effect': '', 'health': 'True,,15,15'}}
+
+    update_decor_dict(decorations)
+
+    for option in decor_options:
+        for id in decorations.decor_dict[option].keys():
+            if isinstance(id, str) or "WALK" in decorations.decor_dict[option]["action"]:
+                continue
+            decor = decorations.decor_dict[option][id]
+            # Gets x, y position of decoration
+            decor_x = decor["rect"].x - data["Zoom_rect"].x
+            decor_y = decor["rect"].y - data["Zoom_rect"].y
+
+            rect = I.pg.Rect(decor_x, decor_y, decor["rect"].w, decor["rect"].h)
+            decorations.displayed_rects_full.append(rect)
+            # print(decorations.decor_dict[option])
+
+            if int(decor["health"].split(",,")[1].split(",")[0]) == 0:  # if decor is without health dont display it.
+                removable_list.append((option, id))
+                I.TB.handle_axe_rewards(decorations, option, items)
+                continue
+
+            I.TB.handle_axe_chopping(rect, option, decorations.decor_dict, id, items)
+
+            I.TB.handle_picaxe_chopping(rect, option, decorations.decor_dict, id, items)
+
+            # Check and process decorations in the upper part of the screen
+            if decor_y - rect.h / 2 <= 79 + I.info.OFFSCREEN[1] / 4:
+                collide = process_decor(option, gifs, sub_image[0], rect, rooms, clock, screen, decor, decorations, data, spells, npc, collide, id)
+
+            if decor_y + rect.h / 2 >= 84 + I.info.OFFSCREEN[1] / 4:
+                collide = process_decor(option, gifs, sub_image[1], rect, rooms, clock, screen, decor, decorations, data, spells, npc, collide, id)
+                # if mob != {}:
+                #     collide = handle_mob_visualisation(collide, sub_image, data, mob, gifs, songs, decorations, items, 1)
+
+            collide = handle_dam_border(rooms, data, sub_image, decorations, collide)
+            # I.T.Make_rect_visible(sub_image[0], rect, "green")
+
+
+            if collide[0] != False and "Wave" in collide[0]:
+                collide = [False]
+
+    return collide
+
+def handle_dam_border(rooms, data, sub_image, decorations, collide):
+    if rooms.type == "Village" and rooms.name == "Village_10_9":
+        border1 = I.pg.Rect(467 - data["Zoom_rect"].x, 174 - data["Zoom_rect"].y, 44, 10)
+        # I.T.Make_rect_visible(sub_image[0], border1, "red")
+        decorations.displayed_rects.append(border1)
+
+        border2 = I.pg.Rect(462 - data["Zoom_rect"].x, 174 - data["Zoom_rect"].y, 10, 190)
+        # I.T.Make_rect_visible(sub_image[0], border2, "yellow")
+        decorations.displayed_rects.append(border2)
+
+        border3 = I.pg.Rect(505 - data["Zoom_rect"].x, 174 - data["Zoom_rect"].y, 10, 88)
+        # I.T.Make_rect_visible(sub_image[0], border3, "yellow")
+        decorations.displayed_rects.append(border3)
+
+        border4 = I.pg.Rect(505 - data["Zoom_rect"].x, 292 - data["Zoom_rect"].y, 195, 10)
+        # I.T.Make_rect_visible(sub_image[0], border4, "red")
+        decorations.displayed_rects.append(border4)
+
+        border5 = I.pg.Rect(505 - data["Zoom_rect"].x, 292 - data["Zoom_rect"].y, 10, 70)
+        # I.T.Make_rect_visible(sub_image[0], border5, "yellow")
+        decorations.displayed_rects.append(border5)
+
+        border6 = I.pg.Rect(505 - data["Zoom_rect"].x, 258 - data["Zoom_rect"].y, 195, 10)
+        # I.T.Make_rect_visible(sub_image[0], border6, "red")
+        decorations.displayed_rects.append(border6)
+
+        border7 = I.pg.Rect(695 - data["Zoom_rect"].x, 264 - data["Zoom_rect"].y, 10, 40)
+        # I.T.Make_rect_visible(sub_image[0], border7, "yellow")
+        decorations.displayed_rects.append(border7)
+
+        border8 = I.pg.Rect(905 - data["Zoom_rect"].x, 340 - data["Zoom_rect"].y, 95, 10)
+        # I.T.Make_rect_visible(sub_image[0], border8, "yellow")
+        decorations.displayed_rects.append(border8)
+
+        border9 = I.pg.Rect(705 - data["Zoom_rect"].x, 338 - data["Zoom_rect"].y, 200, 10)
+        # I.T.Make_rect_visible(sub_image[0], border9, "yellow")
+        decorations.displayed_rects.append(border9)
+
+        border10 = I.pg.Rect(505 - data["Zoom_rect"].x, 336 - data["Zoom_rect"].y, 200, 10)
+        # I.T.Make_rect_visible(sub_image[0], border10, "yellow")
+        decorations.displayed_rects.append(border10)
+
+        border11 = I.pg.Rect(400 - data["Zoom_rect"].x, 310 - data["Zoom_rect"].y, 70, 10)
+        # I.T.Make_rect_visible(sub_image[0], border11, "yellow")
+        decorations.displayed_rects.append(border11)
+
+        border12 = I.pg.Rect(200 - data["Zoom_rect"].x, 308 - data["Zoom_rect"].y, 200, 10)
+        # I.T.Make_rect_visible(sub_image[0], border12, "yellow")
+        decorations.displayed_rects.append(border12)
+
+        border13 = I.pg.Rect(0 - data["Zoom_rect"].x, 306 - data["Zoom_rect"].y, 200, 10)
+        # I.T.Make_rect_visible(sub_image[0], border13, "yellow")
+        decorations.displayed_rects.append(border13)
+
+        # x1 = 0 - data["Zoom_rect"].x
+        # y1 = 308 - data["Zoom_rect"].y
+        # x2 = 470 - data["Zoom_rect"].x
+        # y2 = 415 - data["Zoom_rect"].y
+        # # border8 = I.pg.draw.line(sub_image[0], "red", (x1, y1), (x2, y2))
+        # z1 = 510 - data["Zoom_rect"].x
+        # c1 = 428 - data["Zoom_rect"].y
+        # z2 = 1000 - data["Zoom_rect"].x
+        # c2 = 578 - data["Zoom_rect"].y
+        # border9 = I.pg.draw.line(sub_image[0], "red", (z1, c1), (z2, c2))
+        # decorations.displayed_rects.append(border8)
+        # decorations.displayed_rects.append(border9)
+        # I.T.Make_rect_visible(sub_image[0], border8, "red")
+        # I.T.Make_rect_visible(sub_image[0], border9, "red")
+        # if Ff.rect_intersects_line(I.info.Player_rect, x1, y1, x2, y2):
+        #     # print("collide")
+        #     collide = "border", "line"
+
+        rect_list = [border1, border2, border3, border4, border5, border6, border7, border8, border9, border10, border11, border12, border13]
+        collide_id = I.info.Player_rect.collidelistall(rect_list)
+        if collide_id != []:
+            # print(collide_id)
+            collide = ("border", rect_list[collide_id[0]])
+
+    return collide
+
+def level_up(player, gifs):
+    exp = exp_till_lvup(player)
+    if player["Experience"] >= exp:
+        player["Experience"] = 0
+        player["Level"] = 1 + int(player["Level"])
+        player["hp"] = player["hp"][1], player["hp"][1]
+        player["mana"] = player["mana"][1], player["mana"][1]
+        gifs["Level up"].Start_gif("Level up", [S.SCREEN_WIDTH / 2 - S.SCREEN_WIDTH / 20, S.SCREEN_HEIGHT / 2 - S.SCREEN_HEIGHT / 20 * 2, S.SCREEN_WIDTH / 14, S.SCREEN_HEIGHT / 7])
+
+def update_decor_dict(decorations):
+    if I.info.MAP_CHANGE.get(I.info.CURRENT_ROOM["name"]) != None and I.info.MAP_CHANGE[I.info.CURRENT_ROOM["name"]].get("add") != None:
+        for option in I.info.MAP_CHANGE[I.info.CURRENT_ROOM["name"]]["add"].keys():
+            if decorations.decor_dict.get(option) != None:
+                for decor in I.info.MAP_CHANGE[I.info.CURRENT_ROOM["name"]]["add"][option]:
+                    if decorations.decor_dict[option].get(decor[0]) == None:
+                        path = decorations.decor_dict[option]["path"]
+                        health = decorations.decor_dict[option]["health"]
+                        image = I.pg.image.load(path).convert_alpha()
+                        img_rect = image.get_rect(topleft=(decor[1][0], decor[1][1]))
+                        decorations.decor_dict[option][decor[0]] = {"name": option, "id": decor[0], "image": image, "rect": img_rect, "effect": "", "health": health}
+            else:
+                """decoration doesn't exist in decor_dict, creating key"""
+                old_name_split = option.split("_")
+                old_name = old_name_split[0] + "_" + old_name_split[1] + "_" + old_name_split[2]
+                if decorations.decor_dict.get(old_name) != None:
+                    """old name exists, using it's data"""
+                    decor_data = decorations.decor_dict[old_name]
+                    new_path = decor_data["path"].replace(".png", "")
+                    new_path += "_" + old_name_split[3] + ".png"
+                    decorations.decor_dict[option] = {
+                        'action': decor_data["action"],
+                        'health': decor_data["health"],
+                        'type': decor_data["type"],
+                        'path': new_path}
+    if I.info.MAP_CHANGE.get(I.info.CURRENT_ROOM["name"]) != None and I.info.MAP_CHANGE[I.info.CURRENT_ROOM["name"]].get("remove") != None:
+        for option in I.info.MAP_CHANGE[I.info.CURRENT_ROOM["name"]]["remove"].keys():
+            for id in I.info.MAP_CHANGE[I.info.CURRENT_ROOM["name"]]["remove"][option]:
+                del decorations.decor_dict[option][id]
+        I.info.MAP_CHANGE[I.info.CURRENT_ROOM["name"]]["remove"] = {}
+
+
+def display_bacground_decor(sub_image, decorations, data, collide):
+    for option in decorations.decor_dict.keys():
+        if "WALK" in decorations.decor_dict[option]["action"]:
+            for id in decorations.decor_dict[option].keys():
+                if isinstance(id, int):
+                    decor = decorations.decor_dict[option][id]
+                    decor_x = decor["rect"].x - data["Zoom_rect"].x
+                    decor_y = decor["rect"].y - data["Zoom_rect"].y
+
+                    rect = I.pg.Rect(decor_x, decor_y, decor["rect"].w, decor["rect"].h)
+                    # print(decor)
+
+                    size = decor["image"].get_rect()
+                    decor["image"] = I.pg.transform.scale(decor["image"], (size.w, size.h))
+                    sub_image.blit(decor["image"], (rect.x, rect.y))
+
+                    if I.info.Player_rect.colliderect(rect):
+                        collide = [option, id]
+    return collide
+
+
+def closest_mob(mob_class, current_pos, name):
+    final_distance = 99999
+    target_pos = 0,0
+    target = ""
+    i = 0
+    for key in mob_class.keys():
+        for id in mob_class[key].mobs:
+            mob_rect = id["current_pos"]
+            distance = ((current_pos.x - mob_rect.x) ** 2 + (current_pos.y - mob_rect.y) ** 2) ** 0.5
+            if name != key.replace(" Mine", ""):
+                if final_distance > distance:
+                    final_distance = int(distance)
+                    target_pos = mob_rect.x, mob_rect.y
+                    target = key, i, mob_rect
+            i += 1
+        i = 0
+    return target_pos, target

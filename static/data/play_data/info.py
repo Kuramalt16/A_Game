@@ -3,7 +3,7 @@ SELECTED_CHARACTER = ""
 
 DATA = {}
 
-TICK = 50
+TICK = 100
 
 FAST = 1
 
@@ -40,10 +40,10 @@ TEXT = [] # place holder for displayable text on the screen
 
 HARVESTED_OBJECTS = {} # Place holder for harvested decoration lists which contain rects
 
-COMBAT_RECT = (0, 0) # rect, time
-AXE = (0, 0)  # rect, time
-PICAXE = (0, 0)  # rect, time
-POS_CHANGE = 0, 0  # Last orientation, type of strike
+COMBAT_RECT = [0, 0] # rect, time
+AXE = [0, 0]  # rect, time
+PICAXE = [0, 0]  # rect, time
+POS_CHANGE = (0, 0)  # Last orientation, type of strike
 
 BASE_ATTACKING_SPEED = 500  # time used for timer to reset. multiplied by the weapon speed
 BASE_ATTACKING_DAMAGE = 1  # damage used for damaging mobs
@@ -51,13 +51,13 @@ BASE_KNOCKBACK = 1 # how many steps mobs get knocked back
 
 CURRENT_ROOM = ""  # data used for knowing which room is currently used. after mobs start reziding in buildings this will stop
 
-APPLIANCE_CLICK = "" # for furnace to know when it was clicked and able to play the gif
+APPLIANCE_CLICK = [""]  # for furnace to know when it was clicked and able to play the gif
 DOOR_CLICK = 90, ""  # for doors when to open. the 90 is because i need a big value and then decreese from some other set value. and char value is for which building it was.
 
 EQUIPED = {  # USED to know what is equiped on the char
-    "Sword": 0,
-    "Axe": 0,
-    "Picaxe": 0,
+    "Sword": (0, 27),
+    "Axe": (0, 27),
+    "Picaxe": (0, 27),
 }
 
 equipment = {  # equipment posisions with block tuple in inventory
@@ -76,10 +76,21 @@ equipment = {  # equipment posisions with block tuple in inventory
     (-10, 8): "L_Ring",
 }
 
-Temp_variable_holder = []  # used for cooking food
-
 # CONVERSATION = 0
 
 QUESTS = 0  # obtained quests
 COMPLETED_QUESTS = 0  # completed quests. removes data from previous variable
 
+FOLLOWER = {
+    "Name": "",
+    "current_pos": (0,0),
+    "target_pos": (0,0),
+    "orientation": [],
+    "aggressive": {
+        "attack": False,
+        "mob": 0,
+        "mob_pos": (0,0),
+        "class": 0}
+            }  # [Name: str, current_pos: tuple, target_pos: tuple, orientation: tuple_list, agressive]
+
+MAP_CHANGE = {}
