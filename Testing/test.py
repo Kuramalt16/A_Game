@@ -309,7 +309,7 @@ def rename_images_in_folder(folder_path):
 
 # Example usage
 
-# rename_images_in_folder("C:/Users/gytis/PycharmProjects/A_Game/static/images/Playing/Level up")  #at the end of the path last folder doesn't need /
+# rename_images_in_folder("C:/Users/gytis/PycharmProjects/A_Game/static/images/Playing/NPC/Tutorial ManTeleport")  #at the end of the path last folder doesn't need /
 
 
 

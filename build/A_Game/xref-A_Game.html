@@ -280,7 +280,7 @@ imported by:
   <a target="code" href="" type="text/plain"><tt>'org.python'</tt></a>
 <span class="moduletype">MissingModule</span>  <div class="import">
 imported by:
-    <a href="#copy">copy</a>
+    <a href="#pickle">pickle</a>
  &#8226;   <a href="#xml.sax">xml.sax</a>
 
   </div>
@@ -360,19 +360,27 @@ imported by:
 <span class="moduletype">NamespacePackage</span>  <div class="import">
 imports:
     <a href="#Backend.Character_selection_backend">Backend.Character_selection_backend</a>
+ &#8226;   <a href="#Backend.Dialog_backend">Backend.Dialog_backend</a>
  &#8226;   <a href="#Backend.Play">Backend.Play</a>
  &#8226;   <a href="#Backend.Settings_backend">Backend.Settings_backend</a>
  &#8226;   <a href="#Backend.Setup_pygame">Backend.Setup_pygame</a>
+ &#8226;   <a href="#Backend.Spell_Backend">Backend.Spell_Backend</a>
+ &#8226;   <a href="#Backend.Tool_backend">Backend.Tool_backend</a>
 
   </div>
   <div class="import">
 imported by:
     <a href="#A_Game.py">A_Game.py</a>
  &#8226;   <a href="#Backend.Character_selection_backend">Backend.Character_selection_backend</a>
+ &#8226;   <a href="#Backend.Dialog_backend">Backend.Dialog_backend</a>
  &#8226;   <a href="#Backend.Play">Backend.Play</a>
  &#8226;   <a href="#Backend.Settings_backend">Backend.Settings_backend</a>
  &#8226;   <a href="#Backend.Setup_pygame">Backend.Setup_pygame</a>
+ &#8226;   <a href="#Backend.Spell_Backend">Backend.Spell_Backend</a>
+ &#8226;   <a href="#Backend.Tool_backend">Backend.Tool_backend</a>
  &#8226;   <a href="#Render.Background_Render">Render.Background_Render</a>
+ &#8226;   <a href="#utils.Imports">utils.Imports</a>
+ &#8226;   <a href="#utils.threads">utils.threads</a>
 
   </div>
 
@@ -404,6 +412,31 @@ imported by:
 </div>
 
 <div class="node">
+  <a name="Backend.Dialog_backend"></a>
+  <a target="code" href="///C:/Users/gytis/PycharmProjects/A_Game/Backend/Dialog_backend.py" type="text/plain"><tt>Backend.Dialog_backend</tt></a>
+<span class="moduletype">SourceModule</span>  <div class="import">
+imports:
+    <a href="#Backend">Backend</a>
+ &#8226;   <a href="#Backend.Play">Backend.Play</a>
+ &#8226;   <a href="#Render">Render</a>
+ &#8226;   <a href="#Render.Background_Render">Render.Background_Render</a>
+ &#8226;   <a href="#Values">Values</a>
+ &#8226;   <a href="#Values.Settings">Values.Settings</a>
+ &#8226;   <a href="#utils">utils</a>
+ &#8226;   <a href="#utils.Frequent_functions">utils.Frequent_functions</a>
+ &#8226;   <a href="#utils.Imports">utils.Imports</a>
+
+  </div>
+  <div class="import">
+imported by:
+    <a href="#Backend">Backend</a>
+ &#8226;   <a href="#utils.Imports">utils.Imports</a>
+
+  </div>
+
+</div>
+
+<div class="node">
   <a name="Backend.Play"></a>
   <a target="code" href="///C:/Users/gytis/PycharmProjects/A_Game/Backend/Play.py" type="text/plain"><tt>Backend.Play</tt></a>
 <span class="moduletype">SourceModule</span>  <div class="import">
@@ -425,8 +458,10 @@ imports:
   <div class="import">
 imported by:
     <a href="#Backend">Backend</a>
+ &#8226;   <a href="#Backend.Dialog_backend">Backend.Dialog_backend</a>
  &#8226;   <a href="#Backend.Setup_pygame">Backend.Setup_pygame</a>
  &#8226;   <a href="#Render.Background_Render">Render.Background_Render</a>
+ &#8226;   <a href="#utils.threads">utils.threads</a>
 
   </div>
 
@@ -482,6 +517,43 @@ imported by:
     <a href="#A_Game.py">A_Game.py</a>
  &#8226;   <a href="#Backend">Backend</a>
  &#8226;   <a href="#Backend.Play">Backend.Play</a>
+
+  </div>
+
+</div>
+
+<div class="node">
+  <a name="Backend.Spell_Backend"></a>
+  <a target="code" href="///C:/Users/gytis/PycharmProjects/A_Game/Backend/Spell_Backend.py" type="text/plain"><tt>Backend.Spell_Backend</tt></a>
+<span class="moduletype">SourceModule</span>  <div class="import">
+imports:
+    <a href="#Backend">Backend</a>
+
+  </div>
+  <div class="import">
+imported by:
+    <a href="#Backend">Backend</a>
+ &#8226;   <a href="#utils.Imports">utils.Imports</a>
+
+  </div>
+
+</div>
+
+<div class="node">
+  <a name="Backend.Tool_backend"></a>
+  <a target="code" href="///C:/Users/gytis/PycharmProjects/A_Game/Backend/Tool_backend.py" type="text/plain"><tt>Backend.Tool_backend</tt></a>
+<span class="moduletype">SourceModule</span>  <div class="import">
+imports:
+    <a href="#Backend">Backend</a>
+ &#8226;   <a href="#utils">utils</a>
+ &#8226;   <a href="#utils.Frequent_functions">utils.Frequent_functions</a>
+ &#8226;   <a href="#utils.Imports">utils.Imports</a>
+
+  </div>
+  <div class="import">
+imported by:
+    <a href="#Backend">Backend</a>
+ &#8226;   <a href="#utils.Imports">utils.Imports</a>
 
   </div>
 
@@ -2717,6 +2789,7 @@ imports:
   <div class="import">
 imported by:
     <a href="#Backend.Character_selection_backend">Backend.Character_selection_backend</a>
+ &#8226;   <a href="#Backend.Dialog_backend">Backend.Dialog_backend</a>
  &#8226;   <a href="#Backend.Play">Backend.Play</a>
  &#8226;   <a href="#Backend.Settings_backend">Backend.Settings_backend</a>
  &#8226;   <a href="#Backend.Setup_pygame">Backend.Setup_pygame</a>
@@ -2750,7 +2823,8 @@ imports:
   </div>
   <div class="import">
 imported by:
-    <a href="#Backend.Play">Backend.Play</a>
+    <a href="#Backend.Dialog_backend">Backend.Dialog_backend</a>
+ &#8226;   <a href="#Backend.Play">Backend.Play</a>
  &#8226;   <a href="#Render">Render</a>
  &#8226;   <a href="#static.data.play_data.mob_data">static.data.play_data.mob_data</a>
 
@@ -2857,6 +2931,7 @@ imported by:
 <span class="moduletype">NamespacePackage</span>  <div class="import">
 imports:
     <a href="#Testing.test">Testing.test</a>
+ &#8226;   <a href="#Testing.testing_displays">Testing.testing_displays</a>
 
   </div>
   <div class="import">
@@ -2864,6 +2939,7 @@ imported by:
     <a href="#Backend.Setup_pygame">Backend.Setup_pygame</a>
  &#8226;   <a href="#Render.Main_Menu_render">Render.Main_Menu_render</a>
  &#8226;   <a href="#Testing.test">Testing.test</a>
+ &#8226;   <a href="#Testing.testing_displays">Testing.testing_displays</a>
  &#8226;   <a href="#utils.Imports">utils.Imports</a>
 
   </div>
@@ -2898,6 +2974,25 @@ imported by:
 </div>
 
 <div class="node">
+  <a name="Testing.testing_displays"></a>
+  <a target="code" href="///C:/Users/gytis/PycharmProjects/A_Game/Testing/testing_displays.py" type="text/plain"><tt>Testing.testing_displays</tt></a>
+<span class="moduletype">SourceModule</span>  <div class="import">
+imports:
+    <a href="#Testing">Testing</a>
+ &#8226;   <a href="#utils">utils</a>
+ &#8226;   <a href="#utils.Imports">utils.Imports</a>
+
+  </div>
+  <div class="import">
+imported by:
+    <a href="#Testing">Testing</a>
+ &#8226;   <a href="#utils.Imports">utils.Imports</a>
+
+  </div>
+
+</div>
+
+<div class="node">
   <a name="Values"></a>
   <a target="code" href="-" type="text/plain"><tt>Values</tt></a>
 <span class="moduletype">NamespacePackage</span>  <div class="import">
@@ -2910,6 +3005,7 @@ imports:
   <div class="import">
 imported by:
     <a href="#Backend.Character_selection_backend">Backend.Character_selection_backend</a>
+ &#8226;   <a href="#Backend.Dialog_backend">Backend.Dialog_backend</a>
  &#8226;   <a href="#Backend.Play">Backend.Play</a>
  &#8226;   <a href="#Backend.Settings_backend">Backend.Settings_backend</a>
  &#8226;   <a href="#Backend.Setup_pygame">Backend.Setup_pygame</a>
@@ -2923,10 +3019,14 @@ imported by:
  &#8226;   <a href="#Values.Settings">Values.Settings</a>
  &#8226;   <a href="#Values.Songs">Values.Songs</a>
  &#8226;   <a href="#static.data.Character_byte_data">static.data.Character_byte_data</a>
+ &#8226;   <a href="#static.data.play_data.gifs">static.data.play_data.gifs</a>
  &#8226;   <a href="#static.data.play_data.mob_data">static.data.play_data.mob_data</a>
+ &#8226;   <a href="#static.dialog.Dialog">static.dialog.Dialog</a>
  &#8226;   <a href="#static.items.items">static.items.items</a>
+ &#8226;   <a href="#static.rooms.rooms">static.rooms.rooms</a>
  &#8226;   <a href="#utils.Frequent_functions">utils.Frequent_functions</a>
  &#8226;   <a href="#utils.Imports">utils.Imports</a>
+ &#8226;   <a href="#utils.threads">utils.threads</a>
 
   </div>
 
@@ -2960,6 +3060,7 @@ imports:
   <div class="import">
 imported by:
     <a href="#Backend.Character_selection_backend">Backend.Character_selection_backend</a>
+ &#8226;   <a href="#Backend.Dialog_backend">Backend.Dialog_backend</a>
  &#8226;   <a href="#Backend.Play">Backend.Play</a>
  &#8226;   <a href="#Backend.Settings_backend">Backend.Settings_backend</a>
  &#8226;   <a href="#Backend.Setup_pygame">Backend.Setup_pygame</a>
@@ -2972,9 +3073,13 @@ imported by:
  &#8226;   <a href="#Values">Values</a>
  &#8226;   <a href="#Values.Songs">Values.Songs</a>
  &#8226;   <a href="#static.data.Character_byte_data">static.data.Character_byte_data</a>
+ &#8226;   <a href="#static.data.play_data.gifs">static.data.play_data.gifs</a>
  &#8226;   <a href="#static.data.play_data.mob_data">static.data.play_data.mob_data</a>
+ &#8226;   <a href="#static.dialog.Dialog">static.dialog.Dialog</a>
  &#8226;   <a href="#static.items.items">static.items.items</a>
+ &#8226;   <a href="#static.rooms.rooms">static.rooms.rooms</a>
  &#8226;   <a href="#utils.Frequent_functions">utils.Frequent_functions</a>
+ &#8226;   <a href="#utils.threads">utils.threads</a>
 
   </div>
 
@@ -5816,8 +5921,8 @@ imported by:
   <a target="code" href="///C:/Users/gytis/AppData/Local/Programs/Python/Python39/lib/copy.py" type="text/plain"><tt>copy</tt></a>
 <span class="moduletype">SourceModule</span>  <div class="import">
 imports:
-    <a href="#'org.python'">'org.python'</a>
- &#8226;   <a href="#copyreg">copyreg</a>
+    <a href="#copyreg">copyreg</a>
+ &#8226;   <a href="#org">org</a>
  &#8226;   <a href="#types">types</a>
  &#8226;   <a href="#weakref">weakref</a>
 
@@ -17458,7 +17563,7 @@ imported by:
   <a target="code" href="" type="text/plain"><tt>org</tt></a>
 <span class="moduletype">MissingModule</span>  <div class="import">
 imported by:
-    <a href="#pickle">pickle</a>
+    <a href="#copy">copy</a>
 
   </div>
 
@@ -18098,14 +18203,14 @@ imported by:
   <a target="code" href="///C:/Users/gytis/AppData/Local/Programs/Python/Python39/lib/pickle.py" type="text/plain"><tt>pickle</tt></a>
 <span class="moduletype">SourceModule</span>  <div class="import">
 imports:
-    <a href="#_compat_pickle">_compat_pickle</a>
+    <a href="#'org.python'">'org.python'</a>
+ &#8226;   <a href="#_compat_pickle">_compat_pickle</a>
  &#8226;   <a href="#_pickle">_pickle</a>
  &#8226;   <a href="#codecs">codecs</a>
  &#8226;   <a href="#copyreg">copyreg</a>
  &#8226;   <a href="#functools">functools</a>
  &#8226;   <a href="#io">io</a>
  &#8226;   <a href="#itertools">itertools</a>
- &#8226;   <a href="#org">org</a>
  &#8226;   <a href="#pprint">pprint</a>
  &#8226;   <a href="#re">re</a>
  &#8226;   <a href="#struct">struct</a>
@@ -21051,7 +21156,9 @@ imported by:
 imported by:
     <a href="#static.Spells">static.Spells</a>
  &#8226;   <a href="#static.data">static.data</a>
+ &#8226;   <a href="#static.dialog">static.dialog</a>
  &#8226;   <a href="#static.items">static.items</a>
+ &#8226;   <a href="#static.rooms">static.rooms</a>
 
   </div>
 
@@ -21182,8 +21289,11 @@ imported by:
   <a target="code" href="///C:/Users/gytis/PycharmProjects/A_Game/static/data/play_data/gifs.py" type="text/plain"><tt>static.data.play_data.gifs</tt></a>
 <span class="moduletype">SourceModule</span>  <div class="import">
 imports:
-    <a href="#static.data.play_data">static.data.play_data</a>
+    <a href="#Values">Values</a>
+ &#8226;   <a href="#Values.Settings">Values.Settings</a>
+ &#8226;   <a href="#static.data.play_data">static.data.play_data</a>
  &#8226;   <a href="#utils">utils</a>
+ &#8226;   <a href="#utils.Frequent_functions">utils.Frequent_functions</a>
  &#8226;   <a href="#utils.Imports">utils.Imports</a>
 
   </div>
@@ -21225,12 +21335,74 @@ imports:
  &#8226;   <a href="#random">random</a>
  &#8226;   <a href="#static.data.play_data">static.data.play_data</a>
  &#8226;   <a href="#utils">utils</a>
+ &#8226;   <a href="#utils.Frequent_functions">utils.Frequent_functions</a>
  &#8226;   <a href="#utils.Imports">utils.Imports</a>
 
   </div>
   <div class="import">
 imported by:
     <a href="#static.data.play_data">static.data.play_data</a>
+ &#8226;   <a href="#utils.Imports">utils.Imports</a>
+
+  </div>
+
+</div>
+
+<div class="node">
+  <a name="static.dialog"></a>
+  <a target="code" href="-" type="text/plain"><tt>static.dialog</tt></a>
+<span class="moduletype">NamespacePackage</span>  <div class="import">
+imports:
+    <a href="#static">static</a>
+ &#8226;   <a href="#static.dialog.Dialog">static.dialog.Dialog</a>
+ &#8226;   <a href="#static.dialog.Title_handle">static.dialog.Title_handle</a>
+
+  </div>
+  <div class="import">
+imported by:
+    <a href="#static.dialog.Dialog">static.dialog.Dialog</a>
+ &#8226;   <a href="#static.dialog.Title_handle">static.dialog.Title_handle</a>
+ &#8226;   <a href="#utils.Imports">utils.Imports</a>
+
+  </div>
+
+</div>
+
+<div class="node">
+  <a name="static.dialog.Dialog"></a>
+  <a target="code" href="///C:/Users/gytis/PycharmProjects/A_Game/static/dialog/Dialog.py" type="text/plain"><tt>static.dialog.Dialog</tt></a>
+<span class="moduletype">SourceModule</span>  <div class="import">
+imports:
+    <a href="#Values">Values</a>
+ &#8226;   <a href="#Values.Settings">Values.Settings</a>
+ &#8226;   <a href="#static.dialog">static.dialog</a>
+ &#8226;   <a href="#utils">utils</a>
+ &#8226;   <a href="#utils.Frequent_functions">utils.Frequent_functions</a>
+ &#8226;   <a href="#utils.Imports">utils.Imports</a>
+
+  </div>
+  <div class="import">
+imported by:
+    <a href="#static.dialog">static.dialog</a>
+ &#8226;   <a href="#utils.Imports">utils.Imports</a>
+
+  </div>
+
+</div>
+
+<div class="node">
+  <a name="static.dialog.Title_handle"></a>
+  <a target="code" href="///C:/Users/gytis/PycharmProjects/A_Game/static/dialog/Title_handle.py" type="text/plain"><tt>static.dialog.Title_handle</tt></a>
+<span class="moduletype">SourceModule</span>  <div class="import">
+imports:
+    <a href="#static.dialog">static.dialog</a>
+ &#8226;   <a href="#utils">utils</a>
+ &#8226;   <a href="#utils.Imports">utils.Imports</a>
+
+  </div>
+  <div class="import">
+imported by:
+    <a href="#static.dialog">static.dialog</a>
  &#8226;   <a href="#utils.Imports">utils.Imports</a>
 
   </div>
@@ -21271,6 +21443,46 @@ imports:
   <div class="import">
 imported by:
     <a href="#static.items">static.items</a>
+ &#8226;   <a href="#utils.Imports">utils.Imports</a>
+
+  </div>
+
+</div>
+
+<div class="node">
+  <a name="static.rooms"></a>
+  <a target="code" href="-" type="text/plain"><tt>static.rooms</tt></a>
+<span class="moduletype">NamespacePackage</span>  <div class="import">
+imports:
+    <a href="#static">static</a>
+ &#8226;   <a href="#static.rooms.rooms">static.rooms.rooms</a>
+
+  </div>
+  <div class="import">
+imported by:
+    <a href="#static.rooms.rooms">static.rooms.rooms</a>
+ &#8226;   <a href="#utils.Imports">utils.Imports</a>
+
+  </div>
+
+</div>
+
+<div class="node">
+  <a name="static.rooms.rooms"></a>
+  <a target="code" href="///C:/Users/gytis/PycharmProjects/A_Game/static/rooms/rooms.py" type="text/plain"><tt>static.rooms.rooms</tt></a>
+<span class="moduletype">SourceModule</span>  <div class="import">
+imports:
+    <a href="#Values">Values</a>
+ &#8226;   <a href="#Values.Settings">Values.Settings</a>
+ &#8226;   <a href="#static.rooms">static.rooms</a>
+ &#8226;   <a href="#utils">utils</a>
+ &#8226;   <a href="#utils.Frequent_functions">utils.Frequent_functions</a>
+ &#8226;   <a href="#utils.Imports">utils.Imports</a>
+
+  </div>
+  <div class="import">
+imported by:
+    <a href="#static.rooms">static.rooms</a>
  &#8226;   <a href="#utils.Imports">utils.Imports</a>
 
   </div>
@@ -22632,29 +22844,37 @@ imported by:
 imports:
     <a href="#utils.Frequent_functions">utils.Frequent_functions</a>
  &#8226;   <a href="#utils.Imports">utils.Imports</a>
+ &#8226;   <a href="#utils.threads">utils.threads</a>
 
   </div>
   <div class="import">
 imported by:
     <a href="#Backend.Character_selection_backend">Backend.Character_selection_backend</a>
+ &#8226;   <a href="#Backend.Dialog_backend">Backend.Dialog_backend</a>
  &#8226;   <a href="#Backend.Play">Backend.Play</a>
  &#8226;   <a href="#Backend.Settings_backend">Backend.Settings_backend</a>
  &#8226;   <a href="#Backend.Setup_pygame">Backend.Setup_pygame</a>
+ &#8226;   <a href="#Backend.Tool_backend">Backend.Tool_backend</a>
  &#8226;   <a href="#Render.Background_Render">Render.Background_Render</a>
  &#8226;   <a href="#Render.Character_selection_render">Render.Character_selection_render</a>
  &#8226;   <a href="#Render.Load_render">Render.Load_render</a>
  &#8226;   <a href="#Render.Main_Menu_render">Render.Main_Menu_render</a>
  &#8226;   <a href="#Render.Settings_render">Render.Settings_render</a>
  &#8226;   <a href="#Testing.test">Testing.test</a>
+ &#8226;   <a href="#Testing.testing_displays">Testing.testing_displays</a>
  &#8226;   <a href="#Values.Songs">Values.Songs</a>
  &#8226;   <a href="#static.Spells.Spells">static.Spells.Spells</a>
  &#8226;   <a href="#static.data.Character_byte_data">static.data.Character_byte_data</a>
  &#8226;   <a href="#static.data.play_data.decor">static.data.play_data.decor</a>
  &#8226;   <a href="#static.data.play_data.gifs">static.data.play_data.gifs</a>
  &#8226;   <a href="#static.data.play_data.mob_data">static.data.play_data.mob_data</a>
+ &#8226;   <a href="#static.dialog.Dialog">static.dialog.Dialog</a>
+ &#8226;   <a href="#static.dialog.Title_handle">static.dialog.Title_handle</a>
  &#8226;   <a href="#static.items.items">static.items.items</a>
+ &#8226;   <a href="#static.rooms.rooms">static.rooms.rooms</a>
  &#8226;   <a href="#utils.Frequent_functions">utils.Frequent_functions</a>
  &#8226;   <a href="#utils.Imports">utils.Imports</a>
+ &#8226;   <a href="#utils.threads">utils.threads</a>
 
   </div>
 
@@ -22676,9 +22896,11 @@ imports:
   <div class="import">
 imported by:
     <a href="#Backend.Character_selection_backend">Backend.Character_selection_backend</a>
+ &#8226;   <a href="#Backend.Dialog_backend">Backend.Dialog_backend</a>
  &#8226;   <a href="#Backend.Play">Backend.Play</a>
  &#8226;   <a href="#Backend.Settings_backend">Backend.Settings_backend</a>
  &#8226;   <a href="#Backend.Setup_pygame">Backend.Setup_pygame</a>
+ &#8226;   <a href="#Backend.Tool_backend">Backend.Tool_backend</a>
  &#8226;   <a href="#Render.Background_Render">Render.Background_Render</a>
  &#8226;   <a href="#Render.Character_selection_render">Render.Character_selection_render</a>
  &#8226;   <a href="#Render.Load_render">Render.Load_render</a>
@@ -22687,8 +22909,13 @@ imported by:
  &#8226;   <a href="#Testing.test">Testing.test</a>
  &#8226;   <a href="#static.Spells.Spells">static.Spells.Spells</a>
  &#8226;   <a href="#static.data.play_data.decor">static.data.play_data.decor</a>
+ &#8226;   <a href="#static.data.play_data.gifs">static.data.play_data.gifs</a>
+ &#8226;   <a href="#static.data.play_data.mob_data">static.data.play_data.mob_data</a>
+ &#8226;   <a href="#static.dialog.Dialog">static.dialog.Dialog</a>
  &#8226;   <a href="#static.items.items">static.items.items</a>
+ &#8226;   <a href="#static.rooms.rooms">static.rooms.rooms</a>
  &#8226;   <a href="#utils">utils</a>
+ &#8226;   <a href="#utils.threads">utils.threads</a>
 
   </div>
 
@@ -22699,12 +22926,17 @@ imported by:
   <a target="code" href="///C:/Users/gytis/PycharmProjects/A_Game/utils/Imports.py" type="text/plain"><tt>utils.Imports</tt></a>
 <span class="moduletype">SourceModule</span>  <div class="import">
 imports:
-    <a href="#Data.Temp_data">Data.Temp_data</a>
+    <a href="#Backend">Backend</a>
+ &#8226;   <a href="#Backend.Dialog_backend">Backend.Dialog_backend</a>
+ &#8226;   <a href="#Backend.Spell_Backend">Backend.Spell_Backend</a>
+ &#8226;   <a href="#Backend.Tool_backend">Backend.Tool_backend</a>
+ &#8226;   <a href="#Data.Temp_data">Data.Temp_data</a>
  &#8226;   <a href="#Data.Temp_data.values">Data.Temp_data.values</a>
  &#8226;   <a href="#PIL">PIL</a>
  &#8226;   <a href="#PIL.Image">PIL.Image</a>
  &#8226;   <a href="#Testing">Testing</a>
  &#8226;   <a href="#Testing.test">Testing.test</a>
+ &#8226;   <a href="#Testing.testing_displays">Testing.testing_displays</a>
  &#8226;   <a href="#Values">Values</a>
  &#8226;   <a href="#Values.Available">Values.Available</a>
  &#8226;   <a href="#Values.Songs">Values.Songs</a>
@@ -22725,34 +22957,70 @@ imports:
  &#8226;   <a href="#static.data.play_data.gifs">static.data.play_data.gifs</a>
  &#8226;   <a href="#static.data.play_data.info">static.data.play_data.info</a>
  &#8226;   <a href="#static.data.play_data.mob_data">static.data.play_data.mob_data</a>
+ &#8226;   <a href="#static.dialog">static.dialog</a>
+ &#8226;   <a href="#static.dialog.Dialog">static.dialog.Dialog</a>
+ &#8226;   <a href="#static.dialog.Title_handle">static.dialog.Title_handle</a>
  &#8226;   <a href="#static.items">static.items</a>
  &#8226;   <a href="#static.items.items">static.items.items</a>
+ &#8226;   <a href="#static.rooms">static.rooms</a>
+ &#8226;   <a href="#static.rooms.rooms">static.rooms.rooms</a>
  &#8226;   <a href="#threading">threading</a>
  &#8226;   <a href="#time">time</a>
  &#8226;   <a href="#utils">utils</a>
+ &#8226;   <a href="#utils.threads">utils.threads</a>
 
   </div>
   <div class="import">
 imported by:
     <a href="#Backend.Character_selection_backend">Backend.Character_selection_backend</a>
+ &#8226;   <a href="#Backend.Dialog_backend">Backend.Dialog_backend</a>
  &#8226;   <a href="#Backend.Play">Backend.Play</a>
  &#8226;   <a href="#Backend.Settings_backend">Backend.Settings_backend</a>
  &#8226;   <a href="#Backend.Setup_pygame">Backend.Setup_pygame</a>
+ &#8226;   <a href="#Backend.Tool_backend">Backend.Tool_backend</a>
  &#8226;   <a href="#Render.Background_Render">Render.Background_Render</a>
  &#8226;   <a href="#Render.Character_selection_render">Render.Character_selection_render</a>
  &#8226;   <a href="#Render.Load_render">Render.Load_render</a>
  &#8226;   <a href="#Render.Main_Menu_render">Render.Main_Menu_render</a>
  &#8226;   <a href="#Render.Settings_render">Render.Settings_render</a>
  &#8226;   <a href="#Testing.test">Testing.test</a>
+ &#8226;   <a href="#Testing.testing_displays">Testing.testing_displays</a>
  &#8226;   <a href="#Values.Songs">Values.Songs</a>
  &#8226;   <a href="#static.Spells.Spells">static.Spells.Spells</a>
  &#8226;   <a href="#static.data.Character_byte_data">static.data.Character_byte_data</a>
  &#8226;   <a href="#static.data.play_data.decor">static.data.play_data.decor</a>
  &#8226;   <a href="#static.data.play_data.gifs">static.data.play_data.gifs</a>
  &#8226;   <a href="#static.data.play_data.mob_data">static.data.play_data.mob_data</a>
+ &#8226;   <a href="#static.dialog.Dialog">static.dialog.Dialog</a>
+ &#8226;   <a href="#static.dialog.Title_handle">static.dialog.Title_handle</a>
  &#8226;   <a href="#static.items.items">static.items.items</a>
+ &#8226;   <a href="#static.rooms.rooms">static.rooms.rooms</a>
  &#8226;   <a href="#utils">utils</a>
  &#8226;   <a href="#utils.Frequent_functions">utils.Frequent_functions</a>
+ &#8226;   <a href="#utils.threads">utils.threads</a>
+
+  </div>
+
+</div>
+
+<div class="node">
+  <a name="utils.threads"></a>
+  <a target="code" href="///C:/Users/gytis/PycharmProjects/A_Game/utils/threads.py" type="text/plain"><tt>utils.threads</tt></a>
+<span class="moduletype">SourceModule</span>  <div class="import">
+imports:
+    <a href="#Backend">Backend</a>
+ &#8226;   <a href="#Backend.Play">Backend.Play</a>
+ &#8226;   <a href="#Values">Values</a>
+ &#8226;   <a href="#Values.Settings">Values.Settings</a>
+ &#8226;   <a href="#utils">utils</a>
+ &#8226;   <a href="#utils.Frequent_functions">utils.Frequent_functions</a>
+ &#8226;   <a href="#utils.Imports">utils.Imports</a>
+
+  </div>
+  <div class="import">
+imported by:
+    <a href="#utils">utils</a>
+ &#8226;   <a href="#utils.Imports">utils.Imports</a>
 
   </div>
 

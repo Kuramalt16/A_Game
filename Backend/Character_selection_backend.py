@@ -153,6 +153,9 @@ def take_pictures(value, screen, side):
                        "Dialog: " + "" + "\n\n" +
                        "Quests: " + "" + "\n\n" +
                        "Containers: " + "" + "\n\n" +
+                       "Titles: " + "" + "\n\n" +
+                       "Save_point: " + "Village_10_10:330:1:0:0" + "\n\n" +
+                       "DEATH_SAVE: " + "" + "\n\n" +
                        "Spawn: " + "Village_10_10:330:1:0:0"
                        )
 

@@ -89,10 +89,23 @@ def run_game(screen, clock):
                                 # Get the last line
                                 last_line = lines[-1].strip()  # Remove any trailing newline characters
                                 # Check if the last line starts with "Spawn:"
-                                if last_line.startswith("Spawn:"):
-                                    map_name = last_line[7:].split(":")[0]
-                                    I.info.ENTRY_POS = last_line[7:].split(":")[1:3]
-                                    I.info.OFFSCREEN = last_line[7:].split(":")[3:5]
+                                save_point = ""
+                                death_save = ""
+                                spawn_line = ""
+                                for line in lines:
+                                    if "Spawn" in line:
+                                        spawn_line = line.replace("Spawn:", "").strip()
+                                    if "Save_point" in line:
+                                        save_point = line.replace("Save_point: ", "").strip()
+                                    if "DEATH_SAVE" in line:
+                                        death_save = line.replace("DEATH_SAVE: ", "").strip()
+                                if death_save != '0':
+                                    spawn_line = save_point
+
+                                map_name = spawn_line.split(":")[0]
+                                I.info.ENTRY_POS = spawn_line.split(":")[1:3]
+                                I.info.OFFSCREEN = spawn_line.split(":")[3:5]
+
 
                                 # map_name =
                                 rooms = I.rooms.Room()

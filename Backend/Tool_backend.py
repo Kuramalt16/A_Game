@@ -7,7 +7,6 @@ def handle_hoe(collide, data, items, decorations, screen):
         if True in hoe_location:
             pressed_button = [button[0] != 0 for button in [I.info.COMBAT_RECT, I.info.AXE, I.info.PICAXE]]
             if True in pressed_button:
-                print(pressed_button, hoe_location)
                 location = 10
                 for i in range(3):
                     if pressed_button[i] == hoe_location[i] and pressed_button[i]:
@@ -46,8 +45,7 @@ def handle_axe_chopping(decor_rect, decor_name, decor_dict, id, items):
     if I.info.AXE[0] != 0 or I.info.PICAXE[0] != 0 or I.info.COMBAT_RECT[0] != 0:
         """ Button was pressed [X], [V] or [B] """
         rects = {"Sword": I.info.COMBAT_RECT, "Axe": I.info.AXE, "Picaxe": I.info.PICAXE}
-        # print(I.info.EQUIPED)
-        axe_location = [weapon[0] != 0 and "Axe" in weapon for weapon in I.info.EQUIPED.values()]
+        axe_location = [weapon[0] != 0 and "Axe" in weapon[0] for weapon in I.info.EQUIPED.values()]
         pressed_button = [button[0] != 0 for button in rects.values()]
         location = 10
         for i in range(len(axe_location)):
@@ -57,7 +55,6 @@ def handle_axe_chopping(decor_rect, decor_name, decor_dict, id, items):
                 if axe_location[i] == pressed_button[i]:
                     """Found the button pressed"""
                     location = i
-
         if location == 10:
             return
         speed = float(Ff.get_property(I.info.EQUIPED[list(rects.keys())[location]][0].split("|")[0], items, "WEAPON")[1])
@@ -71,6 +68,7 @@ def handle_axe_chopping(decor_rect, decor_name, decor_dict, id, items):
             elif type == "Stone":
                 choppable = ["Tree_T_1", "Tree_M_1"]
                 damage = 2
+
             if decor_name in choppable:
                 bool_var, health = decor_dict[decor_name][id]["health"].split(",,")
                 health = int(health.split(",")[0]) - damage

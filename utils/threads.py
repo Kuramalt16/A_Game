@@ -82,18 +82,20 @@ def ten_min(mob, data, rooms):
 
 def five_min(data, npc):
     while S.PLAY:
-        I.t.sleep(300)  # Wait for the interval time (in seconds)
+        I.t.sleep(10)  # Wait for the interval time (in seconds)
 
         data["Player"]["Exhaustion"] = (data["Player"]["Exhaustion"][0] - 1, data["Player"]["Exhaustion"][1])
 
         for npc_name in npc.keys():
-            if npc[npc_name]["dialog"].iteration == 3:  # after some time if value is 4 sets to value 5
-                npc[npc_name]["dialog"].iteration = 0
+            if npc[npc_name]["dialog"].iteration == 3 and npc_name == "Mayor":  # after some time if value is 4 sets to value 5
+                print("change")
+                npc[npc_name]["dialog"].iteration = 4
 
 def one_min(decorations): # Fixed
     while S.PLAY:
         I.t.sleep(60)
-        Play.harvest_timeout(decorations)
+        if not I.info.PAUSE_THREAD["harvest"]:
+            Play.harvest_timeout(decorations)
 
 
 def one_sec(data, decorations): # Fixed
@@ -170,12 +172,16 @@ def one_hundred_msec(mob, spells, decorations, data, gifs): # works fine
 def hit_mob(interval, gifs): # Fixed
     while True:
         while True:
-            if I.info.EQUIPED["Sword"][1] <= 26:
-                I.info.EQUIPED["Sword"] = I.info.EQUIPED["Sword"][0], I.info.EQUIPED["Sword"][1] - 1
-            I.t.sleep(interval/26)
-            if I.info.EQUIPED["Sword"][1] == 0:
-                I.info.EQUIPED["Sword"] = I.info.EQUIPED["Sword"][0], 27
+            if I.info.EQUIPED["Sword"][0] == 0:
+                I.t.sleep(interval)
                 break
+            else:
+                if I.info.EQUIPED["Sword"][1] <= 26:
+                    I.info.EQUIPED["Sword"] = I.info.EQUIPED["Sword"][0], I.info.EQUIPED["Sword"][1] - 1
+                I.t.sleep(interval/26)
+                if I.info.EQUIPED["Sword"][1] == 0:
+                    I.info.EQUIPED["Sword"] = I.info.EQUIPED["Sword"][0], 27
+                    break
         I.info.COMBAT_RECT = [0, 0]
         if I.info.POS_CHANGE[1] != 0:
             gifs[I.info.POS_CHANGE[1]].start_gif = False
@@ -198,7 +204,6 @@ def axe(interval, gifs): # Fixed
             if I.info.EQUIPED["Axe"][1] == 0:
                 I.info.EQUIPED["Axe"] = I.info.EQUIPED["Axe"][0], 27
                 break
-        print("hit")
         I.info.AXE = [0, 0]
         if I.info.POS_CHANGE[1] != 0:
             gifs[I.info.POS_CHANGE[1]].start_gif = False

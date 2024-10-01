@@ -18,13 +18,13 @@ class Decorations:
                                             "type": data[3],
                                             "path": data[4]
                                             }
-                if "HARVESTABLE:" in data[1]:
+                if "HARVESTABLE:" in data[1] and I.info.HARVESTABLE.get(data[0]) == None:
                     I.info.HARVESTED_OBJECTS[data[0]] = []
                 elif "ENTERABLE:" in data[1]:
                     # if ",," in data[1]:
                     #     enter_through = data[1].split(",,")[0]
                     I.info.ENTERABLE.append(data[0])
-            elif data[3] in ["Furniture", "Appliance", "NPC"]:
+            elif data[3] in ["Furniture", "Appliance", "NPC", "NPC_Mob"]:
                 self.decor_dict[data[0]] = {"action": data[1],
                                             "health": data[2],
                                             "type": data[3],

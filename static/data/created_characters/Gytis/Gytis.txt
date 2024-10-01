@@ -18,30 +18,36 @@ Color_Shir: (165, 170, 0, 255)
 Color_Pant: (0, 100, 201, 255)
 Color_Shoe: (166, 170, 0, 255)
 
-Last Save: 2024/09/17 22:18
+Last Save: 2024/10/01 19:39
 
 
 
-Level: 2
-Experience: 195
-Health: 22
-Mana: 28
-Exhaustion: 92
+Level: 3
+Experience: 55
+Health: 33
+Mana: 40
+Exhaustion: 47
 
-Gold: 58.5
+Gold: 70.3
 
 Alignment: Unaligned
 
 Class: Not trained
 
-Backpack: Gold__58.5__0__0,,Slime Ball__4.0__2__0,,Light Berries__13.0__4__0,,Wooden Axe__1.0__4__2,,Wooden Picaxe__1.0__8__2,,Wooden Staff__1.0__-4__8,,Stick__19.0__6__0,,Light Wood__4.0__10__0,,Obsidian__9.0__12__0,,Basalt__2.0__14__0,,Meat1__9.0__8__0,,Meat0__7.0__0__2,,Pebbles__8.0__2__2,,Wooden Hoe__1.0__-6__8,,Apple Seed__15.0__-8__8,,Apple__7.0__6__2,,
+Backpack: Gold__70.3__0__0,,Slime Ball__5.0__2__0,,Light Berries__27.0__4__0,,Wooden Axe__1.0__-6__8,,Wooden Picaxe__1.0__8__2,,Wooden Staff__1.0__-4__8,,Stick__25.0__6__0,,Light Wood__4.0__10__0,,Obsidian__9.0__12__0,,Basalt__2.0__14__0,,Meat1__8.0__2__4,,Meat0__5.0__0__2,,Pebbles__6.0__-8__8,,Wooden Hoe__1.0__4__2,,Apple Seed__15.0__8__0,,Meat1_Cooked__1.0__2__2,,Slag__1.0__10__2,,Apple|STACK0__64.0__14__2,,Apple|STACK1__64.0__12__2,,Apple|STACK2__44.0__6__2,,Ale__1.0__0__4,,
 
 Spells: 0__Magic Bolt,,2__Fire Bolt,,4__Cold Bolt,,6__Flash,,8__Spawn Skeleton,,
 
-Dialog: Luna__0,,Bear__0,,Joseph__0,,Mayor__0,,Gwen__0,,Sign__0,,
+Dialog: Luna__0__0,,Bear__0__0,,Joseph__0__1,,Mayor__5__0,,Gwen__0__18,,Sign__0__0,,Tutorial Man__0__0,,Castle_Guard__0__-1,,
 
-Quests: ,,
+Quests: COMPLETION:1.0,,GIVER:Mayor,,TYPE:GET,,ITEM:Slime Ball,,AMOUNT:5,,REWARD:CLAIMED,,DESC:Get some slime balls
 
 Containers: 
 
-Spawn: Village_10_10:510:370:0:0
+Titles: Criminal|0
+
+Save_point: Village_10_10:330:1:0:0
+
+DEATH_SAVE: 0
+
+Spawn: Armory:1:1:25:250

@@ -43,6 +43,12 @@
 * DESC: Folowers aren't saved yet
 * PRIORITY: LOW
 
+* DESC: when reseting game while dead it fucks up
+* PRIORITY: LOW
+
+* DESC: need to test out titles and to do something with them
+* PRIORITY: LOW
+
 # Optimization
 
 * Decreased Character selection processing time from 600 ms to 200 ms ( by adding ranges where to search for color pixels)

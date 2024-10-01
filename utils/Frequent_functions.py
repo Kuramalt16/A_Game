@@ -36,7 +36,7 @@ def base_settings_load():
     print("base settings")
 
 
-def display_text(screen, text, size, pos_tuple, color):
+def display_text(screen ,text ,size, pos_tuple, color="black"):
     font = I.pg.font.SysFont('minecraft', int(size + S.RESOLUTION * 10))
     text_surface = font.render(text, True, color)
     text_rect = text_surface.get_rect()
@@ -353,6 +353,17 @@ def dress_by_dict(rect, dict, screen, orientation):
                     screen.set_at((i, top), tuple(map(int, tuple_elements)))
     I.pg.display.flip()
 
+def get_visible(target, current_mob, obstacles, zoom_rect):
+    # Current position
+    current_x, current_y = current_mob['current_pos'].topleft
+
+    # Calculate direction vector and distance to the target
+    direction_x, direction_y = target[0] - current_x, target[1] - current_y
+    distance = (direction_x ** 2 + direction_y ** 2) ** 0.5
+    if distance > 100:
+        return False
+    else:
+        return True
 
 def move_towards(target, current_mob, step_size, obstacles, zoom_rect):
     """
@@ -372,9 +383,8 @@ def move_towards(target, current_mob, step_size, obstacles, zoom_rect):
     if step_size > 1:
         step_size = 1
     else:
-        step_size = 0
+        step_size = 2
     current_x, current_y = current_mob['current_pos'].topleft
-
     # Calculate direction vector and distance to the target
     direction_x, direction_y = target[0] - current_x, target[1] - current_y
     distance = (direction_x ** 2 + direction_y ** 2) ** 0.5
@@ -382,7 +392,6 @@ def move_towards(target, current_mob, step_size, obstacles, zoom_rect):
         return current_x, current_y, False
     # Check if we are close enough to the target
     if distance < step_size:
-        print('reached')
         return target[0], target[1], True
 
     # Normalize direction vector
@@ -851,8 +860,9 @@ def find_open_space():
                 continue
             return row, column
 
-def update_map_view(id: int, item_name: str, coordinates: tuple, case: str):
-    current_room = I.info.CURRENT_ROOM["name"]
+def update_map_view(id: int, item_name: str, coordinates: tuple, case: str, current_room=0):
+    if current_room == 0:
+        current_room = I.info.CURRENT_ROOM["name"]
     if current_room not in I.info.MAP_CHANGE.keys():
         I.info.MAP_CHANGE[current_room] = {"add": {},
                                            "remove": {}}
@@ -880,7 +890,17 @@ def update_map_view(id: int, item_name: str, coordinates: tuple, case: str):
             return 0
         else:
             return len(I.info.MAP_CHANGE[current_room]["add"][item_name])
+    if case == "remove_gif":
+        gifs = coordinates
+        if I.info.MAP_CHANGE.get("remove_gif") == None:
+            I.info.MAP_CHANGE["remove_gif"] = []
+        I.info.MAP_CHANGE["remove_gif"].append(gifs[item_name].name)
+
 
 def get_decor_coordinates(option, id, decorations):
-    rect = decorations.decor_dict[option][id]["rect"]
-    return rect.x, rect.y
+    if decorations.decor_dict.get(option) != None and decorations.decor_dict[option].get(id) != None:
+        rect = decorations.decor_dict[option][id]["rect"]
+        return rect.x, rect.y
+    else:
+        I.t.sleep(0.5)
+        print("error")

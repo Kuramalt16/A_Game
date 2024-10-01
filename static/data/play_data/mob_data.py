@@ -3,7 +3,7 @@ from utils import Imports as I, Frequent_functions as Ff
 from Render import Background_Render as br
 from Values import Settings as S
 class Mob:
-    def __init__(self, name, hp, exp, allignment, count, damage, speed, path, delay):
+    def __init__(self, name, hp, exp, allignment, count, damage, speed, path, delay, decor):
         self.name = name
         self.hp = hp
         self.exp = exp
@@ -18,6 +18,7 @@ class Mob:
         # 7 - Chaotic good, ( helps attack others )
         # 8 - Chaotic neutral, ( attacks and runs away )
         # 9 - Chaotic evil ( attacks all unprovoked )
+        self.decor = decor
         self.count = (count, count)
         self.damage = damage
         self.speed = speed
@@ -49,6 +50,7 @@ class Mob:
             "Cold": 0,
             "Force": 0,
         },
+        "decor": self.decor,
         "damage_type": "",
         "allignment": temp_allignment,
         "gif_frame": (0, Ff.count_png_files(self.path)),
@@ -69,11 +71,14 @@ class Mob:
             for a in range(mob_gif_count):
                 if "Mine" in self.name:
                     self.name = self.name.replace(" Mine", "")
-                image = I.pg.image.load(path + self.name + "_" + str(a) + ".png").convert_alpha()
+                if self.decor:
+                    updated_name = self.name + "_Front"
+                    image = I.pg.image.load(path + updated_name + "_" + str(a) + ".png").convert_alpha()
+                else:
+                    image = I.pg.image.load(path + self.name + "_" + str(a) + ".png").convert_alpha()
                 mob["image"].append(image)
                 if x1 != 0 and y1 != 0:
                     mob["rect"].append(image.get_rect(topleft=(x1, y1)))
-                    print(x1, y1)
                 else:
                     mob["rect"].append(image.get_rect(topleft=(x, y)))
             mob["current_pos"] = mob["rect"][mob_gif_count-1]

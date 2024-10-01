@@ -3,7 +3,7 @@ SELECTED_CHARACTER = ""
 
 DATA = {}
 
-TICK = 100
+TICK = 50
 
 FAST = 1
 
@@ -50,6 +50,9 @@ BASE_ATTACKING_DAMAGE = 1  # damage used for damaging mobs
 BASE_KNOCKBACK = 1 # how many steps mobs get knocked back
 
 CURRENT_ROOM = ""  # data used for knowing which room is currently used. after mobs start reziding in buildings this will stop
+TITLES = []
+
+DEATH_SAVE = 0
 
 APPLIANCE_CLICK = [""]  # for furnace to know when it was clicked and able to play the gif
 DOOR_CLICK = 90, ""  # for doors when to open. the 90 is because i need a big value and then decreese from some other set value. and char value is for which building it was.
@@ -94,3 +97,11 @@ FOLLOWER = {
             }  # [Name: str, current_pos: tuple, target_pos: tuple, orientation: tuple_list, agressive]
 
 MAP_CHANGE = {}
+tutorial_flag = 0
+PAUSE_THREAD = {"harvest": False}
+
+CRIMINAL = {
+    "Charge": "",
+    "Fine": 0,
+    "Prison_time": 0
+    }

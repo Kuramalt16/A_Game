@@ -118,6 +118,7 @@ DECOR_PATH = {
     "Grass_10_11":    'static/images/Background/Grass_10_11.png',
     "Wooden_tiles":  'static/images/Background/House/Wooden_tiles.png',
     "Stone_tiles":  'static/images/Background/House/Stone_tiles.png',
+    "Rocky_tiles":  'static/images/Background/House/Rocky_tiles.png',
 }
 
 CHAR_SAVE_PATH = 'static/data/created_characters'

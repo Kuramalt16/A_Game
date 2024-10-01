@@ -1,7 +1,7 @@
 from Values import Settings as S
 from utils import Frequent_functions as Ff, Imports as I
 class Gif:
-    def __init__(self, name, count, path, delay):
+    def __init__(self, name, count, path, delay, start):
         self.gif_dict = {}
         self.name = name
         self.frame_count = count
@@ -9,9 +9,11 @@ class Gif:
         self.frame_paths = [path + str(i) + ".png" for i in range(count)]
 
         # self.read_db()
-
-
-        self.start_gif = False
+        if start == 0:
+            self.start_gif = False
+        else:
+            self.Start_gif(self.name, 0)
+        # self.start_gif = False
         self.current_frame = 0
         self.images = []
         self.frame_time = 0
@@ -36,14 +38,15 @@ class Gif:
 
     def next_frame(self, repeat):
         # Check if gif time has passed:
-        if repeat == -1:
+        if self.start_gif == False:
+            return self.images[self.current_frame]
+        if repeat == -1 and self.repeat != 999:
             self.repeat = 1
-
         if I.pg.time.get_ticks() - self.frame_time > self.delay:
             self.current_frame += 1
             self.frame_time = I.pg.time.get_ticks()
             if self.current_frame > self.frame_count:
-                if repeat == self.repeat and repeat != -1:
+                if repeat == self.repeat and repeat != -1 or self.repeat == 999:
                     self.start_gif = False
                     self.repeat = 0
                     # print(decor[0].effected_decor[decor[1]])
@@ -60,11 +63,11 @@ class Gif:
                 return self.images[self.current_frame - 1]
 
 def read_db(decorations):
-    db_data = Ff.read_data_from_db("gifs", ["name", "frames", "path", "delay"])
+    db_data = Ff.read_data_from_db("gifs", ["name", "frames", "path", "delay", "start"])
     gif_dict = {}
     for data in db_data:
         path = data[2]
         if data[2] == "Decor":
             path = decorations.decor_dict[data[0]]["path"]
-        gif_dict[data[0]] = Gif(data[0], data[1], path, data[3])
+        gif_dict[data[0]] = Gif(data[0], data[1], path, data[3], data[4])
     return gif_dict

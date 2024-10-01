@@ -22,7 +22,7 @@
 
 * DESC: Add new mobs
 * PRIORITY: HIGH
-* NEEDS: willpower, i added pigs
+* NEEDS: willpower, i added pigs, i added guards
 
 * DESC: Add ghost hunting mobs
 * PRIORITY: Low
@@ -238,6 +238,10 @@
 * DESC: can collect grass type plants only with a sythe or maybe just using a sythe is wayyy easyer
 * PRIORITY: LOW
 * NEEDS: plants
+
+* DESC: When killed by guards you loose all of your items (make grave not spawn in)
+* PRIORITY: LOW
+* NEEDS: willpower
 
 
 UNTILL FULL ALPHA:
