@@ -140,7 +140,10 @@ def Make_rect_visible(screen, rect, color):
 
 def print_coordinates(event, coordinates):
     if event.key == I.pg.K_c:
-        print(f"{int(coordinates.x + 145 + I.info.OFFSCREEN[0] / 4)},{int(coordinates.y + 72 + I.info.OFFSCREEN[1] / 4)},1,1,1,1,,")
+        if I.info.CURRENT_ROOM["Type"] == "Village":
+            print(f"{int(coordinates.x + 145 + I.info.OFFSCREEN[0] / 4)},{int(coordinates.y + 72 + I.info.OFFSCREEN[1] / 4)},1,1,1,1,,")
+        else:
+            print(f"{int(I.info.OFFSCREEN[0] + 528) },{int(I.info.OFFSCREEN[1] + 337)},3,3,3,3,,")
 
 def get_time_diferance(time1, time2):
     print(time1-time2)

@@ -351,7 +351,7 @@ def handle_interior_visualisation(decorations, sub_image, data, gifs):
     decor_options = list(decorations.decor_dict.keys())
     for option in decor_options:
         for id in decorations.decor_dict[option].keys():
-            if isinstance(id, str):
+            if isinstance(id, str) or "WALK" in decorations.decor_dict[option]["action"]:
                 continue
 
             decor = decorations.decor_dict[option][id]

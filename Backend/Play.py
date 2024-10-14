@@ -338,8 +338,8 @@ def walking(dx, dy, collide, data, decorations, sub_screen, rooms, screen):
             # me = I.pg.Rect(S.SCREEN_WIDTH / 2 - S.SCREEN_WIDTH / 24 + I.info.OFFSCREEN[0], S.SCREEN_HEIGHT / 2 - S.SCREEN_HEIGHT / 16 + I.info.OFFSCREEN[1], S.SCREEN_WIDTH / 24,S.SCREEN_HEIGHT / 12)
             x = S.SCREEN_WIDTH / 2 - S.SCREEN_WIDTH / 24 + I.info.OFFSCREEN[0]
             y = S.SCREEN_HEIGHT / 2 - S.SCREEN_HEIGHT / 16 + I.info.OFFSCREEN[1]
-            me_left = I.pg.Rect(x + 5, y + 26, S.SCREEN_WIDTH / 150, S.SCREEN_HEIGHT / 20)  # black
-            me_right = I.pg.Rect(x + 45, y + 26, S.SCREEN_WIDTH / 150, S.SCREEN_HEIGHT / 20)  # purple
+            me_left = I.pg.Rect(x + 5, y + 26, S.SCREEN_WIDTH / 150, S.SCREEN_HEIGHT / 30)  # black
+            me_right = I.pg.Rect(x + 45, y + 26, S.SCREEN_WIDTH / 150, S.SCREEN_HEIGHT / 30)  # purple
             me_up = I.pg.Rect(x + 18, y - 10, S.SCREEN_WIDTH / 50, S.SCREEN_HEIGHT / 100)  # white
             me_down = I.pg.Rect(x + 18, y + 50, S.SCREEN_WIDTH / 50, S.SCREEN_HEIGHT / 100)  # orange
 
@@ -764,7 +764,7 @@ def handle_containers(container_name, container_size, items, screen, player, dec
                                         new_block = -2, new_block[1] + 2
                                         if new_block[1] > container_size[0] * 2 - 2: # Handles not overfilling the container. if the new block Y pos is higher than the size of container multiplied by 2 ( block format is in twos) and removed -2 (block format starts from 0) then dont add
                                             cancel = True
-                        if not cancel:
+                        if not cancel and pickup[0] != None:
                             handle_container_storage(pickup[0], container_name, new_block, id, selected)
 
 
@@ -860,7 +860,7 @@ def handle_container_storage(item_name, container, possision, id, rect):
             I.info.CONTAINERS[container, id][possision] = item_name, 1
         else:
             # pass
-            # print("item already exists here")
+            print("item already exists here need to skip to another location in container")
 
             rect = 10, 800
             # THIS MEANS AN ITEM ALREADY EXISTS HERE
@@ -869,10 +869,11 @@ def handle_container_storage(item_name, container, possision, id, rect):
             # a, pos_x, pos_y = I.info.BACKPACK_CONTENT[item_name]
             # I.info.BACKPACK_CONTENT[old_item[0]] = old_item[1], pos_x, pos_y
     # I.info.CONTAINERS[container, id] = item_name, I.info.BACKPACK_CONTENT[item_name][0], possision
-    if rect[0] >= 633:
+    if rect[0] >= 633 and item_name != None:
         I.info.BACKPACK_CONTENT[item_name] = I.info.BACKPACK_CONTENT[item_name][0] - 1, I.info.BACKPACK_CONTENT[item_name][1], I.info.BACKPACK_CONTENT[item_name][2]
         if I.info.BACKPACK_CONTENT[item_name][0] == 0:
             del I.info.BACKPACK_CONTENT[item_name]
+    print(I.info.CONTAINERS)
 
 def handle_appliances(appliance_name, item_dict, items):
     item = I.info.EQUIPED["Sword"][0]
@@ -962,7 +963,7 @@ def handle_container_backpack_switching(pickup, selected, container_name, id, bl
     if not any((block[0], block[1]) == (tpl[1], tpl[2]) for tpl in taken_spaces):
         # print("if the new possision is not in a taken space")
         #  IF THE SPOT WE WANT TO ASSIGN IS NOT TAKEN CONTINUE
-        if block[0] < 0:
+        if block[0] < 0 and pickup[0] != None:
             # print("if the new possision is in the container:")
             handle_container_storage(pickup[0], container_name, block, id, selected)
         else:
@@ -1026,9 +1027,7 @@ def handle_guards(collide, data, screen, npc, items, decorations, gifs, rooms, c
 
     if collide != [False] and "Guard" in collide[0] and "Criminal" in ",".join(I.info.TITLES):
         current_mob = collide[1]
-        mob_rect = collide[2]
         guard_name = collide[0]
-        print(current_mob["hp"], npc[guard_name]["dialog"].iteration)
         if current_mob["hp"][0] == current_mob["hp"][1] and npc[guard_name]["dialog"].iteration != 1:
             I.DialB.init_dialog(guard_name, data["Player"], screen, npc, items, decorations, data, gifs, rooms, clock, spells)
             # current_mob["hp"] = current_mob["hp"][0], current_mob["hp"][1] + 1
