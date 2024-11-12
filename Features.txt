@@ -203,6 +203,10 @@
 * PRIORITY: High
 * NEEDS: willpower
 
+* DESC: add numbers and symbols to name
+* PRIORITY: High
+* NEEDS: willpower
+
 
 UNTILL FULL ALPHA:
 * 20 QUESTS (17 Remain) (Tutorial quest, get:slimeballs, get:Meat0)
