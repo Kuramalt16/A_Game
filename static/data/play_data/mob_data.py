@@ -1,9 +1,7 @@
 import random
 from utils import Imports as I, Frequent_functions as Ff
-from Render import Background_Render as br
-from Values import Settings as S
 class Mob:
-    def __init__(self, name, hp, exp, allignment, count, damage, speed, path, delay, decor):
+    def __init__(self, name, hp, exp, allignment, count, damage, speed, path, delay, decor, drop):
         self.name = name
         self.hp = hp
         self.exp = exp
@@ -24,7 +22,15 @@ class Mob:
         self.speed = speed
         self.path = path
         self.delay = delay
+        list_drop = drop.split(",, ")
+        self.drop = []
+        for drop in list_drop:
+            drop_values = drop.split(",")
+            self.drop.append([drop_values[0], int(drop_values[1]), int(drop_values[2])])
+        if len(self.drop) == 1:
+            self.drop = (self.drop[0][0], self.drop[0][1], self.drop[0][2])
         self.mobs = [self.create_mob(i) for i in range(count)]  # Create initial list of mobs
+
 
 
     def create_mob(self, id):
@@ -33,35 +39,55 @@ class Mob:
             temp_allignment = random.randint(1, 9)
         else:
             temp_allignment = self.allignment
-
-        drop = 0
-        if I.A.DROPS.get(self.name) != None:
-            drop = I.A.DROPS[self.name]
-
-        return {
-        "id": id,
-        "hp": (self.hp, self.hp),
-        "damage": self.damage,
-        "exp": self.exp,
-        "drop": drop,
-        "speed": (self.speed, 0),
-        "effect": {
-            "Fire": 0,
-            "Cold": 0,
-            "Force": 0,
-        },
-        "decor": self.decor,
-        "damage_type": "",
-        "allignment": temp_allignment,
-        "gif_frame": (0, Ff.count_png_files(self.path)),
-        "visible": False,
-        "rect": [],  # Placeholder for the Pygame rect object
-        "image": [],  # Placeholder for the Pygame image list
-        "previous_pos": (0, 0, 0, 0),
-        "current_pos": (0, 0, 0, 0),
-        "flip": False
-
-        }
+        if "Guard" in self.name:
+            return {
+                "id": id,
+                "hp": (self.hp, self.hp),
+                "damage": self.damage,
+                "exp": self.exp,
+                "drop": self.drop,
+                "speed": (self.speed, 0),
+                "effect": {
+                    "Fire": 0,
+                    "Cold": 0,
+                    "Force": 0,
+                },
+                "decor": self.decor,
+                "damage_type": "",
+                "allignment": temp_allignment,
+                "gif_frame": (0, Ff.count_png_files(self.path)),
+                "visible": False,
+                "rect": [],  # Placeholder for the Pygame rect object
+                "image": [],  # Placeholder for the Pygame image list
+                "previous_pos": (0, 0, 0, 0),
+                "current_pos": (0, 0, 0, 0),
+                "flip": False,
+                "guard_post": 0
+            }
+        else:
+            return {
+            "id": id,
+            "hp": (self.hp, self.hp),
+            "damage": self.damage,
+            "exp": self.exp,
+            "drop": self.drop,
+            "speed": (self.speed, 0),
+            "effect": {
+                "Fire": 0,
+                "Cold": 0,
+                "Force": 0,
+            },
+            "decor": self.decor,
+            "damage_type": "",
+            "allignment": temp_allignment,
+            "gif_frame": (0, Ff.count_png_files(self.path)),
+            "visible": False,
+            "rect": [],  # Placeholder for the Pygame rect object
+            "image": [],  # Placeholder for the Pygame image list
+            "previous_pos": (0, 0, 0, 0),
+            "current_pos": (0, 0, 0, 0),
+            "flip": False
+            }
 
     def spawn_mobs(self, background_size, path, mob_gif_count, x1=0, y1=0):
         """Spawn mobs at random positions on the screen."""
@@ -170,18 +196,13 @@ class Mob:
         self.mobs = [mob for mob in self.mobs if mob["id"] != mob_id]
 
 
-    def deal_damage(self, victim: object, player: dict, weapon: str, items: dict, gifs: dict):
-        if weapon == "":
+    def deal_damage(self, victim: object, player: dict, weapon: any, items: dict, gifs: dict, rooms, data):
+        if isinstance(weapon, list):
             # NOT SPELL AND NOT EFFECT DAMAGE
-            if I.info.EQUIPED["Sword"][0] != 0:
-                damage, speed, knockback, type = Ff.get_property(I.info.EQUIPED["Sword"][0], items, "WEAPON")
-                damage = int(damage)
-                speed = float(speed)
-                knockback = int(knockback)
-            else:
-                damage = I.info.BASE_ATTACKING_DAMAGE
-                knockback = I.info.BASE_KNOCKBACK
-                type = "Blunt"
+            damage = float(weapon[0])
+            speed = float(weapon[1])
+            knockback = int(weapon[2])
+            type = weapon[3]
         elif weapon == "Follower":
             damage = 1 # based on pet's level
             knockback = 2
@@ -212,24 +233,27 @@ class Mob:
             gifs[type].start_gif = False
             self.remove_mob(victim["id"])
             player["Experience"] += victim["exp"]
-            br.level_up(player, gifs)
+            I.PB.level_up(player, gifs)
             if isinstance(victim["drop"], tuple): # if victim drops not more than one item
                 amount = victim["drop"][1] if random.randint(0, victim["drop"][2]-1) == 0 else 0
-                Ff.add_to_backpack(victim["drop"][0], amount, items)  # Adds mob drops 1
-                if amount != 0:
-                    Ff.display_text_player("Recieved " + str(amount) + " " + str(victim["drop"][0]), 5000)
+                # print(victim["rect"][0])
+                I.IB.add_dropped_items_to_var(victim["drop"][0], amount, rooms, (victim["rect"][0][0], victim["rect"][0][1]), data, "mob")
+
+                # if amount != 0:
+                #     Ff.display_text_player("Recieved " + str(amount) + " " + str(victim["drop"][0]), 5000)
             else:
                 # choose = random.randint(0, len(victim["drop"]) - 1)
                 if victim["drop"] != 0 and victim["drop"] != []:
+                    print(victim["drop"])
                     amount1 = victim["drop"][0][1] if random.randint(0, victim["drop"][0][2]) == 0 else 0
-                    Ff.add_to_backpack(victim["drop"][0][0], amount1, items)  # adds mob drops 2
                     amount2 = victim["drop"][1][1] if random.randint(0, victim["drop"][1][2]) == 0 else 0
-                    Ff.add_to_backpack(victim["drop"][1][0], amount2, items)  # adds mob drops 3
+                    I.IB.add_dropped_items_to_var(victim["drop"][0][0], amount1, rooms,(victim["rect"][0][0], victim["rect"][0][1]), data, "mob")
+                    I.IB.add_dropped_items_to_var(victim["drop"][1][0], amount2, rooms,(victim["rect"][0][0], victim["rect"][0][1]), data, "mob")
 
-                    if amount1 != 0:
-                        Ff.display_text_player("Recieved " + str(amount1) + " " + str(victim["drop"][0][0][:-1]), 5000)
-                    if amount2 != 0:
-                        Ff.display_text_player("Recieved " + str(amount2) + " " + str(victim["drop"][1][0][:-1]), 5000)
+                    # if amount1 != 0:
+                    #     Ff.display_text_player("Recieved " + str(amount1) + " " + str(victim["drop"][0][0][:-1]), 5000)
+                    # if amount2 != 0:
+                    #     Ff.display_text_player("Recieved " + str(amount2) + " " + str(victim["drop"][1][0][:-1]), 5000)
 
             # gifs[type].start_gif = False
 
@@ -265,7 +289,7 @@ class Mob:
             rect.topleft = (new_x, new_y)
 
 def read_db():
-    db_data = Ff.read_data_from_db("mobs", ["name", "exp", "health", "allignment", "damage", "speed", "path", "delay"])
+    db_data = Ff.read_data_from_db("mobs", ["name", "exp", "health", "allignment", "damage", "speed", "path", "delay", "drops"])
     db_dict = {}
     for data in db_data:
         db_dict[data[0]] = {"exp": int(data[1]),
@@ -274,6 +298,7 @@ def read_db():
                            "damage": data[4],
                            "speed": int(data[5]),
                            "path": data[6],
-                           "delay": int(data[7])
+                           "delay": int(data[7]),
+                           "drop": data[8],
                            }
     return db_dict

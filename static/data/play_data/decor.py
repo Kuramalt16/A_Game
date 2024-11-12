@@ -12,7 +12,7 @@ class Decorations:
     def create_place_holders(self):
         db_data = Ff.read_data_from_db("decor", ["name", "action", "health", "type", "path"])
         for data in db_data:
-            if data[3] in ["Nature", "House", "Door"]:
+            if data[3] in ["Nature", "House", "Door", "Trap Door", "Stairs"]:
                 self.decor_dict[data[0]] = {"action": data[1],
                                            "health": data[2],
                                             "type": data[3],
@@ -21,8 +21,6 @@ class Decorations:
                 if "HARVESTABLE:" in data[1] and I.info.HARVESTABLE.get(data[0]) == None:
                     I.info.HARVESTED_OBJECTS[data[0]] = []
                 elif "ENTERABLE:" in data[1]:
-                    # if ",," in data[1]:
-                    #     enter_through = data[1].split(",,")[0]
                     I.info.ENTERABLE.append(data[0])
             elif data[3] in ["Furniture", "Appliance", "NPC", "NPC_Mob"]:
                 self.decor_dict[data[0]] = {"action": data[1],
@@ -31,13 +29,9 @@ class Decorations:
                                             "path": data[4]
                                             }
                 if "ENTERABLE:" in data[1]:
-                    if ",," in data[1]:
-                        enter_through = data[1].split(",,")[0]
                     I.info.ENTERABLE.append(data[0])
             self.health = data[2]
 
-            # elif "AXE:" in data[1]:
-            #     I.info.AXE_ =
     def generate_decor(self, name, num_of_items, background_size, path):
         for i in range(num_of_items):
             x = random.randint(100, background_size[0] - 200)
@@ -54,8 +48,6 @@ class Decorations:
         height = img_rect.h * rect_scale[1]
         img_rect = I.pg.Rect(img_rect.x, img_rect.y, width, height)
         return image, img_rect
-
-
 
     def place_batches_decor_by_coordinates(self, name,  x, y, path, scale, rect_scale):
         image = I.pg.image.load(path).convert_alpha()

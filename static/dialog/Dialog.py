@@ -1,3 +1,5 @@
+from scipy.cluster.hierarchy import complete
+
 from Values import Settings as S
 from utils import Frequent_functions as Ff, Imports as I
 
@@ -26,6 +28,9 @@ class Dialog():
                 for t in text.split(",, "):
                     text_list.append(t)
             for i in range(len(self.response)):
+                # print(self.response[i])
+                # print(text_list[i])
+                # print(self.text)
                 self.text[self.response[i]] = text_list[i]
 
         self.conv_key = "Start"  # key to start conversations
@@ -76,43 +81,67 @@ class Dialog():
                     self.iteration = 2
                     I.info.TITLES.append("Alcoholic")
         elif self.name == "Mayor":
-            if self.iteration != 3:
-                if I.info.COMPLETED_QUESTS != 0 and I.info.COMPLETED_QUESTS["GIVER"] == self.name and I.info.COMPLETED_QUESTS["ITEM"] == "Meat0":
-                    """have completed quests and the quest giver was joseph"""
+            if self.iteration != 4:
+                if I.info.QUESTS != [] and any(quest["GIVER"] == "Mayor" and quest["ITEM"] == "Meat0" for quest in I.info.QUESTS):
+                    """iteration 0 is getting meat quest, iteration 1 means completed quest"""
                     self.iteration = 1
-                    I.info.QUESTS = 0
-                elif I.info.QUESTS != 0 and I.info.QUESTS != [""] and I.info.QUESTS["GIVER"] == self.name and I.info.COMPLETED_QUESTS["ITEM"] == "Meat0":
+                elif I.info.QUESTS != [] and any(quest["GIVER"] == "Mayor" for quest in I.info.QUESTS) and any(completed_quest["ITEM"] == "Meat0" for completed_quest in I.info.COMPLETED_QUESTS):
                     self.iteration = 2
-                if I.info.COMPLETED_QUESTS != 0 and I.info.COMPLETED_QUESTS["REWARD"] == "CLAIMED" and I.info.COMPLETED_QUESTS["GIVER"] == self.name:
+                elif I.info.COMPLETED_QUESTS != [] and any(completed_quest["GIVER"] == "Mayor" for completed_quest in I.info.COMPLETED_QUESTS):
                     self.iteration = 3
-            if I.info.COMPLETED_QUESTS != 0 and I.info.COMPLETED_QUESTS["GIVER"] == self.name:
-                if I.info.COMPLETED_QUESTS["ITEM"] == "Slime Ball" and I.info.COMPLETED_QUESTS["REWARD"] != "CLAIMED":
+            if I.info.COMPLETED_QUESTS != [] and any(completed_quest["GIVER"] == "Mayor" for completed_quest in I.info.COMPLETED_QUESTS):
+                if any(quest["TYPE"] == "GET" and quest["ITEM"] == "Slime Ball" and quest["COMPLETION"] >= 1 for quest in I.info.QUESTS):
                     self.iteration = 5
         elif self.name == "Tutorial Man":
-            if I.info.COMPLETED_QUESTS != 0:
-                if I.info.COMPLETED_QUESTS["ACTION"] == "WALK" and I.info.COMPLETED_QUESTS["REWARD"] != "CLAIMED":
-                    self.iteration = 1
-                elif I.info.COMPLETED_QUESTS["ACTION"] == "WALK" and I.info.COMPLETED_QUESTS["REWARD"] == "CLAIMED":
-                    self.iteration = 2
-                elif I.info.COMPLETED_QUESTS["ACTION"] == "RUN" and I.info.COMPLETED_QUESTS["REWARD"] != "CLAIMED":
-                    self.iteration = 3
-                elif I.info.COMPLETED_QUESTS["ACTION"] == "RUN" and I.info.COMPLETED_QUESTS["REWARD"] == "CLAIMED":
-                    self.iteration = 4
-                elif I.info.COMPLETED_QUESTS["ACTION"] == "PUNCH" and I.info.COMPLETED_QUESTS["REWARD"] != "CLAIMED":
-                    self.iteration = 5
-                elif I.info.COMPLETED_QUESTS["ACTION"] == "PUNCH" and I.info.COMPLETED_QUESTS["REWARD"] == "CLAIMED":
-                    self.iteration = 6
-                elif I.info.COMPLETED_QUESTS["ACTION"] == "QUEST_BACKPACK" and I.info.COMPLETED_QUESTS["REWARD"] != "CLAIMED":
-                    self.iteration = 7
-                elif I.info.COMPLETED_QUESTS["ACTION"] == "QUEST_BACKPACK" and I.info.COMPLETED_QUESTS["REWARD"] == "CLAIMED":
-                    self.iteration = 8
-                elif I.info.COMPLETED_QUESTS["ACTION"] == "EAT" and I.info.COMPLETED_QUESTS["REWARD"] != "CLAIMED":
-                    self.iteration = 9
-                elif I.info.COMPLETED_QUESTS["ACTION"] == "EAT" and I.info.COMPLETED_QUESTS["REWARD"] == "CLAIMED":
-                    self.iteration = 10
+            if I.info.tutorial_flag == 1 and I.info.QUESTS == []:
+                self.iteration = 0
+            else:
+                if any(quest["GIVER"] == "Purple Wizard" for quest in I.info.QUESTS) or any(completed_quest["TYPE"] == "Tutorial" and completed_quest["ACTION"] != "EAT" for completed_quest in I.info.COMPLETED_QUESTS):
+                    I.info.tutorial_flag = 0
+                    if any(quest["ACTION"] == "WALK" and quest["COMPLETION"] >= 1 for quest in I.info.QUESTS) and self.iteration == 0:
+                        """got reward for WALK quest"""
+                        self.iteration = 1
+                    elif any(completed_quest["TYPE"] == "Tutorial" and completed_quest["ACTION"] == "WALK" for completed_quest in I.info.COMPLETED_QUESTS) and self.iteration == 1:
+                        """Got run quest"""
+                        self.iteration = 2
+                    elif any(quest["ACTION"] == "RUN" and quest["COMPLETION"] >= 1 for quest in I.info.QUESTS) and self.iteration == 2:
+                        """Got reward for run quest"""
+                        self.iteration = 3
+                    elif any(completed_quest["TYPE"] == "Tutorial" and completed_quest["ACTION"] == "RUN" for completed_quest in I.info.COMPLETED_QUESTS) and self.iteration == 3:
+                        self.iteration = 4
+                    elif any(quest["ACTION"] == "PUNCH" and quest["COMPLETION"] >= 1 for quest in I.info.QUESTS) and self.iteration == 4:
+                        self.iteration = 5
+                    elif any(completed_quest["TYPE"] == "Tutorial" and completed_quest["ACTION"] == "PUNCH" for completed_quest in I.info.COMPLETED_QUESTS) and self.iteration == 5:
+                        self.iteration = 6
+                    elif any(quest["ACTION"] == "QUEST_BACKPACK" and quest["COMPLETION"] >= 1 for quest in I.info.QUESTS) and self.iteration == 6:
+                        self.iteration = 7
+                    elif any(completed_quest["TYPE"] == "Tutorial" and completed_quest["ACTION"] == "QUEST_BACKPACK" for completed_quest in I.info.COMPLETED_QUESTS) and self.iteration == 7:
+                        self.iteration = 8
+                    elif any(quest["ACTION"] == "EAT" and quest["COMPLETION"] >= 1 for quest in I.info.QUESTS) and self.iteration == 8:
+                        self.iteration = 9
+                    elif any(completed_quest["TYPE"] == "Tutorial" and completed_quest["ACTION"] == "EAT" for completed_quest in I.info.COMPLETED_QUESTS) and self.iteration == 9:
+                        self.iteration = 10
+                    elif self.iteration == 10:
+                        self.iteration = 11
+                else:
+                    self.iteration = 11
         elif self.name == "Castle_Guard":
-            if "Criminal|0" in I.info.TITLES:
+            if I.info.CRIMINAL["Charge"] != "" and I.info.CURRENT_ROOM["Type"] != "Prison":
                 self.iteration = 1
+            elif I.info.CURRENT_ROOM["Type"] == "Prison":
+                self.iteration = 2
+            else:
+                self.iteration = 0
+        elif self.name == "Gwen":
+            if any(quest["GIVER"] == "Gwen" and quest["ITEM"] == "Stick" and quest["COMPLETION"] >= 1 for quest in I.info.QUESTS):
+                if any(quest["ITEM"] == "Light Wood" and quest["COMPLETION"] >= 1 for quest in I.info.QUESTS):
+                    self.iteration = 2
+            elif "Wooden Axe" in list(I.info.BACKPACK_CONTENT.keys()) and not any(quest["GIVER"] == "Gwen" for quest in I.info.QUESTS) and not any(completed_quest["GIVER"] == "Gwen" and completed_quest["ITEM"] == "Stick" for completed_quest in I.info.COMPLETED_QUESTS):
+                self.iteration = 1
+            else:
+                self.iteration = 0
+
+
 
     def has_conversation_ended(self):
         self.select_id()

@@ -4,31 +4,44 @@ from Render import Background_Render as br
 from Values import Settings as S
 from Backend import Play
 
-def check_quest_completion():
+def check_quest_completion(id=None):
     remainder = 0
-    if I.info.QUESTS != 0 and I.info.QUESTS["TYPE"] == "GET":
-        if I.info.BACKPACK_CONTENT.get(I.info.QUESTS["ITEM"]) == None:
-            amount = 0
-        else:
-            amount, x, y = I.info.BACKPACK_CONTENT[I.info.QUESTS["ITEM"]]
-        remainder = float(amount) / float(I.info.QUESTS["AMOUNT"])
-        I.info.QUESTS["COMPLETION"] = remainder
-    elif I.info.QUESTS != 0 and I.info.QUESTS["TYPE"] == "Tutorial":
-        remainder = float(I.info.QUESTS["COMPLETION"])
-    if remainder >= 1:
-        I.info.COMPLETED_QUESTS = I.info.QUESTS
-        remainder = 1
-    return remainder
+    for quest in I.info.QUESTS:
+        if quest["TYPE"] == "GET":
+            if I.info.BACKPACK_CONTENT.get(quest["ITEM"]) == None:
+                amount = 0
+                if I.info.BACKPACK_CONTENT.get(quest["ITEM"] + "|STACK0") != None:
+                    amount += I.info.BACKPACK_CONTENT[quest["ITEM"] + "|STACK0"][0]
+                    amount += I.info.BACKPACK_CONTENT[quest["ITEM"] + "|STACK1"][0]
+            else:
+                amount, x, y, = I.info.BACKPACK_CONTENT[quest["ITEM"]]
+                if I.info.BACKPACK_CONTENT.get(quest["ITEM"] + "|STACK0") != None:
+                    amount += I.info.BACKPACK_CONTENT[quest["ITEM"] + "|STACK0"][0]
+                    amount += I.info.BACKPACK_CONTENT[quest["ITEM"] + "|STACK1"][0]
+            remainder = float(amount) / float(quest["AMOUNT"])
+            quest["COMPLETION"] = remainder
+        elif quest["TYPE"] in ["Tutorial", "MEET"]:
+            remainder = float(quest["COMPLETION"])
+        if remainder >= 1:
+            # I.info.COMPLETED_QUESTS.append(quest)
+            # I.info.QUESTS.remove(quest)
+            remainder = 1
+        if id != None and I.info.QUESTS[id] == quest:
+            return remainder
 
 def init_dialog(name, player, screen, npc, items, decorations, data, gifs, rooms, clock, spells):
+    dim_surface = I.pg.Surface((S.SCREEN_WIDTH, S.SCREEN_HEIGHT), I.pg.SRCALPHA)
+    dim_surface.fill((0, 0, 0, 180))
+    screen.blit(dim_surface, (0, 0))
     dialog_obj = npc[name]["dialog"]
-    I.info.tutorial_flag = 0
+    I.QB.handle_meet_quests(name, player)
     dialog_obj.name = name
     check_quest_completion()
-    handdle_sign_display(screen, dialog_obj, player, items, decorations, data, gifs)
+    handle_sign_display(screen, dialog_obj, player, items, decorations, data, gifs)
     handle_dialog_outcome(dialog_obj, player, screen, items, npc, rooms, clock, data, spells)
 
     dialog_obj.conv_key = "Start"
+
 def handle_functions_in_text(text, response, dialog, screen, items, decorations, data, gifs):
     """Function inside the text handler"""
     player = data["Player"]
@@ -36,8 +49,19 @@ def handle_functions_in_text(text, response, dialog, screen, items, decorations,
 
 
     if "{REWARD}" in text:
+        quest_reward = 0
+        quest_reward_list = []
+        for quest in I.info.QUESTS:
+            if quest["GIVER"] == dialog.name and quest["COMPLETION"] >= 1 or quest["GIVER"] == "Purple Wizard" and quest["COMPLETION"] >= 1:
+                quest_reward_list.append(quest["REWARD"])
+                quest_reward = quest["REWARD"]
+        if len(quest_reward_list) != 1:
+            quest_reward = 0
+            """if multiple quests in one quest"""
+            for quest_reward_money in quest_reward_list:
+                quest_reward += int(quest_reward_money.replace(" Sp", ""))
+            quest_reward = str(quest_reward) + " Sp"
         """CHANGES {REWARD} with reward from the completed quest"""
-        quest_reward = I.info.COMPLETED_QUESTS["REWARD"]
         if "{" in quest_reward:
             quest_reward = quest_reward.replace("Sp", "")
             if "Friendlyness" in quest_reward:
@@ -58,8 +82,7 @@ def handle_functions_in_text(text, response, dialog, screen, items, decorations,
         cost = items.item_dict[item]["Cost"]
         text = text.replace(text[text.index("{"):text.index("}") + 1], str(cost))
     elif "{CRIME_FINE}" in text:
-        text = text.replace("{CRIME_FINE}", "10 Gp") # Needs updating with more crimes
-        print(I.info.CRIMINAL)
+        text = text.replace("{CRIME_FINE}", str(I.info.CRIMINAL["Fine"]) + " Gp") # Needs updating with more crimes
     elif response[1] != '':
         # handles other actions
         """IF the text had a function like: {Acquired quest} it takes the second response as data and puts it into dialog.data and makes it invisible to the user"""
@@ -69,12 +92,11 @@ def handle_functions_in_text(text, response, dialog, screen, items, decorations,
             rand_addon = str(I.random.randint(0, 1))
             dialog.conv_key = dialog.conv_key.split("|")[0] + "-" + rand_addon
             dialog.data = (None, None, None, None)
-            handdle_sign_display(screen, dialog, data["Player"], items, decorations, data, gifs)
+            handle_sign_display(screen, dialog, data["Player"], items, decorations, data, gifs)
             running = False
         elif dialog.data[0] == "Crime":
             if dialog.data[1] == "PayFine":
-                print(I.info.CRIMINAL)
-                if player["Gold"] < 10:
+                if dialog.data[2] == "Gold" and player["Gold"] < int(I.info.CRIMINAL["Fine"]):
                     dialog.conv_key = "Funds"
                     dialog.data = (None, None, None, None)
                     text = dialog.get_text()
@@ -112,20 +134,21 @@ def handle_functions_in_text(text, response, dialog, screen, items, decorations,
             I.th.start_thread(2000, "folower", data)
 
     return text, response, running
-def handdle_sign_display(screen, dialog, player, items, decorations, data, gifs):
+
+def handle_sign_display(screen, dialog, player, items, decorations, data, gifs):
     # print(dialog.type, dialog.data, dialog.conv_key)
     # print("Name: id: ",dialog.name, dialog.iteration)
     text = dialog.get_text()
     response = dialog.select_response()
-    print("Text:", text)
-    print("response: ", response)
+    # print("Text:", text)
+    # print("response: ", response)
     running = True
     if "{" in text:
         text, response, running = handle_functions_in_text(text, response, dialog, screen, items, decorations, data, gifs)
         if not running:
             return
-        print("Updated Text: ", text)
-        print("Updated response: ", response)
+        # print("Updated Text: ", text)
+        # print("Updated response: ", response)
     Ff.add_image_to_screen(screen, S.PLAYING_PATH["Text_bar"], (0, S.SCREEN_HEIGHT / 2, S.SCREEN_WIDTH, S.SCREEN_HEIGHT / 2))
     a = 0
     collumn = 100
@@ -176,7 +199,7 @@ def handdle_sign_display(screen, dialog, player, items, decorations, data, gifs)
 
     if not running:
         if not dialog.has_conversation_ended():
-            handdle_sign_display(screen, dialog, player, items, decorations, data, gifs)
+            handle_sign_display(screen, dialog, player, items, decorations, data, gifs)
 
 def handle_dialog_outcome(dialog, player, screen, items, npc, rooms, clock, data, spells):
     if dialog.data != (None, None, None, None):
@@ -188,39 +211,18 @@ def handle_dialog_outcome(dialog, player, screen, items, npc, rooms, clock, data
                 return
 
             if "questfail" in dialog.data[0]:
-                I.info.QUESTS = 0
+                Ff.display_text_player("i need to know which quest to delete, currently deleting all", 10000)
+                I.info.QUESTS = []
                 dialog.iteration = 0
                 dialog.data = (None, None, None, None)
             elif "questcomplete" in dialog.data[0]:
-                reward = I.info.COMPLETED_QUESTS["REWARD"]
-                if "Gp" in reward:
-                    reward = reward.replace("Gp", "")
-                    currency = " Gp"
-                    player["Gold"] += float(reward)
-                if "Sp" in reward:
-                    reward = reward.replace("Sp", "")
-                    currency = " Sp"
-                    if "Friendlyness" in reward:
-                        reward = reward.replace("{Friendlyness}", "")
-                        sign = reward[-1]
-                        reward = reward[:-1]
-                        if sign == "*":
-                            reward = float(reward) + 5 * dialog.friendlyness
-                    player["Gold"] += round(float(reward) / 10, 2)
-                    player["Gold"] = round(player["Gold"], 2)
-                Ff.display_text_player("Recieved " + str(reward) + currency + " for completing a quest", 4000)
-                I.info.COMPLETED_QUESTS["REWARD"] = "CLAIMED"
-                # if dialog.data[2] == "Silver":
-                #     player["Gold"] += float(dialog.data[1])/10
-                # br.remove_from_backpack(dialog.data[4], int(dialog.data[3]))
-                # dialog.iteration = 3
-                dialog.data = (None, None, None, None)
+                I.QB.handle_completed_quest_dialog(player, dialog)
             else:
-                I.info.QUESTS = get_quest_dict(npc[giver]["quest"].split(",,,")[int(iteration)], giver) # QUESTS GET ASSIGNED HERE
+                I.QB.get_quest_dict(npc[giver]["quest"].split(",,,")[int(iteration)], giver) # QUESTS GET ASSIGNED HERE
                 check_quest_completion()
                 dialog.data = (None, None, None, None)
         elif "shop" in dialog.data[0]:
-            br.handle_shop(dialog.data[1], player, screen, items)
+            I.SHB.handle_shop(dialog.data[1], player, screen, items)
         elif dialog.data[0] == "item":
             if "buy" in dialog.data[1]:
                 # print("Buying ", dialog.data[3], "for ", dialog.data[2])
@@ -241,41 +243,40 @@ def handle_dialog_outcome(dialog, player, screen, items, npc, rooms, clock, data
                     Ff.add_to_backpack(name, amount, items)
                 dialog.data = (None, None, None, None)
         elif "Crime" in dialog.data[0]:
-            if "Assault" in dialog.data[1]:
-                I.info.CRIMINAL["Fine"] = 50
-                I.info.CRIMINAL["Prison_time"] = 360
-                I.info.CRIMINAL["Charge"] = dialog.data[1]
-                if "Criminal|0" not in I.info.TITLES:
-                    I.info.TITLES.append("Criminal|0")
-            elif "Abuse" in dialog.data[1]:
-                I.info.CRIMINAL["Fine"] = 5
-                I.info.CRIMINAL["Prison_time"] = 60
-                I.info.CRIMINAL["Charge"] = dialog.data[1]
-                if "Criminal|0" not in I.info.TITLES:
-                    I.info.TITLES.append("Criminal|0")
-            elif "PayFine" in dialog.data[1]:
-                player["Gold"] -= 10
-                I.info.TITLES.remove("Criminal|0")
-                print("Transport character near prison")
+            # if "Assault" in dialog.data[1]:
+            #     I.info.CRIMINAL["Fine"] = 50
+            #     I.info.CRIMINAL["Prison_time"] = 360
+            #     I.info.CRIMINAL["Charge"] = dialog.data[1]
+
+            # elif "Abuse" in dialog.data[1]:
+            #     I.info.CRIMINAL["Fine"] = 10
+            #     I.info.CRIMINAL["Prison_time"] = 60
+            #     I.info.CRIMINAL["Charge"] = dialog.data[1]
+
+            if "PayFine" in dialog.data[1]:
+                if "Gold" in dialog.data[2]:
+                    player["Gold"] -= int(I.info.CRIMINAL["Fine"])
+                    I.GB.reset_criminal_record(dialog)
+                if "Time" in dialog.data[2]:
+                    I.GB.reset_criminal_record(dialog)
+
+                    rooms.select_room("Village_10_10")
+                    I.info.CURRENT_ROOM = {"name": "Village_10_10", "Spells": True, "Backpack": True, "Running": True, "Mobs": rooms.mobs, "Type": rooms.type}
+                    I.info.ENTRY_POS = (330, 50)
+                    I.info.OFFSCREEN = (0, 0)
+                    I.PB.update_character_stats('static/data/created_characters/' + I.info.SELECTED_CHARACTER + "/" + I.info.SELECTED_CHARACTER + ".txt", data["Player"], spells.selected_spell, npc)
+                    # Play.Start(screen, clock, rooms)
+                    I.info.RESET = True
+
+
             elif "Prison" in dialog.data[1]:
                 rooms.select_room("Prison1")
-                I.info.CURRENT_ROOM = {"name": "Prison1", "Spells": True, "Backpack": True, "Running": True, "Mobs": rooms.mobs, "Type": "House"}
+                I.info.CURRENT_ROOM = {"name": "Prison1", "Spells": True, "Backpack": True, "Running": True, "Mobs": rooms.mobs, "Type": rooms.type}
                 I.info.ENTRY_POS = (1, 1)
-                I.info.OFFSCREEN = (25, 250)
-                br.update_character_stats('static/data/created_characters/' + I.info.SELECTED_CHARACTER + "/" + I.info.SELECTED_CHARACTER + ".txt", data["Player"], spells.selected_spell, npc)
-                Play.Start(screen, clock, rooms)
-                print("transport player to prison")
-
-
-def get_quest_dict(quest_data, giver):
-    if giver == 'Tutorial Man':
-        giver = "Purple Wizard"
-    dict = {"COMPLETION": 0, "GIVER": giver}
-    quest_list = quest_data.split(",,")
-    for data in quest_list:
-        property = data.split(":")[0]
-        dict[property] = data.split(":")[1]
-    return dict
+                I.info.OFFSCREEN = (25, 50)
+                I.PB.update_character_stats('static/data/created_characters/' + I.info.SELECTED_CHARACTER + "/" + I.info.SELECTED_CHARACTER + ".txt", data["Player"], spells.selected_spell, npc)
+                # Play.Start(screen, clock, rooms)
+                I.info.RESET = True
 
 def list_to_dict(list):
     dict = {}

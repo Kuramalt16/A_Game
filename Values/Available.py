@@ -158,11 +158,6 @@ NOTES = {
     "G5": 783.99
 }
 
-DROPS = {
-    "Slime_S": ("Slime Ball", 1, 3),
-    "Pig": [("Meat0", 1, 2), ("Meat1", 1, 3)],
-    "Skeleton" : []
-         }   # Key: Mob that drops : value: tuple(name of item, amount of item, chance of item, write only the denominator of fraction 1/x)
 
 background_music = [
     ((NOTES["C4"], NOTES["C3"]), 500),
@@ -217,4 +212,314 @@ dead_music = [
     ((NOTES["D4"], NOTES["F3"]), 1000),
 ]
 
-COMMANDS = ["TOGGLE GOD_MODE", "TELEPORT", "ROOM"]
+COMMANDS = ["TOGGLE GOD_MODE", "TELEPORT", "ROOM", "SET TIME", "GET"]
+
+DUST_COLORS = {"blue": (0, 0, 255, 255),
+               "red": (255, 0, 0, 255),
+               "green": (0, 255, 0, 255),
+               "yellow": (255, 255, 0, 255),
+               "light yellow": (220, 245, 122, 255),
+               "white": (255, 255, 255, 255),
+               }
+
+POTIONS = {
+    "SOUR": "Exhaustion",
+    "SWEET": "Health",
+    "BITTER": "Mana"
+}
+
+CRAFTING_DICT = \
+    {
+        "Iron Sword Blade Cast":
+            {
+                (-2, 4): "Clay",
+                (-4, 4): "Clay",
+                (-6, 4): "Clay",
+                (-2, 6): "Clay",
+                (-4, 6): "Wooden Sword",
+                (-6, 6): "Clay",
+                (-2, 8): "Clay",
+                (-4, 8): "Clay",
+                (-6, 8): "Clay"
+            },
+        "Iron Picaxe Blade Cast":
+            {
+                (-4, 4): "Clay",
+                (-6, 4): "Clay",
+                (-8, 4): "Clay",
+                (-2, 6): "Clay",
+                (-4, 6): "Light Wood Plank",
+                (-6, 6): "Light Wood Plank",
+                (-8, 6): "Light Wood Plank",
+                (-10, 6): "Clay",
+                (-4, 8): "Clay",
+                (-6, 8): "Clay",
+                (-8, 8): "Clay",
+            },
+        "Iron Shovel Blade Cast":
+            {
+                (-4, 4): 'Clay',
+                (-6, 6): 'Clay',
+                (-2, 6): 'Clay',
+                (-4, 8): 'Clay',
+                (-2, 8): 'Clay',
+                (-6, 8): 'Clay',
+                (-4, 6): 'Light Wood Plank'
+            },
+        "Iron Axe Blade Cast":
+            {
+                (-2, 6): 'Clay',
+                (-2, 4): 'Clay',
+                (-2, 8): 'Clay',
+                (-4, 8): 'Clay',
+                (-6, 6): 'Clay',
+                (-4, 4): 'Clay',
+                (-4, 6): 'Light Wood Plank'
+            },
+        "Sword Handle Cast":
+            {
+                (-2, 6): 'Clay',
+                (-4, 4): 'Clay',
+                (-6, 4): 'Clay',
+                (-8, 4): 'Clay',
+                (-10, 6): 'Clay',
+                (-8, 8): 'Clay',
+                (-4, 8): 'Clay',
+                (-6, 10): 'Clay',
+                (-4, 6): 'Light Wood Plank',
+                (-6, 6): 'Light Wood Plank',
+                (-8, 6): 'Light Wood Plank',
+                (-6, 8): 'Light Wood Plank'
+            },
+
+# wooden
+        "2**Light Wood Plank":
+            {
+                (-2, 4): ("Light Wood")
+            },
+        "Wooden Dagger":
+            {
+                (-2, 4): "Light Wood Plank",
+                (-2, 6): "Stick"
+            },
+        "Wooden Axe":
+            {
+                (-4, 4): "Light Wood Plank",
+                (-2, 6): 'Light Wood Plank',
+                (-4, 6): 'Light Wood Plank',
+                (-2, 8): 'Stick',
+                (-2, 10): 'Stick'
+            },
+        "Wooden Sword":
+            {
+                (-2, 4): 'Light Wood Plank',
+                (-2, 6): 'Light Wood Plank',
+                (-2, 8): 'Light Wood Plank',
+                (-2, 10): 'Stick',
+                (-2, 12): 'Stick'
+            },
+        "Wooden Picaxe":
+            {
+                (-2, 4): 'Light Wood Plank',
+                (-4, 4): 'Light Wood Plank',
+                (-4, 6): 'Stick',
+                (-4, 8): 'Stick',
+                (-6, 4): 'Light Wood Plank'
+            },
+        "Wooden Shovel":
+            {
+                (-2, 4): 'Light Wood Plank',
+                (-2, 6): 'Stick',
+                (-2, 8): 'Stick'
+            },
+        "Wooden Hoe":
+            {
+                (-2, 4): "Light Wood Plank",
+                (-4, 4): "Light Wood Plank",
+                (-2, 6): "Stick",
+                (-2, 8): "Stick",
+            },
+# Iron
+#         "Iron Dagger":
+#             {
+#                 (-2, 4): "Iron",
+#                 (-2, 6): "Stick"
+#             },
+        "Iron Sword":
+            {
+                (-2, 4): 'Iron Sword Blade',
+                (-2, 6): 'Iron Sword Handle',
+            },
+        "Iron Axe":
+            {
+                (-2, 4): "Iron Axe Blade",
+                (-2, 6): 'Stick',
+                (-2, 8): 'Stick',
+            },
+        "Iron Picaxe":
+            {
+                (-2, 4): "Iron Picaxe Blade",
+                (-2, 6): 'Stick',
+                (-2, 8): 'Stick',
+            },
+        "Iron Shovel":
+            {
+                (-2, 4): "Iron Shovel Blade",
+                (-2, 6): 'Stick',
+                (-2, 8): 'Stick',
+            },
+#         "Iron Ring":
+#             {
+#                 (-2, 6): 'Iron',
+#                 (-4, 4): 'Iron',
+#                 (-4, 8): 'Iron',
+#                 (-6, 6): 'Iron'
+#             },
+
+# Magnesium
+#         "Magnesium Dagger":
+#             {
+#                 (-2, 4): "Magnesium",
+#                 (-2, 6): "Stick"
+#             },
+        "Magnesium Sword":
+            {
+                (-2, 4): 'Magnesium Sword Blade',
+                (-2, 6): 'Magnesium Sword Handle',
+            },
+        "Magnesium Axe":
+            {
+                (-2, 4): "Magnesium Axe Blade",
+                (-2, 6): 'Stick',
+                (-2, 8): 'Stick',
+            },
+        "Magnesium Picaxe":
+            {
+                (-2, 4): "Magnesium Picaxe Blade",
+                (-2, 6): 'Stick',
+                (-2, 8): 'Stick',
+            },
+        "Magnesium Shovel":
+            {
+                (-2, 4): "Magnesium Shovel Blade",
+                (-2, 6): 'Stick',
+                (-2, 8): 'Stick',
+            },
+#         "Magnesium Ring":
+#             {
+#                 (-2, 6): 'Magnesium',
+#                 (-4, 4): 'Magnesium',
+#                 (-4, 8): 'Magnesium',
+#                 (-6, 6): 'Magnesium'
+#             },
+# Obsidian
+        "Obsidian Dagger":
+            {
+                (-2, 4): "Obsidian Shard",
+                (-2, 6): "Slime Ball",
+                (-2, 8): "Stick"
+            },
+        # "Obsidian Axe":
+        #     {
+        #         (-4, 4): "Obsidian Shard",
+        #         (-2, 6): 'Obsidian Shard',
+        #         (-4, 6): 'Obsidian Shard',
+        #         (-2, 8): 'Stick',
+        #         (-2, 10): 'Stick'
+        #     },
+        # "Obsidian Sword":
+        #     {
+        #         (-2, 4): 'Obsidian Shard',
+        #         (-2, 6): 'Obsidian Shard',
+        #         (-2, 8): 'Obsidian Shard',
+        #         (-2, 10): 'Stick',
+        #         (-2, 12): 'Stick'
+        #     },
+        # "Obsidian Picaxe":
+        #     {
+        #         (-2, 4): 'Obsidian Shard',
+        #         (-4, 4): 'Obsidian Shard',
+        #         (-4, 6): 'Stick',
+        #         (-4, 8): 'Stick',
+        #         (-6, 4): 'Obsidian Shard'
+        #     },
+        # "Obsidian Ring":
+        #     {
+        #         (-2, 6): 'Obsidian Shard',
+        #         (-4, 4): 'Obsidian Shard',
+        #         (-4, 8): 'Obsidian Shard',
+        #         (-6, 6): 'Obsidian Shard'
+        #     },
+ # Glass
+        "Glass Sword":
+            {
+                (-2, 4): "Glass Sword Blade",
+                (-2, 6): "Glass Sword Handle",
+            },
+        "Glass Axe":
+            {
+                (-2, 4): "Glass Axe Blade",
+                (-2, 6): 'Stick',
+                (-2, 8): 'Stick',
+            },
+        "Glass Picaxe":
+            {
+                (-2, 4): "Glass Picaxe Blade",
+                (-2, 6): 'Stick',
+                (-2, 8): 'Stick',
+            },
+        "Glass Shovel":
+            {
+                (-2, 4): "Glass Shovel Blade",
+                (-2, 6): 'Stick',
+                (-2, 8): 'Stick',
+            },
+
+    }
+WALKING_COLORS = \
+    {
+    (70, 70, 70, 255): "Pavement",
+    (180, 180, 180, 255): "Pavement",
+    (0, 0, 0, 255): "Pavement",
+    (97, 125, 32, 255): "Grass-Pavement", # grass/pavement mix
+    (77, 105, 12, 255): "Grass-Flakes", # grass/pavement mix
+    (137, 176, 46, 255): "Grass",
+    (152, 179, 44, 255): "Grass",
+    (76, 104, 11, 255): "Grass",
+    (154, 181, 45, 255): "Grass",
+    (255, 255, 0, 255): "Flash",
+    (254, 224, 130, 255): "Sand",
+    (240, 225, 113, 255): "Sand",
+    (255, 152, 0, 255): "Sand-Flakes",
+    (255, 193, 7, 255): "Sand-Flakes",
+    (222, 206, 104, 255): "Sand-Grass",
+    (179, 152, 80, 255): "Sand-Wet",
+    (168, 141, 66, 255): "Sand-Pavement",
+    (214, 186, 103, 255): "Sand-Deck",
+    (204, 177, 98, 255): "Sand-Wet",
+    (102, 53, 33, 255): "Deck",
+    (230, 156, 124, 255): "Deck",
+    (125, 72, 50, 255): "Deck",
+    (204, 130, 98, 255): "Deck",
+    (181, 110, 80, 255): "Deck",
+    (0, 172, 193, 255): "Water",
+    (163, 146, 47, 255): "SandClay-Pavement",
+    (115, 101, 23, 255): "SandClay-Pavement",
+    (194, 178, 78, 255): "Clay",
+    (230, 219, 142, 255): "Clay",
+    (89, 79, 26, 255): "SandClay-Pavement",
+    (64, 55, 12, 255): "Clay-Stairs",
+    (235, 216, 94, 255): "Clay-Stairs",
+    (207, 185, 66, 255): "Clay-Stairs",
+    (240, 227, 134, 255): "Clay-Flakes",
+    (168, 157, 81, 255): "Clay-Flakes",
+    (66, 66, 66, 255): "Rock",
+    (97, 97, 97, 255): "Rock",
+    (117, 117, 117, 255): "Rock",
+    (189, 189, 189, 255): "Rock",
+    (97, 61, 36, 255): "FencePost",
+    (138, 166, 133, 255): "Dark Grass-Pavement",
+    (137, 165, 132, 255): "Dark Grass-Pavement",
+    (133, 156, 34, 255): "Stuffed Grass",
+    (245, 228, 156, 255): "Tree Leaves", # ship this
+    }

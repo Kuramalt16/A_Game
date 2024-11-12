@@ -1,3 +1,4 @@
+import threading
 
 SELECTED_CHARACTER = ""
 
@@ -55,6 +56,7 @@ TITLES = []
 DEATH_SAVE = 0
 
 APPLIANCE_CLICK = [""]  # for furnace to know when it was clicked and able to play the gif
+"""Apliance name, item to be melted, , command"""
 DOOR_CLICK = 90, ""  # for doors when to open. the 90 is because i need a big value and then decreese from some other set value. and char value is for which building it was.
 
 EQUIPED = {  # USED to know what is equiped on the char
@@ -81,8 +83,8 @@ equipment = {  # equipment posisions with block tuple in inventory
 
 # CONVERSATION = 0
 
-QUESTS = 0  # obtained quests
-COMPLETED_QUESTS = 0  # completed quests. removes data from previous variable
+QUESTS = []  # obtained quests
+COMPLETED_QUESTS = []  # completed quests. removes data from previous variable
 
 FOLLOWER = {
     "Name": "",
@@ -98,10 +100,19 @@ FOLLOWER = {
 
 MAP_CHANGE = {}
 tutorial_flag = 0
-PAUSE_THREAD = {"harvest": False}
+PAUSE_THREAD = {"harvest": False, "drop_items": False}
+WALKING_ON = "Grass"
 
 CRIMINAL = {
     "Charge": "",
     "Fine": 0,
     "Prison_time": 0
     }
+
+DIM = 0
+
+LIGHT = [0, 0]
+
+RESET = False
+
+dropped_items_lock = threading.Lock()

@@ -10,16 +10,20 @@ class Room:
         self.background = ""
         self.room_dict = {}
         self.read_db()
+        self.light = 255
         self.start_game = 1
+        self.size = [1,1,1,1]
     def read_db(self):
-        db_data = Ff.read_data_from_db("rooms", ["name", "decor", "coordinates", "type", "background", "exit", "mobs"])
+        db_data = Ff.read_data_from_db("rooms", ["name", "decor", "coordinates", "type", "background", "exit", "mobs", "size", "light"])
         for data in db_data:
             self.room_dict[data[0]] = {"decor": data[1],
                                         "coordinates": data[2],
                                         "type": data[3],
                                         "background": data[4],
                                        "exit": data[5],
-                                       "mobs": data[6]
+                                       "mobs": data[6],
+                                       "size": data[7],
+                                       "light": int(data[8])
                                         }
     def select_room(self, name):
         previous_name = name  # Idiotic way
@@ -30,6 +34,8 @@ class Room:
         self.type = self.room_dict[name]["type"]
         self.background = self.room_dict[name]["background"]
         self.mobs = self.room_dict[name]["mobs"]
+        self.size = self.room_dict[name]["size"].split(", ")
+        self.light = self.room_dict[name]["light"]
         data_list = self.room_dict[name]["coordinates"].split(",,,")
         pos = self.room_dict[previous_name]["exit"].split(", ")
         if not S.GOD_MODE:
@@ -59,7 +65,6 @@ class Room:
                     I.info.ENTRY_POS = starting_pos[direction]
                 else:
                     I.info.OFFSCREEN = (0, 0)
-                    # I.info.ENTRY_POS
                     I.info.ENTRY_POS = (int(pos[0]), int(pos[1]))
         for i in range(0, len(data_list)):
             if ",," in data_list[i]:

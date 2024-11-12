@@ -27,6 +27,8 @@ WINDOW = "" # controls to re enter paused game (K_esc) after exiting from settin
 
 PLAY = False # once set to True starts the game.
 
+THREADS = True # set to False doesn't start threads, set to True starts threads
+
 # IMPORTANT DON'T CHANGE SPECIFIES THE FIRST COLOR EACH OBJECT STARTS AT WONT BE ABLE TO CHANGE COLORS IF CHANGED
 DEFAULT = {"Eyes": (33, 150, 243, 255),
            "Skin": (255, 205, 210, 255),
@@ -109,6 +111,9 @@ PLAYING_PATH = {
     "Container_5": "static/images/Playing/Container_5.png",
     "Container_6": "static/images/Playing/Container_6.png",
     "Backpack_Tile": "static/images/Playing/backpack_tile.png",
+    "Tutorial_icon": "static/images/Playing/Tutorial_icon.png",
+    "Meet_icon": "static/images/Playing/Meet_icon.png",
+    "Build_Station": "static/images/Playing/Meet_icon.png",
 }
 
 DECOR_PATH = {
@@ -117,7 +122,10 @@ DECOR_PATH = {
     "Grass_9_10":    'static/images/Background/Grass_9_10.png',
     "Grass_10_11":    'static/images/Background/Grass_10_11.png',
     "Wooden_tiles":  'static/images/Background/House/Wooden_tiles.png',
+    "Wooden_tiles2":  'static/images/Background/House/Wooden_tiles2.png',
+    "Wooden_tiles3":  'static/images/Background/House/Wooden_tiles3.png',
     "Stone_tiles":  'static/images/Background/House/Stone_tiles.png',
+    "Carpet1":  'static/images/Background/House/Carpet1.png',
     "Rocky_tiles":  'static/images/Background/House/Rocky_tiles.png',
 }
 

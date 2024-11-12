@@ -25,9 +25,12 @@ class Gif:
     def read_image(self):
         for i in range(self.frame_count):
             path = self.frame_paths[i]
+            call_path = I.os.getcwd()
+            if "Testing" in call_path:
+                call_path = call_path.replace("Testing", "") + path
+                path = call_path
             self.images.append(I.pg.image.load(path).convert_alpha())
 
-    # def update_frame(self):
     def Start_gif(self, name, rect):
         self.name = name
         # self.name += 1

@@ -102,14 +102,6 @@
 * PRIORITY: Medium
 * NEEDS: willpower
 
-* DESC: Folowers
-* PRIORITY: LOW
-* NEEDS: meska walking, luna walking
-
-* DESC: tools
-* PRIORITY: LOW
-* NEEDS: drawing
-
 * DESC: add levels (mastery) experience bars to a seperate window let's say the letter "Q" controlls it.
 * PRIORITY: LOW
 * NEEDS: drawing
@@ -142,14 +134,6 @@
 * PRIORITY: MEDIUM
 * NEEDS: willpower
 
-* DESC: Make Barrels containers
-* PRIORITY: MEDIUM
-* NEEDS: willpower
-
-* DESC: Add weapon seller
-* PRIORITY: MEDIUM
-* NEEDS: willpower
-
 * DESC: Add NPCS to db. Collumns: Type: (bartender, blacksmith, mayor, maid, story-teller), Quests: (names of quests or False), Conversations: big list of all the things a character can say.
 * PRIORITY: HIGH
 * NEEDS: willpower
@@ -158,27 +142,7 @@
 * PRIORITY: HIGH
 * NEEDS: willpower
 
-* DESC: Give the mayor a hat and a cigar animation
-* PRIORITY: HIGH
-* NEEDS: willpower
-
-* DESC: Make Axe usable (in db properties collum its set to AXE,,WEAPON, axe needs efficiency value and weapon needs damage value and damage type
-* PRIORITY: HIGH
-* NEEDS: willpower
-
-* DESC: Make Picaxe usable (in db properties collum its set to PICAXE,,WEAPON, picaxe needs efficiency value and weapon needs damage value and damage type
-* PRIORITY: HIGH
-* NEEDS: willpower
-
-* DESC: Make Sword, Staff, Dagger usable.
-* PRIORITY: HIGH
-* NEEDS: willpower
-
 * DESC: Make Bow and arrows
-* PRIORITY: HIGH
-* NEEDS: willpower
-
-* DESC: Make a Pavement for blacksmith shop
 * PRIORITY: HIGH
 * NEEDS: willpower
 
@@ -191,10 +155,6 @@
 * NEEDS: spells with effects.
 
 * DESC: add diferent knockbacks and animations for diferent type weapons (blunt, slashing, piercing)
-* PRIORITY: LOW
-* NEEDS: spells with effects.
-
-* DESC: in shop make tabs for selling. switch tabs by clicking [A] or [S]
 * PRIORITY: LOW
 * NEEDS: spells with effects.
 
@@ -214,10 +174,6 @@
 * DESC: when thieving will be achieved also make items in containers "mysteriously" dissappear. and appear on some random people.
 * PRIORITY: LOW
 * NEEDS: Beta version
-
-* DESC: when breaking trees, stones, anything, display hp.
-* PRIORITY: LOW
-* NEEDS: willpower
 
 * DESC: when smelting. make the player set the temperature and see what happens, if player intterracts with others he finds out what temperature normal things need to be at.
 * PRIORITY: LOW
@@ -243,10 +199,14 @@
 * PRIORITY: LOW
 * NEEDS: willpower
 
+* DESC: Walk behind decor in houses.
+* PRIORITY: High
+* NEEDS: willpower
+
 
 UNTILL FULL ALPHA:
-* 20 QUESTS (19 Remain)
-* Make Levelup (music remains)
+* 20 QUESTS (17 Remain) (Tutorial quest, get:slimeballs, get:Meat0)
+* Make Levelup (need to make music)
 * Stat changes
 * Allignment changes
 * Rock mining (only pebbles can be mined)
@@ -257,11 +217,11 @@ UNTILL FULL ALPHA:
 * Followers (Done)
 * Savable interractions
 * Tree respawning
-* Planting plants
-* Hoe for seed beds
+* Planting plants (done)
+* Hoe for seed beds (Done)
 * Blunt strikes (Done)
-* 10 spells (5 remaining)
+* 10 spells (4 remaining) (firebolt, magicbolt, icebolt, healminor, spawnskeletons, flash)
 * Bow and arrows
 * Add masteries (fishing, smelting, mining, axing, hoeing, planting, hunter, wizard, glassblowing)
-* 20 mobs (18 remaining)
+* 20 mobs (17 remaining) (pigs, slimeballs, guards)
 * make a house (rundown old building, get the mayor to sell it to you for too much money, ask wood carver for help in fixing it and then later other villagers on how to make other stuff (beds, cupboards, glass stuf etc)

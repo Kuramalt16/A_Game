@@ -3,33 +3,48 @@ from Backend import Play
 from Values import Settings as S
 
 def start_threads(data, mob, spells, decorations, rooms, npc, gifs, songs, items):
-    ten_min_thread = I.threading.Thread(target=ten_min, args=(mob, data, rooms))
-    ten_min_thread.daemon = True
-    ten_min_thread.start()
+    if S.THREADS:
 
-    five_min_thread = I.threading.Thread(target=five_min, args=(data, npc))
-    five_min_thread.daemon = True
-    five_min_thread.start()
+        five_min_thread = I.threading.Thread(target=five_min, args=(npc, ))
+        five_min_thread.daemon = True
+        five_min_thread.start()
 
-    one_min_thread = I.threading.Thread(target=one_min, args=(decorations, ))
-    one_min_thread.daemon = True
-    one_min_thread.start()
+        day_night_thread = I.threading.Thread(target=day_night)
+        day_night_thread.deamon = True
+        day_night_thread.start()
+
+        five_hundred_msec_thread = I.threading.Thread(target=five_hundred_msec, args=(songs, ))
+        five_hundred_msec_thread.daemon = True
+        five_hundred_msec_thread.start()
+
+        three_hundred_msec_thread = I.threading.Thread(target=three_hundred_msec)
+        three_hundred_msec_thread.daemon = True
+        three_hundred_msec_thread.start()
+
+        light_render_calculations_thread = I.threading.Thread(target=light_render_calculations, args=(rooms, decorations))
+        light_render_calculations_thread.daemon = True
+        light_render_calculations_thread.start()
+
+        item_drops_thread = I.threading.Thread(target=Handle_item_drops)
+        item_drops_thread.daemon = True
+        item_drops_thread.start()
+        S.THREADS = False
 
     one_sec_thread = I.threading.Thread(target=one_sec, args=(data, decorations))
     one_sec_thread.daemon = True
     one_sec_thread.start()
 
-    five_hundred_msec_thread = I.threading.Thread(target=five_hundred_msec, args=(songs, ))
-    five_hundred_msec_thread.daemon = True
-    five_hundred_msec_thread.start()
-
-    three_hundred_msec_thread = I.threading.Thread(target=three_hundred_msec)
-    three_hundred_msec_thread.daemon = True
-    three_hundred_msec_thread.start()
+    ten_min_thread = I.threading.Thread(target=ten_min, args=(mob, data, rooms))
+    ten_min_thread.daemon = True
+    ten_min_thread.start()
 
     one_hundred_msec_thread = I.threading.Thread(target=one_hundred_msec, args=(mob, spells, decorations, data, gifs))
     one_hundred_msec_thread.daemon = True
     one_hundred_msec_thread.start()
+
+    one_min_thread = I.threading.Thread(target=one_min, args=(decorations, data))
+    one_min_thread.daemon = True
+    one_min_thread.start()
 
 def start_thread(interval, case, extra):
     interval = float(interval) / 1000
@@ -65,44 +80,46 @@ def start_thread(interval, case, extra):
         spawn_thread = I.threading.Thread(target=spawn, args=(interval, extra))
         spawn_thread.daemon = True
         spawn_thread.start()
-    # elif case == "spell_cooloff":
-    #     spell_cooloff_thread = I.threading.Thread(target=spell_cooloff_th, args=(interval, extra))
-    #     spell_cooloff_thread.daemon = True
-    #     spell_cooloff_thread.start()
 
 
 
 
 
 def ten_min(mob, data, rooms):
+    if mob != {}:
+        while S.PLAY:
+            I.t.sleep(600)
+            I.MB.handle_mob_respawn(mob, data, rooms)
+
+
+def five_min(npc):
     while S.PLAY:
-        I.t.sleep(600)
-        Play.handle_mob_respawn(mob, data, rooms)
-
-
-def five_min(data, npc):
-    while S.PLAY:
-        I.t.sleep(10)  # Wait for the interval time (in seconds)
-
-        data["Player"]["Exhaustion"] = (data["Player"]["Exhaustion"][0] - 1, data["Player"]["Exhaustion"][1])
-
+        I.t.sleep(1)  # Wait for the interval time (in seconds)
         for npc_name in npc.keys():
-            if npc[npc_name]["dialog"].iteration == 3 and npc_name == "Mayor":  # after some time if value is 4 sets to value 5
-                print("change")
+            if npc[npc_name]["dialog"].iteration == 3 and npc_name == "Mayor":  # after some time if value is 3 sets to value 4
+                I.info.QUESTS.append({'COMPLETION': 0, 'GIVER': 'God', 'TYPE': 'MEET', 'WHO': 'Mayor', 'REWARD': '1 Sp', 'DESC': 'Go to the Mayor'})
                 npc[npc_name]["dialog"].iteration = 4
 
-def one_min(decorations): # Fixed
+def one_min(decorations, data): # Fixed
     while S.PLAY:
         I.t.sleep(60)
+        if int(data["Player"]["Exhaustion"][0]) > 0:
+            data["Player"]["Exhaustion"] = (int(data["Player"]["Exhaustion"][0]) - 1, int(data["Player"]["Exhaustion"][1]))
+
         if not I.info.PAUSE_THREAD["harvest"]:
             Play.harvest_timeout(decorations)
+        if "Prison" in I.info.CURRENT_ROOM["name"]:
+            I.info.CRIMINAL["Prison_time"] -= 60
+            if I.info.CRIMINAL["Prison_time"] <= 0:
+                I.info.CRIMINAL["Prison_time"] = 0
+                I.info.CRIMINAL["Charge"] = ""
 
 
 def one_sec(data, decorations): # Fixed
     while S.PLAY:
         I.t.sleep(1)
         """Healing player if not too exhausted"""
-        if I.pg.time.get_ticks() - data["Player"]["Last_hit"] > 20000 and data["Player"]["Exhaustion"][0] >= 90:
+        if I.pg.time.get_ticks() - int(data["Player"]["Last_hit"]) > 20000 and int(data["Player"]["Exhaustion"][0]) >= 90:
             if data["Player"]["hp"][0] < data["Player"]["hp"][1]:
                 data["Player"]["hp"] = (data["Player"]["hp"][0] + 1, data["Player"]["hp"][1])
             if float(data["Player"]["mana"][0]) < float(data["Player"]["mana"][1]):
@@ -142,6 +159,8 @@ def five_hundred_msec(song): # Fixed ( works better than before, still play's mu
         I.t.sleep(0.5)
         song[song["Playing"]].next_note()
 
+
+
 def three_hundred_msec(): # Fixed
     while S.PLAY:
         I.t.sleep(0.4)
@@ -158,8 +177,6 @@ def one_hundred_msec(mob, spells, decorations, data, gifs): # works fine
                 if mob[key].delay[0] <= 0:
                     for current_mob in mob[key].mobs:
                         current_mob["gif_frame"] = (current_mob["gif_frame"][0] + 1, current_mob["gif_frame"][1])
-                        # current_mob["gif_frame"] = ((current_mob["gif_frame"][0] + current_mob["gif_frame"][1]) % current_mob["gif_frame"][1], current_mob["gif_frame"][1])
-                        # print(current_mob["gif_frame"])
                         if current_mob["gif_frame"][0] >= current_mob["gif_frame"][1]:
                             current_mob["gif_frame"] = (0, current_mob["gif_frame"][1])
                             mob[key].move_mobs_randomly(decorations, data)
@@ -170,8 +187,8 @@ def one_hundred_msec(mob, spells, decorations, data, gifs): # works fine
                 spells.spell_cooloff[key] -= 1
 
 def hit_mob(interval, gifs): # Fixed
-    while True:
-        while True:
+    while S.PLAY:
+        while S.PLAY:
             if I.info.EQUIPED["Sword"][0] == 0:
                 I.t.sleep(interval)
                 break
@@ -183,21 +200,23 @@ def hit_mob(interval, gifs): # Fixed
                     I.info.EQUIPED["Sword"] = I.info.EQUIPED["Sword"][0], 27
                     break
         I.info.COMBAT_RECT = [0, 0]
+        I.info.WALKING_ON = None
         if I.info.POS_CHANGE[1] != 0:
             gifs[I.info.POS_CHANGE[1]].start_gif = False
             I.info.POS_CHANGE = 0, 0
         break
 
 
-def cook(interval, items):
-    while True:
+def cook(interval, extra):
+    items, rooms, data = extra
+    while S.PLAY:
         I.t.sleep(interval)
-        Play.handle_cooking_food(items)
+        I.AB.handle_cooking_food(items, rooms, data)
         break
 
 def axe(interval, gifs): # Fixed
-    while True:
-        while True:
+    while S.PLAY:
+        while S.PLAY:
             if I.info.EQUIPED["Axe"][1] <= 26:
                 I.info.EQUIPED["Axe"] = I.info.EQUIPED["Axe"][0], I.info.EQUIPED["Axe"][1] - 1
             I.t.sleep(interval / 26)
@@ -205,6 +224,7 @@ def axe(interval, gifs): # Fixed
                 I.info.EQUIPED["Axe"] = I.info.EQUIPED["Axe"][0], 27
                 break
         I.info.AXE = [0, 0]
+        I.info.WALKING_ON = None
         if I.info.POS_CHANGE[1] != 0:
             gifs[I.info.POS_CHANGE[1]].start_gif = False
             gifs[I.info.POS_CHANGE[1].replace(" Strike", "")].start_gif = False
@@ -212,8 +232,8 @@ def axe(interval, gifs): # Fixed
         break
 
 def picaxe(interval, gifs): # Fixed
-    while True:
-        while True:
+    while S.PLAY:
+        while S.PLAY:
             if I.info.EQUIPED["Picaxe"][1] <= 26:
                 I.info.EQUIPED["Picaxe"] = I.info.EQUIPED["Picaxe"][0], I.info.EQUIPED["Picaxe"][1] - 1
             I.t.sleep(interval / 26)
@@ -221,6 +241,7 @@ def picaxe(interval, gifs): # Fixed
                 I.info.EQUIPED["Picaxe"] = I.info.EQUIPED["Picaxe"][0], 27
                 break
         I.info.PICAXE = [0, 0]
+        I.info.WALKING_ON = None
         if I.info.POS_CHANGE[1] != 0:
             gifs[I.info.POS_CHANGE[1]].start_gif = False
             gifs[I.info.POS_CHANGE[1].replace(" Strike", "")].start_gif = False
@@ -228,7 +249,7 @@ def picaxe(interval, gifs): # Fixed
         break
 
 def waves(interval, gifs): # Fixed
-    while True:
+    while S.PLAY:
         I.t.sleep(interval)
         for key in gifs.keys():
             if "Wave1" in key or "Wave4" in key:
@@ -237,7 +258,7 @@ def waves(interval, gifs): # Fixed
         # I.pg.time.set_timer(I.pg.USEREVENT + 11, 0)
 
 def folower(interval, data): # Fixed
-    while True:
+    while S.PLAY:
         I.t.sleep(interval)
         x_init = 148 + data["Zoom_rect"].x + int(I.info.OFFSCREEN[0] / 4)
         y_init = 72 + data["Zoom_rect"].y + int(I.info.OFFSCREEN[1] / 4)
@@ -306,13 +327,85 @@ def planting(interval, decorations):
                 decorations.decor_dict[option][id]["effect"] = effect[0] + ":" + effect[1] + ":" + str(int(effect[2]) - int(interval / 10)) + ":" + str(full_time)
             update_time = []
 
-
 def spawn(interval, extra):
     spells, mobs = extra
-    while True:
+    while S.PLAY:
         I.t.sleep(interval)
         mob_name = list(spells.spawn_counter.keys())[0].replace("Spawn ", "")
-        mob_count = list(spells.spawn_counter.values())[0]
+        # mob_count = list(spells.spawn_counter.values())[0]
         del mobs[mob_name + " Mine"]
         spells.spawn_counter = {}
         break
+
+def day_night():
+    """ Toggle day/night cycle """
+    value = 1
+    while S.PLAY:
+        I.t.sleep(1)
+        I.info.DIM += value
+        if I.info.DIM >= 240:  # set to 240 so it wouldn't get black
+            value = -1
+            I.t.sleep(10)
+        if I.info.DIM <= 1:
+            value = 1
+            I.t.sleep(10)
+
+def light_render_calculations(rooms, decorations):
+    light_source_exists = False
+    while S.PLAY:
+        for decoration in rooms.decor:
+            if decorations.decor_dict.get(decoration) != None and "LIGHT SOURCE" in decorations.decor_dict[decoration]["action"]:
+                radius = decorations.decor_dict[decoration]["action"].find("LIGHT SOURCE")
+                radius = int(decorations.decor_dict[decoration]["action"][radius:].split(",,")[0].split(":")[1])
+                radius_2 = int(radius * 0.5)
+                light_source_exists = True
+
+                if rooms.type not in ["House", "Prison"]:
+                    radius = int(radius / 4)
+                    radius_2 = int(radius / 4)
+
+                I.info.LIGHT[0] = Ff.create_light_mask(radius_2, (10, 10, 10))
+                I.info.LIGHT[1] = Ff.create_light_mask(radius, (20, 20, 20))
+        I.t.sleep(0.1)
+    if not light_source_exists:
+        I.t.sleep(1)
+
+# Threaded function to handle item drops
+def Handle_item_drops():
+    def adjust_y_sequence(y, step):
+        # "up, up, down, down" sequence
+        if step % 6 == 0 or step % 6 == 1 or step % 6 == 2:  # First two steps: move up by 1
+            return y - 1
+        elif step % 6 == 3 or step % 6 == 4 or step % 6 == 5:  # Next two steps: move down by 1
+            return y + 1
+
+    # Dictionary to track both step and current y position for each item
+    item_steps = {}
+
+    while S.PLAY:
+        I.t.sleep(0.2)
+        # Update y-coordinates in-place in I.IB.dropped_items
+        with I.info.dropped_items_lock:
+            for room, items in I.IB.dropped_items.items():
+                for position, item in list(items.items()):
+                    x, y = position
+
+                    # Initialize step counter and current y position for this item if not present
+                    if position not in item_steps:
+                        item_steps[position] = {"step": 0, "y": y}
+
+                    # Get the current step and y position for this item
+                    step = item_steps[position]["step"]
+                    current_y = item_steps[position]["y"]
+
+                    # Calculate the new y position based on the current step
+                    new_y = adjust_y_sequence(current_y, step)
+
+                    # Define the new position and update in I.IB.dropped_items
+                    new_position = (x, new_y)
+                    items.pop(position)  # Remove the old position
+                    items[new_position] = item  # Add the item with the new position
+
+                    # Update `item_steps`: remove the old key and add the new one
+                    item_steps.pop(position)  # Remove old entry
+                    item_steps[new_position] = {"step": step + 1, "y": new_y}  # Update step count and y position

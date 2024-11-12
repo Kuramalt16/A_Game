@@ -151,11 +151,13 @@ def take_pictures(value, screen, side):
                        "Backpack: " + "Gold__0__0__0" + "\n\n" +
                        "Spells: " + "" + "\n\n" +
                        "Dialog: " + "" + "\n\n" +
-                       "Quests: " + "" + "\n\n" +
+                       "Quests: " + "[]" + "\n\n" +
+                       "Completed_quests: " + "[]" + "\n\n" +
                        "Containers: " + "" + "\n\n" +
                        "Titles: " + "" + "\n\n" +
                        "Save_point: " + "Village_10_10:330:1:0:0" + "\n\n" +
                        "DEATH_SAVE: " + "" + "\n\n" +
+                       "Criminal: " + "" + "\n\n" +
                        "Spawn: " + "Village_10_10:330:1:0:0"
                        )
 

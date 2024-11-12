@@ -18,36 +18,40 @@ Color_Shir: (165, 170, 0, 255)
 Color_Pant: (0, 100, 201, 255)
 Color_Shoe: (166, 170, 0, 255)
 
-Last Save: 2024/10/14 09:48
+Last Save: 2024/11/12 18:53
 
 
 
-Level: 3
-Experience: 65
-Health: 33
-Mana: 6
-Exhaustion: 32
+Level: 5
+Experience: 140
+Health: -5
+Mana: 70
+Exhaustion: 91
 
-Gold: 70.3
+Gold: 90.9
 
 Alignment: Unaligned
 
 Class: Not trained
 
-Backpack: Gold__70.3__0__0,,Slime Ball__5.0__2__0,,Light Berries__31.0__4__0,,Wooden Axe__1.0__-6__8,,Wooden Picaxe__1.0__8__2,,Wooden Staff__1.0__-4__8,,Stick__25.0__6__0,,Light Wood__4.0__10__0,,Obsidian__9.0__12__0,,Basalt__2.0__14__0,,Meat1__8.0__2__4,,Meat0__5.0__0__2,,Pebbles__6.0__-8__8,,Wooden Hoe__1.0__4__2,,Apple Seed__15.0__8__0,,Meat1_Cooked__1.0__2__2,,Slag__1.0__10__2,,Apple|STACK0__64.0__14__2,,Apple|STACK1__64.0__12__2,,Apple|STACK2__47.0__6__2,,Ale__1.0__0__4,,
+Backpack: Gold__90.9__0__0,,Slime Ball__3.0__2__0,,Light Berries__15.0__6__0,,Wooden Axe__1.0__12__8,,Wooden Staff__1.0__0__2,,Meat1__2.0__2__6,,Meat0__22.0__10__4,,Pebbles__20.0__2__4,,Apple|STACK0__64.0__14__2,,Apple|STACK2__33.0__12__2,,Lockpick__40.0__6__4,,Wooden Picaxe__1.0__10__0,,Apple Seed|STACK0__128.0__8__4,,Apple Seed|STACK1__128.0__2__2,,Blue berry__14.0__6__2,,Potion_Empty__3.0__4__6,,Potion_Exhaustion__3.0__12__4,,Wooden Hammer__1.0__10__2,,Basalt Pebbles__1.0__0__6,,Purple Dust|STACK0__16.0__12__6,,Purple Dust|STACK1__16.0__14__4,,Stick|STACK0__48.0__4__2,,Stick|STACK1__5.0__2__10,,Obsidian Shard__5.0__6__6,,Obsidian Dagger__1.0__-8__8,,Wooden Shovel__1.0__14__0,,Light Wood Plank__7.0__8__0,,Slag Pebbles__2.0__8__6,,Purple Dust|STACK2__6.0__10__6,,Apple Seed|STACK2__3.0__14__6,,Meat1_Cooked__8.0__8__2,,Clay__4.0__4__4,,Magnesium Shovel Blade__1.0__0__14,,Magnesium Picaxe Blade__1.0__4__14,,Magnesium Axe Blade__1.0__2__14,,Iron Axe Blade__1.0__2__16,,Iron Picaxe Blade__1.0__4__16,,Iron Shovel Blade__1.0__0__16,,Sword Handle Cast__1.0__0__8,,Iron Picaxe Blade Cast__1.0__4__0,,Glass Picaxe Blade__1.0__4__18,,Glass Axe Blade__1.0__2__18,,Iron Axe Blade Cast__1.0__4__8,,Glass Shovel Blade__1.0__0__18,,Iron Shovel Blade Cast__1.0__2__8,,Iron Sword Blade Cast__1.0__0__4,,Glass Sword__1.0__-4__8,,Magnesium Sword__1.0__-6__8,,Iron Sword__1.0__0__12,,
 
 Spells: 0__Magic Bolt,,2__Fire Bolt,,4__Cold Bolt,,6__Flash,,8__Spawn Skeleton,,
 
-Dialog: Luna__0__0,,Bear__0__0,,Joseph__0__1,,Mayor__3__-1,,Gwen__0__27,,Sign__0__0,,Tutorial Man__0__0,,Castle_Guard__1__0,,
+Dialog: Luna__0__0,,Bear__0__0,,Joseph__0__0,,Mayor__5__-6,,Gwen__0__23,,Sign__0__0,,Tutorial Man__11__10,,Castle_Guard__1__-1,,Rina__0__0,,
 
-Quests: COMPLETION:1.0,,GIVER:Mayor,,TYPE:GET,,ITEM:Slime Ball,,AMOUNT:5,,REWARD:CLAIMED,,DESC:Get some slime balls
+Quests: []
 
-Containers: 
+Completed_quests: [{"COMPLETION": 4.6, "GIVER": "Mayor", "TYPE": "GET", "ITEM": "Meat0", "AMOUNT": "5", "REWARD": "50 Sp*{Friendlyness}", "DESC": "Get some steak"}, {"COMPLETION": 1, "GIVER": "God", "TYPE": "MEET", "WHO": "Mayor", "REWARD": "1 Sp", "DESC": "Go to the Mayor"}, {"COMPLETION": 2.4, "GIVER": "Mayor", "TYPE": "GET", "ITEM": "Slime Ball", "AMOUNT": "5", "REWARD": "70 Sp*{Friendlyness}", "DESC": "Get some slime balls"}, {"COMPLETION": 2.75, "GIVER": "Gwen", "TYPE": "GET", "ITEM": "Stick", "AMOUNT": "20", "REWARD": "10 Sp", "DESC": "Get some sticks"}, {"COMPLETION": 1.0, "GIVER": "Gwen", "TYPE": "GET", "ITEM": "Light Wood", "AMOUNT": "5", "REWARD": "40 Sp", "DESC": "Get some wood"}, {"COMPLETION": 1, "GIVER": "Purple Wizard", "TYPE": "Tutorial", "ACTION": "WALK", "REWARD": "1 Sp", "DESC": "Press [LEFT], [RIGHT], [UP], [DOWN]"}, {"COMPLETION": 1, "GIVER": "Purple Wizard", "TYPE": "Tutorial", "ACTION": "RUN", "REWARD": "1 Sp", "DESC": "Press [LEFT], [RIGHT], [UP], [DOWN] while holding [Z]"}, {"COMPLETION": 1, "GIVER": "Purple Wizard", "TYPE": "Tutorial", "ACTION": "PUNCH", "REWARD": "1 Sp", "DESC": " Press [X] to hit"}, {"COMPLETION": 1, "GIVER": "Purple Wizard", "TYPE": "Tutorial", "ACTION": "QUEST_BACKPACK", "REWARD": "1 Sp", "DESC": " Press [Q] to open Quest Catalog \\n Press [I] to open Backpack"}, {"COMPLETION": 1, "GIVER": "Purple Wizard", "TYPE": "Tutorial", "ACTION": "EAT", "REWARD": "1 Sp", "DESC": "Collect one Light Berry from a bush by pressing [C] on it open Backpack\\nand place the berry to a diferent location with the [C] button \\neat the berry with the key [X]"}]
 
-Titles: Criminal|0
+Containers: {"House1": {"[\"Barrel\", 0]": {"[-2, 0]": ["Slime Ball", 1], "[-4, 0]": ["Slime Ball", 1], "[-2, 2]": ["Slime Ball", 1], "[-4, 2]": ["Slime Ball", 1], "[-2, 4]": ["Slime Ball", 1], "[-4, 4]": ["Slime Ball", 1]}}, "Prison1": {"[\"Barrel\", 0]": {"[-2, 0]": ["Slime Ball", 1], "[-4, 0]": ["Slime Ball", 1], "[-2, 2]": ["Meat1", 1], "[-4, 2]": ["Meat1", 1], "[-2, 4]": ["Meat1", 1], "[-4, 4]": ["Meat1", 1]}}}
+
+Titles: 
 
 Save_point: Village_10_10:330:1:0:0
 
-DEATH_SAVE: 0
+DEATH_SAVE: Village_10_10:343:-3:0:-12:0
 
-Spawn: Prison1:1:1:25:250
+Criminal: {"Charge": "Assault", "Fine": 100, "Prison_time": 180}
+
+Spawn: Village_10_10:330:1:0:0
