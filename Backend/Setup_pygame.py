@@ -39,6 +39,7 @@ def run_game(screen, clock):
     running = True  # if set to false game doesn't start and window doesn't open
     clicked_button = ""
     screen.fill("white")
+    print("LABASSSSS ")
     while running:
         for event in I.pg.event.get():
             if event.type == I.pg.QUIT:
@@ -50,20 +51,9 @@ def run_game(screen, clock):
                 pos = I.pg.mouse.get_pos()
                 for key, value in buttons.items():
                     if value.collidepoint(pos[0], pos[1]) and I.pg.mouse.get_pressed()[0]:
-                        if key == "Exit":
+                        if key in ["Exit", "Start Game", "Settings", "Update"]:
                             Ff.button_click_render_down(screen, value, 1, S.PATHS["Empty_button_frame"])
-                            Ff.display_text(screen, key, 30,
-                                            (buttons[key + "_text"].left, buttons[key + "_text"].top * 1.005), "black")
-                            clicked_button = key
-                        elif key == "Start Game":
-                            Ff.button_click_render_down(screen, value, 1, S.PATHS["Empty_button_frame"])
-                            Ff.display_text(screen, key, 30,
-                                            (buttons[key + "_text"].left, buttons[key + "_text"].top * 1.005), "black")
-                            clicked_button = key
-                        elif key == "Settings":
-                            Ff.button_click_render_down(screen, value, 1, S.PATHS["Empty_button_frame"])
-                            Ff.display_text(screen, key, 30,
-                                            (buttons[key + "_text"].left, buttons[key + "_text"].top * 1.005), "black")
+                            Ff.display_text(screen, key, 30,(buttons[key + "_text"].left, buttons[key + "_text"].top * 1.005), "black")
                             clicked_button = key
                         I.pg.display.flip()
             if event.type == I.pg.MOUSEBUTTONUP and (S.MAIN_MENU):
@@ -118,11 +108,15 @@ def run_game(screen, clock):
                             I.pg.display.flip()
                             S.MAIN_MENU = False
                             SB.Settings(screen)
+                        elif key == "Update" and clicked_button == key:
+                            Ff.button_click_render_down(screen, value, 0, S.PATHS["Empty_button_frame"])
+                            I.pg.display.flip()
+                            S.MAIN_MENU = False
+                            I.UG.update_game()
 
                     elif clicked_button == key:
                         Ff.button_click_render_down(screen, value, 0, S.PATHS["Empty_button_frame"])
-                        Ff.display_text(screen, key, 30, (buttons[key + "_text"].left, buttons[key + "_text"].top),
-                                        "black")
+                        Ff.display_text(screen, key, 30, (buttons[key + "_text"].left, buttons[key + "_text"].top), "black")
                         I.pg.display.flip()
                         clicked_button = ""
         clock.tick(S.FRAMERATE)  # limits FPS to 60

@@ -727,11 +727,11 @@ def read_data_from_db(table, columns='*', conditions=None):
     Returns:
         list: A list of tuples containing the rows retrieved from the database.
     """
-    root_dir = I.os.path.dirname(I.os.path.dirname(I.os.path.abspath(__file__)))  # Adjust if necessary
-    db_path = I.os.path.join(root_dir, "static", "data", "A_Game.db")
+    # root_dir = I.os.path.dirname(I.os.path.dirname(I.os.path.abspath(__file__)))  # Adjust if necessary
+    db_path = I.os.path.join(S.local_path, "static", "data", "A_Game.db")
 
-    # conn = I.sqlite3.connect(db_path)
-    conn = I.sqlite3.connect("C:/Users/user/Desktop/A_Game-main/static/data/A_Game.db")
+    conn = I.sqlite3.connect(db_path)
+    # conn = I.sqlite3.connect("C:/Users/user/Desktop/A_Game-main/static/data/A_Game.db")
     cursor = conn.cursor()
 
     if isinstance(columns, list):

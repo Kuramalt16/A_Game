@@ -1,4 +1,5 @@
 
+local_path = ""
 
 SCREEN_WIDTH = 1280
 SCREEN_HEIGHT = SCREEN_WIDTH * 9 / 16

@@ -814,7 +814,6 @@ def handle_opening_doors(gifs, new_subimage, rect, rooms, npc, data, spells, scr
             I.PB.update_character_stats('static/data/created_characters/' + I.info.SELECTED_CHARACTER + "/" + I.info.SELECTED_CHARACTER + ".txt", data["Player"], spells.selected_spell, npc)
             # Play.Start(screen, clock, rooms)
             I.info.RESET = True
-
         else:
             print("ROOM DOESN'T EXIST")
 

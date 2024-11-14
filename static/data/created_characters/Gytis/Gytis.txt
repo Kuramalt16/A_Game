@@ -18,13 +18,13 @@ Color_Shir: (165, 170, 0, 255)
 Color_Pant: (0, 100, 201, 255)
 Color_Shoe: (166, 170, 0, 255)
 
-Last Save: 2024/11/12 18:53
+Last Save: 2024/11/14 22:31
 
 
 
 Level: 5
 Experience: 140
-Health: -5
+Health: 55
 Mana: 70
 Exhaustion: 91
 
@@ -34,7 +34,7 @@ Alignment: Unaligned
 
 Class: Not trained
 
-Backpack: Gold__90.9__0__0,,Slime Ball__3.0__2__0,,Light Berries__15.0__6__0,,Wooden Axe__1.0__12__8,,Wooden Staff__1.0__0__2,,Meat1__2.0__2__6,,Meat0__22.0__10__4,,Pebbles__20.0__2__4,,Apple|STACK0__64.0__14__2,,Apple|STACK2__33.0__12__2,,Lockpick__40.0__6__4,,Wooden Picaxe__1.0__10__0,,Apple Seed|STACK0__128.0__8__4,,Apple Seed|STACK1__128.0__2__2,,Blue berry__14.0__6__2,,Potion_Empty__3.0__4__6,,Potion_Exhaustion__3.0__12__4,,Wooden Hammer__1.0__10__2,,Basalt Pebbles__1.0__0__6,,Purple Dust|STACK0__16.0__12__6,,Purple Dust|STACK1__16.0__14__4,,Stick|STACK0__48.0__4__2,,Stick|STACK1__5.0__2__10,,Obsidian Shard__5.0__6__6,,Obsidian Dagger__1.0__-8__8,,Wooden Shovel__1.0__14__0,,Light Wood Plank__7.0__8__0,,Slag Pebbles__2.0__8__6,,Purple Dust|STACK2__6.0__10__6,,Apple Seed|STACK2__3.0__14__6,,Meat1_Cooked__8.0__8__2,,Clay__4.0__4__4,,Magnesium Shovel Blade__1.0__0__14,,Magnesium Picaxe Blade__1.0__4__14,,Magnesium Axe Blade__1.0__2__14,,Iron Axe Blade__1.0__2__16,,Iron Picaxe Blade__1.0__4__16,,Iron Shovel Blade__1.0__0__16,,Sword Handle Cast__1.0__0__8,,Iron Picaxe Blade Cast__1.0__4__0,,Glass Picaxe Blade__1.0__4__18,,Glass Axe Blade__1.0__2__18,,Iron Axe Blade Cast__1.0__4__8,,Glass Shovel Blade__1.0__0__18,,Iron Shovel Blade Cast__1.0__2__8,,Iron Sword Blade Cast__1.0__0__4,,Glass Sword__1.0__-4__8,,Magnesium Sword__1.0__-6__8,,Iron Sword__1.0__0__12,,
+Backpack: Gold__90.9__0__0,,Slime Ball__3.0__-6__8,,Light Berries__15.0__6__0,,Wooden Axe__1.0__12__8,,Wooden Staff__1.0__0__2,,Meat1__2.0__2__6,,Meat0__22.0__10__4,,Pebbles__20.0__2__4,,Apple|STACK0__64.0__14__2,,Apple|STACK2__33.0__12__2,,Lockpick__40.0__6__4,,Wooden Picaxe__1.0__10__0,,Apple Seed|STACK0__128.0__8__4,,Apple Seed|STACK1__128.0__2__2,,Blue berry__14.0__6__2,,Potion_Empty__3.0__4__6,,Potion_Exhaustion__3.0__12__4,,Wooden Hammer__1.0__10__2,,Basalt Pebbles__1.0__0__6,,Purple Dust|STACK0__16.0__12__6,,Purple Dust|STACK1__16.0__14__4,,Stick|STACK0__48.0__4__2,,Stick|STACK1__5.0__2__10,,Obsidian Shard__5.0__6__6,,Obsidian Dagger__1.0__2__0,,Wooden Shovel__1.0__14__0,,Light Wood Plank__7.0__8__0,,Slag Pebbles__2.0__8__6,,Purple Dust|STACK2__6.0__10__6,,Apple Seed|STACK2__3.0__14__6,,Meat1_Cooked__8.0__8__2,,Clay__4.0__4__4,,Magnesium Shovel Blade__1.0__0__14,,Magnesium Picaxe Blade__1.0__4__14,,Magnesium Axe Blade__1.0__2__14,,Iron Axe Blade__1.0__2__16,,Iron Picaxe Blade__1.0__4__16,,Iron Shovel Blade__1.0__0__16,,Sword Handle Cast__1.0__0__8,,Iron Picaxe Blade Cast__1.0__-4__8,,Glass Picaxe Blade__1.0__4__18,,Glass Axe Blade__1.0__2__18,,Iron Axe Blade Cast__1.0__4__8,,Glass Shovel Blade__1.0__0__18,,Iron Shovel Blade Cast__1.0__2__8,,Iron Sword Blade Cast__1.0__0__4,,Glass Sword__1.0__-8__8,,Magnesium Sword__1.0__4__0,,Iron Sword__1.0__0__12,,
 
 Spells: 0__Magic Bolt,,2__Fire Bolt,,4__Cold Bolt,,6__Flash,,8__Spawn Skeleton,,
 
@@ -50,8 +50,8 @@ Titles:
 
 Save_point: Village_10_10:330:1:0:0
 
-DEATH_SAVE: Village_10_10:343:-3:0:-12:0
+DEATH_SAVE: 0
 
 Criminal: {"Charge": "Assault", "Fine": 100, "Prison_time": 180}
 
-Spawn: Village_10_10:330:1:0:0
+Spawn: Village_10_10:185:370:0:0

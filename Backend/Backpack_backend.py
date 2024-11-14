@@ -30,13 +30,7 @@ def BackPack(screen, items, player):
                 elif event.key == I.pg.K_c:
                     pressed = I.pg.K_c
                     if selected == 0:
-                        if block[0] >= 0:
-                            selected = I.pg.Rect(list(I.info.BACKPACK_COORDINATES_X.values())[block[0]], list(I.info.BACKPACK_COORDINATES_Y.values())[block[1]], item_w, item_h)
-                        else:
-                            selected = I.pg.Rect(coordinates[block][0], coordinates[block][1], item_w, item_h)
-                            I.info.EQUIPED[I.info.equipment[block]] = 0, I.info.EQUIPED[I.info.equipment[block]][1]
-                        pickup = (Ff.find_item_by_slot(block[0], block[1]), block[0], block[1])
-                        I.QB.tutorial_move_berry(pickup)
+                        pickup, selected = handle_pickup_item_inBackpack(block, item_w, item_h, coordinates)
 
                     else:
                         if pickup[0] != 0 and pickup[0] != None and (pickup[1:]) != block:
@@ -72,9 +66,14 @@ def BackPack(screen, items, player):
                                 #     I.info.EQUIPED[I.info.equipment[(pickup[1], pickup[2])]] = existing_item
                         pickup = (0, 0, 0)
                         selected = 0
+                elif event.key == I.pg.K_z:
+                    pressed = I.pg.K_z
+                elif event.key in [I.pg.K_1, I.pg.K_KP1, I.pg.K_2, I.pg.K_KP2, I.pg.K_3, I.pg.K_KP3]:
+                    handle_place_item_in_useSlot_inBackpack(block, event.key)
                 block = key_press_get_block(event, block, 14, 26, "backpack")
             elif event.type == I.pg.KEYUP:
-                if pressed == I.pg.K_i or pressed == I.pg.K_ESCAPE:
+                if pressed in [I.pg.K_i, I.pg.K_ESCAPE, I.pg.K_z]:
+                # if pressed == I.pg.K_i or pressed == I.pg.K_ESCAPE or pressed:
                     running = False  # exits backpack view
                 elif pressed == I.pg.K_x:
                     color = "Yellow"
@@ -102,7 +101,10 @@ def BackPack(screen, items, player):
             I.pg.draw.rect(screen, color, rect, border)
             if selected != 0:
                 I.pg.draw.rect(screen, "Yellow", selected, 2)
-
+            update_equiped()
+            Ff.display_text(screen, "[1]", 1, (425, 364),"black")
+            Ff.display_text(screen, "[2]", 1, (475, 364),"black")
+            Ff.display_text(screen, "[3]", 1, (525, 364),"black")
             I.pg.display.flip()
 
 def display_backpack(screen, player, items, rect, word):
@@ -145,8 +147,7 @@ def display_backpack(screen, player, items, rect, word):
         I.pg.draw.rect(screen, "Green", (bag.w * 0.604, bag.h * 0.857, bag.w * 0.115 * remainder, bag.h * 0.012))
         Ff.display_text(screen, "Exh", 1, (bag.w * 0.55, bag.h * 0.85), "black")
 
-        Ff.add_image_to_screen(screen,'static/data/created_characters/' + I.info.SELECTED_CHARACTER + "/" + I.info.SELECTED_CHARACTER + "Front.png",
-                               [rect.center[0] * 0.64 ,rect.center[1] * 0.4, S.SCREEN_WIDTH / 8, S.SCREEN_HEIGHT / 4])
+        Ff.add_image_to_screen(screen,'static/data/created_characters/' + I.info.SELECTED_CHARACTER + "/" + I.info.SELECTED_CHARACTER + "Front.png",[rect.center[0] * 0.64 ,rect.center[1] * 0.4, S.SCREEN_WIDTH / 8, S.SCREEN_HEIGHT / 4])
 
         Ff.display_text(screen, "Level: " + str(player["Level"]) , 5, (bag.w * 0.65, bag.h * 0.25), "black")
 
@@ -314,9 +315,13 @@ def update_equiped():
                 if posx < 0:
                     I.info.EQUIPED[I.info.equipment[(posx, posy)]] = item, I.info.EQUIPED[I.info.equipment[(posx, posy)]][1]
 
-
+    block_dict = {
+        "Sword": (-8, 8),
+        "Axe": (-6, 8),
+        "Picaxe": (-4, 8)
+    }
     for key, item in I.info.EQUIPED.items():
-        if I.info.BACKPACK_CONTENT.get(item[0]) == None:
+        if I.info.BACKPACK_CONTENT.get(item[0]) == None or I.info.BACKPACK_CONTENT[item[0]][1] > 0 or I.info.BACKPACK_CONTENT[item[0]][1:] != block_dict[key]:
             I.info.EQUIPED[key] = 0, I.info.EQUIPED[key][1]
 
 def key_press_get_block(event, block, right_limit, bottom_limit, case):
@@ -338,3 +343,36 @@ def key_press_get_block(event, block, right_limit, bottom_limit, case):
         if block[0] > right_limit and case not in ["build station"]:
             block = (0, block[1])
     return block
+
+def handle_pickup_item_inBackpack(block, item_w, item_h, coordinates):
+    if block[0] >= 0:
+        selected = I.pg.Rect(list(I.info.BACKPACK_COORDINATES_X.values())[block[0]], list(I.info.BACKPACK_COORDINATES_Y.values())[block[1]], item_w, item_h)
+    else:
+        selected = I.pg.Rect(coordinates[block][0], coordinates[block][1], item_w, item_h)
+        I.info.EQUIPED[I.info.equipment[block]] = 0, I.info.EQUIPED[I.info.equipment[block]][1]
+    pickup = (Ff.find_item_by_slot(block[0], block[1]), block[0], block[1])
+    I.QB.tutorial_move_berry(pickup)
+    return pickup, selected
+def handle_place_item_in_useSlot_inBackpack(block, key_pressed):
+    key_dict = {I.pg.K_1: ("Sword", -8, 8),
+                I.pg.K_KP1: ("Sword", -8, 8),
+                I.pg.K_2: ("Axe", -6, 8),
+                I.pg.K_KP2: ("Axe", -6, 8),
+                I.pg.K_3: ("Picaxe", -4, 8),
+                I.pg.K_KP3: ("Picaxe", -4, 8),
+                }
+    pickup = (Ff.find_item_by_slot(block[0], block[1]), block[0], block[1])
+
+    if pickup[0] != None:
+        """Makes sure we dont change places with nothing"""
+        amount = I.info.BACKPACK_CONTENT[pickup[0]][0]
+        if I.info.EQUIPED[key_dict[key_pressed][0]][0] != 0:
+            equiped_amount = I.info.BACKPACK_CONTENT[I.info.EQUIPED[key_dict[key_pressed][0]][0]][0]
+            """lets make sure that if an item is equiped we change places"""
+            I.info.BACKPACK_CONTENT[pickup[0]] = amount, key_dict[key_pressed][1], key_dict[key_pressed][2]
+            I.info.BACKPACK_CONTENT[I.info.EQUIPED[key_dict[key_pressed][0]][0]] = equiped_amount, block[0], block[1]
+        else:
+            """if no item exists"""
+            """place the picked up item in the selected equip slot"""
+            I.info.BACKPACK_CONTENT[pickup[0]] = amount, key_dict[key_pressed][1], key_dict[key_pressed][2]
+        update_equiped()

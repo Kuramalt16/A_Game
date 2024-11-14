@@ -71,13 +71,13 @@ def Character_creation(screen, option, extra):
         buttons["Boy"] = Ff.add_image_to_screen(screen, path + 'Boy.png',[frame_main_menu.right - frame_main_menu.w * 0.4 , frame_main_menu.top + frame_main_menu.h * 0.3, S_F_WIDTH / 3, S_F_HEIGHT / 3])
         buttons["Girl"] = Ff.add_image_to_screen(screen, path + 'Girl.png',[frame_main_menu.left + frame_main_menu.w * 0.1 , frame_main_menu.top + frame_main_menu.h * 0.35, S_F_WIDTH / 3, S_F_HEIGHT / 3])
     elif option == "Name":
-        if extra.isalpha():
-            if I.os.path.exists('static/data/created_characters/' + extra):
-                Ff.display_text(screen, "CHARACTER ALREADY EXISTS", 16, (S.SCREEN_WIDTH / 3, S.SCREEN_HEIGHT / 4),"black")
-            else:
-                Ff.display_text(screen, "HIT ENTER AFTER COMPLETION", 16,(S.SCREEN_WIDTH / 3, S.SCREEN_HEIGHT / 4), "black")
-                buttons["ENTER"] = Ff.add_image_to_screen(screen, path + 'Empty.png',[frame_main_menu.left + frame_main_menu.w * 0.25,frame_main_menu.top + frame_main_menu.h * 0.7, S_F_WIDTH / 2,S_F_HEIGHT / 10])
-                Ff.display_text(screen, "ENTER", 30, (buttons["ENTER"].left + buttons["ENTER"].left / 10, buttons["ENTER"].top * 1.025), "black")
+        # if extra.isalpha():
+        if I.os.path.exists('static/data/created_characters/' + extra):
+            Ff.display_text(screen, "CHARACTER ALREADY EXISTS", 16, (S.SCREEN_WIDTH / 3, S.SCREEN_HEIGHT / 4),"black")
+        else:
+            Ff.display_text(screen, "HIT ENTER AFTER COMPLETION", 16,(S.SCREEN_WIDTH / 3, S.SCREEN_HEIGHT / 4), "black")
+            buttons["ENTER"] = Ff.add_image_to_screen(screen, path + 'Empty.png',[frame_main_menu.left + frame_main_menu.w * 0.25,frame_main_menu.top + frame_main_menu.h * 0.7, S_F_WIDTH / 2,S_F_HEIGHT / 10])
+            Ff.display_text(screen, "ENTER", 30, (buttons["ENTER"].left + buttons["ENTER"].left / 10, buttons["ENTER"].top * 1.025), "black")
         Ff.display_text(screen, "NAME: ", 30, (S.SCREEN_WIDTH / 3, S.SCREEN_HEIGHT / 2), "black")
         Ff.display_text(screen, extra, 30, (S.SCREEN_WIDTH / 2.2, S.SCREEN_HEIGHT / 2), "black")
     elif option == "Age":

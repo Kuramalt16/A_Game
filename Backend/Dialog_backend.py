@@ -159,7 +159,7 @@ def handle_sign_display(screen, dialog, player, items, decorations, data, gifs):
                 if a > len(text):
                     running = False
                     dialog.conv_key = response[1]
-                    dialog.friendlyness += int(response[1].split("|")[1])
+                    dialog.friendlyness += int(response[1].split("|")[1]) # CRASH DETECTED
             if event.type == I.pg.KEYDOWN and event.key == I.pg.K_c:
                 if a > len(text):
                     running = False

@@ -299,7 +299,8 @@ def handle_keydown(event, text_buffer, trait, character, screen):
         if trait == "Age" and text_buffer.isdigit():
             character[trait] = text_buffer
             return text_buffer, True
-        elif trait == "Name" and text_buffer.isalpha():
+        # elif trait == "Name" and text_buffer.isalpha():
+        elif trait == "Name":
             character[trait] = text_buffer
             if I.os.path.exists('static/data/created_characters/' + text_buffer):
                 return text_buffer, False

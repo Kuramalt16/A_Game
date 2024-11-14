@@ -51,7 +51,7 @@ def handle_physical_damaging_mobs(rect, song, mob, data, gifs, current_mob, item
             effect = song[curr_song].generate_thump_sound()
             song[curr_song].play_effect(effect)
             gifs[damage_type].Start_gif(damage_type, current_mob)
-            if "Shovel" in weapon[0]:
+            if weapon[0] != 0 and "Shovel" in weapon[0]:
                 I.info.WALKING_ON = "Mob"
             mob.deal_damage(current_mob, data["Player"], weapon_data, items, gifs, rooms, data)
             if "Guard" in mob.name:
@@ -103,7 +103,7 @@ def handle_damage_type_visualisation(sub_image, current_mob, gifs, pos, data, mo
                 frame = gifs[effect].next_frame(duration)
                 sub_image.blit(frame, (decorations.displayed_rects[index].x, decorations.displayed_rects[index].y))
 
-            if data_to_remove != [] and not gifs["effect"].start_gif: # REMOVES BURNED DECOR
+            if data_to_remove != [] and not gifs[effect].start_gif: # REMOVES BURNED DECOR
                 for index in data_to_remove:
                     del decorations.effected_decor[index]
 

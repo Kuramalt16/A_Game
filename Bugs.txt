@@ -61,6 +61,17 @@
 * DESC: When holding down an attack and running around its possible to hit an opponent twice
 * PRIORITY: High
 
+* DESC: continue dialog after completed quest
+* PRIORITY: High
+
+* DESC: crash detected in dialog backend line: 162 # CRASH DETECTED
+* PRIORITY: High
+
+* DESC: what's your name to thye tutorial wizard doesnt give a response, bye doesnt leave
+* PRIORITY: High
+
+
+
 # Optimization
 
 * insted of recuring loop. only restart the start function before the while loop. recuring loops here are not efficient

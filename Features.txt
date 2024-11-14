@@ -199,17 +199,13 @@
 * PRIORITY: LOW
 * NEEDS: willpower
 
-* DESC: Walk behind decor in houses.
-* PRIORITY: High
-* NEEDS: willpower
-
-* DESC: add numbers and symbols to name
+* DESC: add quest icon above quest havers
 * PRIORITY: High
 * NEEDS: willpower
 
 
 UNTILL FULL ALPHA:
-* 20 QUESTS (17 Remain) (Tutorial quest, get:slimeballs, get:Meat0)
+* 20 QUESTS (16 Remain) (Tutorial quest, get:slimeballs, get:Meat0, get:logs, sticks)
 * Make Levelup (need to make music)
 * Stat changes
 * Allignment changes
@@ -217,9 +213,9 @@ UNTILL FULL ALPHA:
 * 10 Areas ( 6 remaining)
 * Fishing
 * Smelting (Done)
-* Smithing
+* Smithing (Done)
 * Followers (Done)
-* Savable interractions
+* Savable interractions (Done)
 * Tree respawning
 * Planting plants (done)
 * Hoe for seed beds (Done)
@@ -227,5 +223,5 @@ UNTILL FULL ALPHA:
 * 10 spells (4 remaining) (firebolt, magicbolt, icebolt, healminor, spawnskeletons, flash)
 * Bow and arrows
 * Add masteries (fishing, smelting, mining, axing, hoeing, planting, hunter, wizard, glassblowing)
-* 20 mobs (17 remaining) (pigs, slimeballs, guards)
+* 20 mobs (15 remaining) (pigs, slimeballs, guards, chickens, skeletons)
 * make a house (rundown old building, get the mayor to sell it to you for too much money, ask wood carver for help in fixing it and then later other villagers on how to make other stuff (beds, cupboards, glass stuf etc)
