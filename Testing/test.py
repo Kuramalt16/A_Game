@@ -603,5 +603,5 @@ def upload_data_to_db(table, data):
 
 
 
-#  pyinstaller --onefile --icon=.\static\images\Icon.ico .\A_Game.py
+ # pyinstaller --onefile --icon=.\static\images\Icon.ico .\A_Game.py
 # rename_images_in_folder("C:/Users/gytis.monstvilas/Documents/GitHub/A_Game/static/images/Mobs/Plant/Ent_Hidden")  #at the end of the path last folder doesn't need /
