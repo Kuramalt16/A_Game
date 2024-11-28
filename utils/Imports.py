@@ -2,7 +2,7 @@ import pygame as pg
 from PIL import Image as img
 import os
 import subprocess
-import git
+# import git
 import sys
 from Values import Available as A
 from Values import Songs
@@ -27,7 +27,7 @@ import numpy as np
 from static.data.Character_byte_data import CharacterData
 import sqlite3
 import random
-import webcolors
+# import webcolors
 import queue
 from utils import threads as th
 from Backend import (Tool_backend as TB, Spell_Backend as SB, Dialog_backend as DialB, Item_backend as IB,

@@ -85,3 +85,7 @@
 * DESC: select char, go back, try to play, doesn't work
 * PRIORITY: LOW
 * ID: 23
+
+* DESC: Fix Font's change to something else
+* PRIORITY: LOW
+* ID: 23

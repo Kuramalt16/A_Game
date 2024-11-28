@@ -113,7 +113,7 @@ def run_game(screen, clock):
                             Ff.button_click_render_down(screen, value, 0, S.PATHS["Empty_button_frame"])
                             I.pg.display.flip()
                             S.MAIN_MENU = False
-                            I.UG.update_game()
+                            # I.UG.update_game()
 
                     elif clicked_button == key:
                         Ff.button_click_render_down(screen, value, 0, S.PATHS["Empty_button_frame"])
