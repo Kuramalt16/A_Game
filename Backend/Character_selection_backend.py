@@ -6,6 +6,7 @@ def Character_Selection(screen):
     clicked_button = ""
     screen.fill("white")
     I.pg.display.flip()
+    was_canceled = False
     buttons = cr.Char_Select(screen)
     while not select:
         if S.START_APP:
@@ -50,8 +51,10 @@ def Character_Selection(screen):
                             Ff.display_text(screen, key, 30,(buttons[key + "_text"].left, buttons[key + "_text"].top), "black")
                             I.pg.display.flip()
                             S.BUSY = True
-                            show_load(screen)
-                            select = True
+                            was_canceled = show_load(screen)
+                            if not was_canceled:
+                                """Makes sure only when in Show_load we selected a character and didn't cancel else returns to this loop"""
+                                select = True
                         elif key == "Main Menu" and clicked_button == key:
                             Ff.button_click_render(screen, value, 0, "Empty")
                             Ff.display_text(screen, key, 30, (buttons[key + "_text"].left, buttons[key + "_text"].top), "black")
@@ -71,10 +74,20 @@ def Create_Character(screen):
     character, arrow_value = create_char_init()
     cancel = False
     d = I.CharacterData()
-    for trait in character.keys():
+    i = 0
+    while i <= len(character.keys()):
         save = False
         if cancel:
+            i -= 2
+            create_char_init()
+            cancel = False
+            if i < 0:
+                cancel = True
+                break
+            # break
+        if i == 6:
             break
+        trait = list(character.keys())[i]
         text_buffer = ""
         screen.fill("white")
         extra = ""
@@ -106,6 +119,7 @@ def Create_Character(screen):
                 elif event.type == I.pg.KEYDOWN and trait in ["Name", "Age"]:
                     text_buffer, save = handle_keydown(event, text_buffer, trait, character, screen)
                 I.pg.display.flip()
+        i += 1
     if not cancel:
         # Save_Character(character, screen)
         Save_Character_Dict(d, screen, character)
@@ -148,6 +162,7 @@ def take_pictures(value, screen, side):
                        "Gold: " + "0" + "\n\n" +
                        "Alignment: " + "Unaligned" + "\n\n" +
                        "Class: " + "Not trained" + "\n\n" +
+                       "Stats: " + "" + "\n\n" +
                        "Backpack: " + "Gold__0__0__0" + "\n\n" +
                        "Spells: " + "" + "\n\n" +
                        "Dialog: " + "" + "\n\n" +
@@ -158,6 +173,7 @@ def take_pictures(value, screen, side):
                        "Save_point: " + "Village_10_10:330:1:0:0" + "\n\n" +
                        "DEATH_SAVE: " + "" + "\n\n" +
                        "Criminal: " + "" + "\n\n" +
+                       "Map_change: " + "" + "\n\n" +
                        "Spawn: " + "Village_10_10:330:1:0:0"
                        )
 
@@ -406,6 +422,7 @@ def show_load(screen):
                                     Ff.button_click_render_down(screen, buttons[key], 0, S.PATHS[key])
                                     cancel = True
                                     I.info.SELECTED_CHARACTER = ""
+                                    show_load(screen)
 
                                 elif key == "Delete":
                                     Ff.button_click_render_down(screen, buttons[key], 0, S.PATHS[key])
@@ -413,6 +430,7 @@ def show_load(screen):
                                     cancel = True
                                     I.shutil.rmtree('static/data/created_characters/' + I.info.SELECTED_CHARACTER)
                                     I.info.SELECTED_CHARACTER = ""
+                                    show_load(screen)
                                 elif key == I.info.SELECTED_CHARACTER:
                                     select = False
                                     S.PLAY = True
@@ -429,3 +447,4 @@ def show_load(screen):
 
     S.BUSY = False
     S.START_APP = True
+    return cancel

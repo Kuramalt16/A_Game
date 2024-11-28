@@ -24,7 +24,7 @@ from utils import Frequent_functions as Ff, Imports as I
     """
 
 
-def handle_guards(collide, data, screen, npc, items, decorations, gifs, rooms, clock, spells):
+def handle_guards(collide, data, screen, npc, items, decorations, gifs, rooms, clock, spells, mobs):
     if collide != [False] and "Guard" in collide[0] and I.info.CRIMINAL["Charge"] != "":
         if not isinstance(collide[1], I.pg.Rect):
             """Handles talking to the guards after they catch you"""
@@ -32,7 +32,7 @@ def handle_guards(collide, data, screen, npc, items, decorations, gifs, rooms, c
             guard_name = collide[0]
             if npc[guard_name]["dialog"].iteration != 1:
                 """if crime has been commited and still havent talked."""
-                I.DialB.init_dialog(guard_name, data["Player"], screen, npc, items, decorations, data, gifs, rooms, clock, spells)
+                I.DialB.init_dialog(guard_name, data["Player"], screen, npc, items, decorations, data, gifs, rooms, clock, spells, mobs)
             # elif npc[guard_name]["dialog"].iteration == 1:
             #     """if iteration is 1 means conversation has been started for weather to capture or pay fine"""
             #     print("here1")
@@ -40,7 +40,7 @@ def handle_guards(collide, data, screen, npc, items, decorations, gifs, rooms, c
     if "Prison" in rooms.name and I.info.CRIMINAL["Prison_time"] == 0:
         """adds castle guard to prison cell, to escort the prisoner out"""
         if "Castle_Guard" not in rooms.decor:
-            Ff.update_map_view(0, "Castle_Guard", (600, 200), "add")
+            Ff.update_map_view(0, "Castle_Guard", (600, 200, 100, 100), "add")
 
 
     # if rooms.type == "Prison" and I.info.CRIMINAL["Prison_time"] == 0:
@@ -55,7 +55,7 @@ def guard_allignment_change(mob, current_mob):
         if current_mob["visible"]:
             current_mob["allignment"] = 6
             current_mob["decor"] = False
-            Ff.update_map_view(current_mob["id"], mob.name, (0, 0), "remove")
+            Ff.update_map_view(current_mob["id"], mob.name, (0,0,0,0), "remove")
 
 def guard_allignment_2_handle(current_mob, decorations, mob, target_pos, data):
     """Castle guard changes from decor to mob"""
@@ -98,3 +98,23 @@ def set_guard_posts(decorations, mob):
                 if isinstance(id, int):
                     guard_rect = decorations.decor_dict[option][id]["rect"]
                     mob[option].mobs[id]["guard_post"] = guard_rect
+
+def drop_charges_for_dying(data):
+    if data["Player"].get("killer") != None and data["Player"]["killer"] == "Castle_Guard":
+        I.info.CRIMINAL = {
+            "Charge": "",
+            "Fine": 0,
+            "Prison_time": 0
+        }
+
+def restore_guard_decor(rooms):
+    # print(I.info.MAP_CHANGE[rooms.name]["remove"])
+    remove_guard_mobs = []
+    if I.info.MAP_CHANGE.get(rooms.name) != None:
+        for option in I.info.MAP_CHANGE[rooms.name]["remove"].keys():
+            if "Guard" in option:
+                for id in I.info.MAP_CHANGE[rooms.name]["remove"][option].keys():
+                    remove_guard_mobs.append((option, id))
+        for option, id in remove_guard_mobs:
+            del I.info.MAP_CHANGE[rooms.name]["remove"][option][id]
+

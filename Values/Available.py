@@ -15,36 +15,59 @@ EYE_COLORS = {
         "Black": (1, 1, 1, 255),
         "White": (250, 250, 250, 255),
         "Red": (200, 0, 0, 255),
+
+        "Lime": (165, 169, 0, 255),
         "Green": (0, 200, 0, 255),
+        "Green1": (45, 150, 57, 255),
+        "Dark_Green": (10, 50, 10, 255),
+
         "Blue": (0, 0, 200, 255),
         "Sky-Blue": (50, 100, 200, 255),
-        "Yellow": (200, 200, 0, 255),
-        "Magenta": (250, 0, 250, 255),
-        "Dark_Green": (10, 50, 10, 255),
-        "Dark_Orange": (200, 100, 0, 255),
-        "Gold": (200, 150, 0, 255),
-        "Silver": (165, 169, 180, 255),
-        "Lime": (165, 169, 0, 255),
         "Light_Blue": (0, 100, 200, 255),
-        "Silk-Purple": (100, 100, 200, 255),
         "Teal": (0, 128, 128, 255),
+
+        "Light Yellow": (229, 203, 133, 255),
+        "Yellow": (200, 200, 0, 255),
+        "Gold": (200, 150, 0, 255),
+
+        "Magenta": (250, 0, 250, 255),
+        "Silk-Purple": (100, 100, 200, 255),
         "Pink": (254, 192, 203, 255),
+
+        "Dark_Orange": (200, 100, 0, 255),
+        "Orange": (204, 121, 32, 255),
+        "Light Orange": (214, 159, 10, 255),
+
+        "Silver": (165, 169, 180, 255),
+
         }
 
 SKIN_COLORS = {
             "Original": (255, 205, 210, 255),
-            "light-skinned": (250, 200, 154, 255),
-            "Gold": (199, 150, 0, 255),
-            "Black": (60, 50, 20, 255),
+            "lightskinned": (250, 200, 154, 255),
+            "Goldskin": (199, 150, 0, 255),
+            "brownskin": (60, 50, 20, 255),
+            "grayskin": (96, 93, 68, 255),
+            "Iceskin": (234, 232, 194, 255),
+            "Darkskin": (114, 78, 81, 255),
+            "greenskin": (31, 53, 44, 255),
+            "whiteskin": (162, 168, 170, 255),
+
 
             }
 
 SKIN2_COLORS = {
                 "Original": (239, 154, 154, 255),
-                "light-skinned": (200, 150, 100, 255),
-                "Gold": (149, 150, 0, 255),
-                "Black": (30, 20, 10, 255),
-               }
+                "lightskinned": (200, 150, 100, 255),
+                "Goldskin": (149, 150, 0, 255),
+                "brownskin": (30, 20, 10, 255),
+                "grayskin": (66, 63, 58, 255),
+                "Iceskin": (174, 172, 184, 255),
+                "Darkskin": (84, 58, 61, 255),
+                "greenskin": (21, 43, 34, 255),
+                "whiteskin": (132, 138, 160, 255),
+
+}
 
 HAIR_COLORS = {}
 
@@ -94,9 +117,9 @@ color_mappings = {
 clothing_count = {
     "Hair": 6,
     "Shir": 6,
-    "Slee": 3,
+    "Slee": 4,
     "Pant": 5,
-    "Shoe": 3
+    "Shoe": 4
 }
 
 NOTES = {
@@ -220,12 +243,28 @@ DUST_COLORS = {"blue": (0, 0, 255, 255),
                "yellow": (255, 255, 0, 255),
                "light yellow": (220, 245, 122, 255),
                "white": (255, 255, 255, 255),
+               "pale green": (152, 251, 152, 255),
+               "light purple": (102, 102, 153, 255),
+               "purple": (85, 85, 170, 255),
                }
 
 POTIONS = {
     "SOUR": "Exhaustion",
     "SWEET": "Health",
-    "BITTER": "Mana"
+    "BITTER": "Mana",
+    "TASTELESS": "NoEffect",
+    "MILD": "Strength",
+    "STICKY": "Damage Health",
+    "SHARP": "Damage Health",
+}
+POTION_COLORS = {
+    "Pale Green": "Potion_Damage Health",
+    "Light Yellow": "Potion_Exhaustion",
+    "Brown": "Potion_Speed",
+    "Light Purple": "Potion_Strength",
+    "Blue": "Potion_Mana",
+    "Sage": "Potion_Slow",
+    "Light Blue": "Potion_Mana_Regeneration",
 }
 
 CRAFTING_DICT = \
@@ -340,11 +379,11 @@ CRAFTING_DICT = \
                 (-2, 8): "Stick",
             },
 # Iron
-#         "Iron Dagger":
-#             {
-#                 (-2, 4): "Iron",
-#                 (-2, 6): "Stick"
-#             },
+        "Iron Dagger":
+            {
+                (-2, 4): "Iron",
+                (-2, 6): "Stick"
+            },
         "Iron Sword":
             {
                 (-2, 4): 'Iron Sword Blade',
@@ -368,6 +407,12 @@ CRAFTING_DICT = \
                 (-2, 6): 'Stick',
                 (-2, 8): 'Stick',
             },
+        "Iron Hoe":
+            {
+                (-2, 4): "Iron Hoe Blade",
+                (-2, 6): "Stick",
+                (-2, 8): "Stick",
+            },
 #         "Iron Ring":
 #             {
 #                 (-2, 6): 'Iron',
@@ -377,11 +422,11 @@ CRAFTING_DICT = \
 #             },
 
 # Magnesium
-#         "Magnesium Dagger":
-#             {
-#                 (-2, 4): "Magnesium",
-#                 (-2, 6): "Stick"
-#             },
+        "Magnesium Dagger":
+            {
+                (-2, 4): "Magnesium",
+                (-2, 6): "Stick"
+            },
         "Magnesium Sword":
             {
                 (-2, 4): 'Magnesium Sword Blade',
@@ -523,3 +568,6 @@ WALKING_COLORS = \
     (133, 156, 34, 255): "Stuffed Grass",
     (245, 228, 156, 255): "Tree Leaves", # ship this
     }
+QUEST_SHOW_MARKS = {}
+
+MAPS = {}

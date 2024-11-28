@@ -1,0 +1,131 @@
+# Testing
+
+* MOBS:
+    hit diferent mobs: PIGS, SLIMES, GUARDS.
+    Guards:
+        when hitting a guard, with a physical attack they start catching you
+    Pigs:
+        when hitting a pig they start running away from you
+    Slime:
+        when hitting a slime they start moving toward you
+    test getting punched by each mob, see if you are knocked back and if you receive damage.
+
+* Appliances:
+    Build station:
+        test building:
+            Wooden axe
+            Wooden Sword
+            Wooden Picaxe
+            Cast for iron sword
+    Anvil:
+        test putting rocks:
+            Obsidian
+            Slag
+            Basalt
+    Potion stand:
+        test creating potions:
+            blue dust + yellow dust,
+            yellow dust,
+            blue dust,
+    Grinder:
+        test grinding up combinations:
+            ash = White Dust
+            blue berries = Blue Dust
+            light berries = yellow dust
+            ash + light berries = Light Purple Dust
+            ash + light berries = Light Yellow Dust
+            ash + Slime Ball = Pale Green Dust
+
+    Blast furnace:
+        test smelting pebbles
+        test smelting crushed up rocks
+    Furnace:
+        test cooking food
+        test burning food
+
+* Decorations:
+    Colliding with decorations
+    not colliding with flowers, rugs
+
+* Tools:
+    Hammer:
+        test hitting rocks on anvil
+    Axe:
+        "WOODEN AXE":
+            * test hitting small trees:
+                * test if hitting small tree makes it appear more chipped
+                * test if it takes 5 hits to destroy a small tree (tree has 5 hp, axe does 1 dmg)
+                * how much time to destroy one tiny tree while spaming axe swings? (do several tries, average the result)
+           * test hitting medium trees:
+                * deal no damage
+        "IRON AXE":
+            * test hitting small trees:
+                * test if it takes 3 hits to destroy a small tree (tree has 5 hp, axe does 2 dmg)
+                * how much time to destroy one tiny tree while spaming axe swings? (do several tries, average the result)
+            * test hitting medium trees:
+                * test if it takes 8 hits to destroy the tree (tree has 15 hp, axe does 2 dmg)
+                * how much time to destroy one medium tree while spaming axe swings? (do several tries, average the result)
+    Picaxe:
+        hit small rocks
+    Magic Staff:
+        test using spells check damage
+    Dagger:
+        test attacking speed
+    Sword:
+        test attacking speed
+    Hoe:
+        test making plant beds on grass
+        test making plant beds on sand
+        test making plant beds on pavement
+        test growing things
+    Shovel:
+        Test Digging holes on grass
+        Test Digging holes on Sand
+        Test hitting mob while on grass
+        Test hitting mob while on Sand
+        Test digging holes on anything but grass, Sand
+        Test digging holes as close to the not grass/sand
+        Test digging holes on holes
+
+* Consumables:
+    Potions:
+    Apples:
+    Blue berries:
+    Light berries:
+
+* Folowers:
+    test acquirng folowers
+    test attacking mobs with folowers
+    test getting mob drops with folowers
+    test changing rooms with folowers
+
+* spells:
+    test Magic bolt
+    test ice bolt:
+        did mob freeze in place?
+    test fire bolt:
+        did mob set on fire?
+        did a tree burn down?
+        did a frozen mob cool off?
+    test spawn skeletons:
+        did they attack nearby mobs?
+        if spawned twice did they attack the player?
+        do they despawn in 30 secs?
+    test flash:
+        test flashing through colliding objects
+        test flashing through mobs
+    test healing:
+        check health
+    test spell casting with no mana
+
+
+
+* DESC: Test Click down on a button and release anywhere else (On other buttons, off-screen, on images)
+* PRIORITY: Test
+
+* DESC: Test killing mobs, respawn time, harvesting, harvest time.
+* PRIORITY: Test
+
+* DESC: Test collision. try running into objects, running through them flashing into them
+* PRIORITY: Test
+

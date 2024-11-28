@@ -1,186 +1,87 @@
-
-# Bugs
-
 * DESC: after minimizing and then increasing the screen slider goes black, due to not using flip
 * PRIORITY: LOW
+* ID: 1
 
-* DESC: spell effects dont show up when moving past the object (it gets transported to a lower layer, need to keep it on the top layer
-* PRIORITY: LOW
-
-* DESC: Pigs walk under the portal
-* PRIORITY: LOW
+* DESC: creating a character, playing as them, restarting the game deleting the created character and then playing as a new char makes some of the character body look like the previous one.
+* PRIORITY: Can not repeat the issue
+* ID: 2
 
 * DESC: fix sound playing while constantly clicking settings, cancel settings cancel.
 * PRIORITY: LOW
-
-* DESC: walking behind decor doesnt work in offset or in rooms
-* PRIORITY: MEDIUM
-
-* DESC: make steping on rect click based
-* PRIORITY: MEDIUM
-
-* DESC: false,,0 dosent stop fire effect
-* PRIORITY: MEDIUM
-
-* DESC: Fire effect completely fucked up
-* PRIORITY: MEDIUM
-
-* DESC: In handle_axe_chopping(decor_rect, decor_name, decor_dict, id): the if and statement 1000 seconds is bad. wont work properly if the speed of the swing is faster than 1000. needs updating.
-* PRIORITY: MEDIUM
-
-* DESC: Mobs walk on decor when decor rects are displayed diferently (green yellow rects)
-* PRIORITY: LOW
+* ID: 3
 
 * DESC: how can i make furnace cook food better?
-* PRIORITY: LOW
+* PRIORITY: Insignificant
+* ID: 4
 
 * DESC: music fuckup on changing maps
-* PRIORITY: LOW
-
-* DESC: hoed down ground spawns in diferent maps
-* PRIORITY: LOW
+* PRIORITY: Insignificant
+* ID: 5
 
 * DESC: Folowers aren't saved yet
 * PRIORITY: LOW
-
-* DESC: when reseting game while dead it fucks up
-* PRIORITY: LOW
+* ID: 6
 
 * DESC: need to test out titles and to do something with them
-* PRIORITY: LOW
-
-* DESC: when there are multiple locked doors with the same name, unlocking one unlocks them all
-* PRIORITY: LOW
-
-* DESC: containers don't work in diferent rooms. need to make I.info.CONTAINERS include room name.
-* PRIORITY: LOW
+* PRIORITY: Insignificant
+* ID: 7
 
 * DESC: cant use diferent light sources in one room.
 * PRIORITY: LOW
+* ID: 8
 
-* DESC: When holding down an attack and running around its possible to hit an opponent twice
-* PRIORITY: High
+* DESC: collected pebbles, in the backpack they overflowed the existing pebbles and the stacks were both in the same place. when something in hand and you collect more of it and it exeeds stack, then the bug occurs
+* PRIORITY: low
+* ID: 9
 
-* DESC: continue dialog after completed quest
-* PRIORITY: High
+* DESC: potion mixing color displaying sucks when using more than two dust
+* PRIORITY: MEDIUM
+* ID: 10
 
-* DESC: crash detected in dialog backend line: 162 # CRASH DETECTED
-* PRIORITY: High
+* DESC: Ent wont walk
+* PRIORITY: MEDIUM
+* ID: 11
 
-* DESC: what's your name to thye tutorial wizard doesnt give a response, bye doesnt leave
-* PRIORITY: High
+* DESC: Plant bed shouldn't be placed on the road or sth
+* PRIORITY: LOW
+* ID: 12
 
+* DESC: Plant bed can not be placed offscreen cuz of the xy calculations
+* PRIORITY: LOW
+* ID: 13
 
+* DESC: sometimes after spell is cast it imidiatelly pops out of existance
+* PRIORITY: LOW
+* ID: 14
 
-# Optimization
+* DESC: fix water
+* PRIORITY: LOW
+* ID: 15
 
-* insted of recuring loop. only restart the start function before the while loop. recuring loops here are not efficient
+* DESC: remove_gif needs to be checked if it still saves, also if the wizard dissappears??
+* PRIORITY: LOW
+* ID: 16
 
-* Decreased Character selection processing time from 600 ms to 200 ms ( by adding ranges where to search for color pixels)
-* Decreased Character selection processing time from 200 ms to 80 ms  ( by adding dictionaries with preloaded values and variables responsible for shifting positional/color values)
+* DESC: Water elemental can't spawn twice
+* PRIORITY: LOW
+* ID: 17
 
-# Testing
+* DESC: Mobs can hit you into decor and ur stuck.
+* PRIORITY: HIGH
+* ID: 18
 
-* MOBS:
-    hit diferent mobs: PIGS, SLIMES, GUARDS.
-    Guards:
-        when hitting a guard, with a physical attack they start catching you
-    Pigs:
-        when hitting a pig they start running away from you
-    Slime:
-        when hitting a slime they start moving toward you
-    test getting punched by each mob, see if you are knocked back and if you receive damage.
+* DESC: spawns three ents, why??
+* PRIORITY: HIGH
+* ID: 20
 
-* Appliances:
-    Build station:
-        test building:
-            Wooden axe
-            Wooden Sword
-            Wooden Picaxe
-            Cast for iron sword
-    Anvil:
-        test crushing rocks:
-            Obsidian
-            Slag
-            Basalt
-    Potion stand:
-        test potions:
-            blue dust + yellow dust
-            yellow dust
-            blue dust
-    Grinder:
-        test grinding up combinations:
-            ash, light berries
-            blue berries
-    Blast furnace:
-        test smelting pebbles
-        test smelting crushed up rocks
-    Furnace:
-        test cooking food
-        test burning food
+* DESC: Mob spawning is not saved
+* PRIORITY: LOW
+* ID: 21
 
-* Decorations:
-    Colliding with decorations
-    not colliding with flowers, rugs
+* DESC: die in another map, restart game, you spawn in a diferent map, same location
+* PRIORITY: HIGH
+* ID: 22
 
-* Tools:
-    Hammer:
-        test hitting rocks on anvil
-    Axe:
-        test hitting small trees
-    Picaxe:
-        hit small rocks
-    Magic Staff:
-        test using spells check damage
-    Dagger:
-        test attacking speed
-    Sword:
-        test attacking speed
-    Hoe:
-        test making plant beds on grass
-        test making plant beds on sand
-        test making plant beds on pavement
-        test growing things
-
-* Consumables:
-    Potions:
-    Apples:
-    Blue berries:
-    Light berries:
-
-* Folowers:
-    test acquirng folowers
-    test attacking mobs with folowers
-    test getting mob drops with folowers
-    test changing rooms with folowers
-
-* spells:
-    test Magic bolt
-    test ice bolt:
-        did mob freeze in place?
-    test fire bolt:
-        did mob set on fire?
-        did a tree burn down?
-        did a frozen mob cool off?
-    test spawn skeletons:
-        did they attack nearby mobs?
-        if spawned twice did they attack the player?
-        do they despawn in 30 secs?
-    test flash:
-        test flashing through colliding objects
-        test flashing through mobs
-    test healing:
-        check health
-    test spell casting with no mana
-
-
-
-* DESC: Test Click down on a button and release anywhere else (On other buttons, off-screen, on images)
-* PRIORITY: Test
-
-* DESC: Test killing mobs, respawn time, harvesting, harvest time.
-* PRIORITY: Test
-
-* DESC: Test collision. try running into objects, running through them flashing into them
-* PRIORITY: Test
-
+* DESC: select char, go back, try to play, doesn't work
+* PRIORITY: LOW
+* ID: 23

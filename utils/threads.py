@@ -1,3 +1,5 @@
+from http.cookiejar import cut_port_re
+
 from utils import Imports as I, Frequent_functions as Ff
 from Backend import Play
 from Values import Settings as S
@@ -30,11 +32,11 @@ def start_threads(data, mob, spells, decorations, rooms, npc, gifs, songs, items
         item_drops_thread.start()
         S.THREADS = False
 
-    one_sec_thread = I.threading.Thread(target=one_sec, args=(data, decorations))
+    one_sec_thread = I.threading.Thread(target=one_sec, args=(data, decorations, rooms, gifs))
     one_sec_thread.daemon = True
     one_sec_thread.start()
 
-    ten_min_thread = I.threading.Thread(target=ten_min, args=(mob, data, rooms))
+    ten_min_thread = I.threading.Thread(target=ten_min, args=(mob, data, rooms, gifs))
     ten_min_thread.daemon = True
     ten_min_thread.start()
 
@@ -45,6 +47,9 @@ def start_threads(data, mob, spells, decorations, rooms, npc, gifs, songs, items
     one_min_thread = I.threading.Thread(target=one_min, args=(decorations, data))
     one_min_thread.daemon = True
     one_min_thread.start()
+
+    I.th.start_thread(5, "planting", decorations)
+
 
 def start_thread(interval, case, extra):
     interval = float(interval) / 1000
@@ -85,16 +90,16 @@ def start_thread(interval, case, extra):
 
 
 
-def ten_min(mob, data, rooms):
+def ten_min(mob, data, rooms, gifs):
     if mob != {}:
         while S.PLAY:
             I.t.sleep(600)
-            I.MB.handle_mob_respawn(mob, data, rooms)
+            I.MB.handle_mob_respawn(mob, data, rooms, gifs)
 
 
 def five_min(npc):
     while S.PLAY:
-        I.t.sleep(1)  # Wait for the interval time (in seconds)
+        I.t.sleep(60)  # Wait for the interval time (in seconds)
         for npc_name in npc.keys():
             if npc[npc_name]["dialog"].iteration == 3 and npc_name == "Mayor":  # after some time if value is 3 sets to value 4
                 I.info.QUESTS.append({'COMPLETION': 0, 'GIVER': 'God', 'TYPE': 'MEET', 'WHO': 'Mayor', 'REWARD': '1 Sp', 'DESC': 'Go to the Mayor'})
@@ -105,9 +110,8 @@ def one_min(decorations, data): # Fixed
         I.t.sleep(60)
         if int(data["Player"]["Exhaustion"][0]) > 0:
             data["Player"]["Exhaustion"] = (int(data["Player"]["Exhaustion"][0]) - 1, int(data["Player"]["Exhaustion"][1]))
-
         if not I.info.PAUSE_THREAD["harvest"]:
-            Play.harvest_timeout(decorations)
+            I.PlantB.harvest_timeout(decorations)
         if "Prison" in I.info.CURRENT_ROOM["name"]:
             I.info.CRIMINAL["Prison_time"] -= 60
             if I.info.CRIMINAL["Prison_time"] <= 0:
@@ -115,44 +119,82 @@ def one_min(decorations, data): # Fixed
                 I.info.CRIMINAL["Charge"] = ""
 
 
-def one_sec(data, decorations): # Fixed
+
+def one_sec(data, decorations, rooms, gifs): # Fixed
+    please_eat_flag = False
+
     while S.PLAY:
         I.t.sleep(1)
         """Healing player if not too exhausted"""
         if I.pg.time.get_ticks() - int(data["Player"]["Last_hit"]) > 20000 and int(data["Player"]["Exhaustion"][0]) >= 90:
+            please_eat_flag = False
             if data["Player"]["hp"][0] < data["Player"]["hp"][1]:
                 data["Player"]["hp"] = (data["Player"]["hp"][0] + 1, data["Player"]["hp"][1])
             if float(data["Player"]["mana"][0]) < float(data["Player"]["mana"][1]):
                 data["Player"]["mana"] = (data["Player"]["mana"][0] + 1, data["Player"]["mana"][1])
+        if int(data["Player"]["Exhaustion"][0]) <= 10:
+            if not please_eat_flag:
+                Ff.display_text_player("Too exhausted.. life draining..", 5000)
+                please_eat_flag = True
+            data["Player"]["hp"] = (data["Player"]["hp"][0] - 1, data["Player"]["hp"][1])
+            data["Player"]["mana"] = (data["Player"]["mana"][0] - 1, data["Player"]["mana"][1])
+        effects_not_supported_by_decor = ["UNLOCKED", "LOCKED", "NoPLANT", '']
+        if rooms.size == ["1", "1", "1", "1"]:
+            for option in rooms.decor:
+                if decorations.decor_dict.get(option) != None:
+                    for id in decorations.decor_dict[option].keys():
+                        if isinstance(id, int):
+                            decor = decorations.decor_dict[option][id]
+                            # print(decor)
+                            if decor["effect"] not in effects_not_supported_by_decor:
+                                if "TIME" in decor["effect"] or "PLANTED" in decor["effect"]:
+                                    continue
+                                effect_list = decor["effect"].split(",,")
+                                for e in effect_list:
+                                    if e in effects_not_supported_by_decor:
+                                        continue
+                                    effect, time = e.split(":")
+                                    # print(decorations.decor_dict[option]["health"])
+                                    # print(effect, time)
+                                    if "Fire" in effect:
+                                        health = decorations.decor_dict[option]["health"]
+                                        if "False" in health:
+                                            decor["effect"] = decor["effect"].replace(e, "")
+                                        else:
+                                            hp_left, hp_max = decor["health"].split(",,")[1].split(",")
+                                            hp_left = int(hp_left) - 1
+                                            if hp_left < 0:
+                                                hp_left = 0
+                                            decor["health"] = "True,," + str(hp_left) + "," + str(hp_max)
+                                            data["Player"]["stats"]["Arsonist"] = int(data["Player"]["stats"]["Arsonist"]) + 1
 
-        if I.info.CURRENT_ROOM["Type"] in ["Village"]:
-            if decorations.effected_decor != {}:
-                dict_to_burn = []
-                for old_index, effect in decorations.effected_decor.items():
-                    if effect in ["Fire"]:
-                        rect = decorations.displayed_rects[old_index]
-                        for option in decorations.decor_dict.keys():
-                            for index in decorations.decor_dict[option].keys():
-                                if isinstance(index, int):
-                                    new_rect = I.pg.Rect(decorations.decor_dict[option][index]["rect"].x - data["Zoom_rect"].x, decorations.decor_dict[option][index]["rect"].y - data["Zoom_rect"].y, decorations.decor_dict[option][index]["rect"].w, decorations.decor_dict[option][index]["rect"].h)
-                                    if new_rect == rect:
-                                        # found the index for the decorations.decor_dict.
-                                        if "True" in decorations.decor_dict[option]["health"]:  # FOUND FLAMABLE
-                                            # print("FOUND FLAMABLE")
-                                            duration = decorations.decor_dict[option]["health"].split(",,")[1]
-                                            if decorations.decor_dict[option][index]["effect"] == "":
-                                                decorations.decor_dict[option][index]["effect"] = "Fire,," + str(duration)
-                                            else:
-                                                duration = int(decorations.decor_dict[option][index]["effect"].split(",,")[1].split(",")[0])
-
-                                                duration -= 1
-                                                decorations.decor_dict[option][index]["effect"] = "Fire,," + str(duration)
-                                            if duration == 0:
-                                                dict_to_burn.append((option, index, old_index))
-                if dict_to_burn != []:
-                    for option, index, old_index in dict_to_burn:
-                        del decorations.decor_dict[option][index]
-                        del decorations.effected_decor[old_index]
+            # if decorations.effected_decor != {}:
+            #     dict_to_burn = []
+            #     for old_index, effect in decorations.effected_decor.items():
+            #         if effect in ["Fire"]:
+            #             rect = decorations.displayed_rects[old_index]
+            #             for option in decorations.decor_dict.keys():
+            #                 for index in decorations.decor_dict[option].keys():
+            #                     if isinstance(index, int):
+            #                         new_rect = I.pg.Rect(decorations.decor_dict[option][index]["rect"].x - data["Zoom_rect"].x, decorations.decor_dict[option][index]["rect"].y - data["Zoom_rect"].y, decorations.decor_dict[option][index]["rect"].w, decorations.decor_dict[option][index]["rect"].h)
+            #                         if new_rect == rect:
+            #                             # found the index for the decorations.decor_dict.
+            #                             if "True" in decorations.decor_dict[option]["health"]:  # FOUND FLAMABLE
+            #                                 # print("FOUND FLAMABLE")
+            #                                 duration = decorations.decor_dict[option]["health"].split(",,")[1]
+            #                                 if decorations.decor_dict[option][index]["effect"] == "":
+            #                                     decorations.decor_dict[option][index]["effect"] = "Fire,," + str(duration)
+            #                                 else:
+            #                                     duration = int(decorations.decor_dict[option][index]["effect"].split(",,")[1].split(",")[0])
+            #
+            #                                     duration -= 1
+            #                                     decorations.decor_dict[option][index]["effect"] = "Fire,," + str(duration)
+            #                                 if duration == 0:
+            #                                     dict_to_burn.append((option, index, old_index))
+            #     if dict_to_burn != []:
+            #         for option, index, old_index in dict_to_burn:
+            #             del decorations.decor_dict[option][index]
+            #             del decorations.effected_decor[old_index]
 
 def five_hundred_msec(song): # Fixed ( works better than before, still play's music on inventory )
     while S.PLAY:
@@ -174,12 +216,15 @@ def one_hundred_msec(mob, spells, decorations, data, gifs): # works fine
         if I.info.CURRENT_ROOM["Mobs"]:
             for key in mob.keys():
                 mob[key].delay = mob[key].delay[0] - 100, mob[key].delay[1] # remove 100 ms
+                mob[key].frame_change = False
                 if mob[key].delay[0] <= 0:
+                    mob[key].frame_change = True
                     for current_mob in mob[key].mobs:
                         current_mob["gif_frame"] = (current_mob["gif_frame"][0] + 1, current_mob["gif_frame"][1])
                         if current_mob["gif_frame"][0] >= current_mob["gif_frame"][1]:
                             current_mob["gif_frame"] = (0, current_mob["gif_frame"][1])
-                            mob[key].move_mobs_randomly(decorations, data)
+                            current_mob["target_posision"] = current_mob["current_pos"][0] + Ff.weighted_random(), current_mob["current_pos"][1] + Ff.weighted_random()
+                            # mob[key].move_mobs_randomly(decorations, data)
                     mob[key].delay = mob[key].delay[1], mob[key].delay[1]
 
         for key in spells.spell_cooloff.keys():
@@ -190,9 +235,13 @@ def hit_mob(interval, gifs): # Fixed
     while S.PLAY:
         while S.PLAY:
             if I.info.EQUIPED["Sword"][0] == 0:
+                """if equiped is nothing basicly using hands"""
                 I.t.sleep(interval)
+                if I.info.EQUIPED["Sword"][1] <= 26:
+                    I.info.EQUIPED["Sword"] = I.info.EQUIPED["Sword"][0], 27
                 break
             else:
+                """if hit was done and reseting weapon"""
                 if I.info.EQUIPED["Sword"][1] <= 26:
                     I.info.EQUIPED["Sword"] = I.info.EQUIPED["Sword"][0], I.info.EQUIPED["Sword"][1] - 1
                 I.t.sleep(interval/26)
@@ -268,65 +317,6 @@ def folower(interval, data): # Fixed
         I.info.FOLLOWER["target_pos"] = x, y
         I.info.FOLLOWER["orientation"] = []
 
-def planting(interval, decorations):
-    interval = interval / 4 * 10000
-    cancel = False
-    update_time = []
-    while not cancel:
-        for option in decorations.decor_dict:
-            if "PLANT" in decorations.decor_dict[option]["action"]:
-                for id in decorations.decor_dict[option].keys():
-                    if isinstance(id, int):
-                        if decorations.decor_dict[option][id]["effect"] != "":
-                            stage, plant, time, full_time = decorations.decor_dict[option][id]["effect"].split(":")
-                            if "_" not in stage:
-                                """ initial seed placement"""
-                                decorations.decor_dict[option][id]["effect"] = str(stage) + "_1:" + str(plant) + ":" + str(time) + ":" + str(full_time)
-                                # print(decorations.decor_dict[option][id])
-                                path = decorations.decor_dict[option]["path"][:-5] + "1.png"
-                                img = I.pg.image.load(path)
-                                # print(img)
-                                update_time.append((option, id))
-                                decorations.decor_dict[option][id]["image"] = img
-                                # print(decorations.decor_dict[option][id])
-                            elif int(stage[-1]) == 1 and int(full_time) - interval / 10 == int(time):
-                                """Updates seeds to grow bigger"""
-                                num = int(stage[-1]) + 1
-                                decorations.decor_dict[option][id]["effect"] = str(stage[:-1]) + str(num) + ":" + str(plant) + ":" + str(time) + ":" + str(full_time)
-                                path = decorations.decor_dict[option]["path"][:-5] + str(num) + ".png"
-                                img = I.pg.image.load(path)
-                                update_time.append((option, id))
-                                decorations.decor_dict[option][id]["image"] = img
-                            elif int(stage[-1]) == 2 and int(full_time) - interval / 5 == int(time):
-                                """Updates seeds to grow bigger"""
-                                num = int(stage[-1]) + 1
-                                decorations.decor_dict[option][id]["effect"] = str(stage[:-1]) + str(num) + ":" + str(plant) + ":" + str(time) + ":" + str(full_time)
-                                path = decorations.decor_dict[option]["path"][:-5] + str(num) + ".png"
-                                img = I.pg.image.load(path)
-                                update_time.append((option, id))
-                                decorations.decor_dict[option][id]["image"] = img
-                            elif int(full_time) - interval / 10 * 3 == int(time):
-                                """final change from seed bed to normal tree, bush, flower, vegetable"""
-                                if "Tree" in plant or "Bush" in plant:
-                                    """this means that the planted plant was a tree or a bush"""
-
-                                    Ff.update_map_view(id, "Plant bed", 0, "remove")
-                                    coordinates = decorations.decor_dict[option][id]["rect"]
-                                    integers = [item for item in list(decorations.decor_dict[plant].keys()) if isinstance(item, int)]
-                                    new_id = max(integers) + 1
-                                    if "Tree" in plant:
-                                        Ff.update_map_view(new_id, plant, (coordinates.x, coordinates.y - 20), "add")
-                                    else:
-                                        Ff.update_map_view(new_id, plant, (coordinates.x, coordinates.y), "add")
-                                cancel = True
-                                break
-        I.t.sleep(interval)
-        if update_time != []:
-            for option, id in update_time:
-                effect = decorations.decor_dict[option][id]["effect"].split(":")
-                decorations.decor_dict[option][id]["effect"] = effect[0] + ":" + effect[1] + ":" + str(int(effect[2]) - int(interval / 10)) + ":" + str(full_time)
-            update_time = []
-
 def spawn(interval, extra):
     spells, mobs = extra
     while S.PLAY:
@@ -341,7 +331,7 @@ def day_night():
     """ Toggle day/night cycle """
     value = 1
     while S.PLAY:
-        I.t.sleep(1)
+        I.t.sleep(2)
         I.info.DIM += value
         if I.info.DIM >= 240:  # set to 240 so it wouldn't get black
             value = -1
@@ -409,3 +399,87 @@ def Handle_item_drops():
                     # Update `item_steps`: remove the old key and add the new one
                     item_steps.pop(position)  # Remove old entry
                     item_steps[new_position] = {"step": step + 1, "y": new_y}  # Update step count and y position
+
+
+def planting(interval, decorations):
+    """currently interval holds time value in ms, so if time was set for 240 seconds, it became ms"""
+    interval = 20
+    """set the interval to 20 seconds so that all diferent seed times could be done, currently only working with 240 s"""
+    while S.PLAY:
+        remove_list = []
+        for plant_name, plant_values in decorations.decor_dict.items():
+            if "PLANT" in plant_values["action"]:
+                for id in decorations.decor_dict[plant_name].keys():
+                    if isinstance(id, int):
+                        plant_decor = decorations.decor_dict[plant_name][id]
+                        if plant_decor["effect"] != "":
+                            """This decor that can hold seeds and has an effect"""
+                            if "NoPLANT" in plant_decor["effect"] and "PLANTED" in plant_decor["effect"]:
+                                plant_decor["effect"].replace("NoPlant", "")
+                            elif "NoPLANT" in plant_decor["effect"]:
+                                remove_list = I.PlantB.remove_not_seeded_beds(plant_decor, remove_list, plant_name, id)
+                            elif "NoPlant" not in plant_decor["effect"] and "PLANTED" in plant_decor["effect"]:
+                                """ONLY SEEDED BEDS HERE"""
+                                state, plant, time, full_time = plant_decor["effect"].split(":")
+                                if state == "PLANTED_0":
+                                    """initial seedling drop and state change"""
+                                    Ff.update_map_view(id, plant_name, plant_decor["effect"], "remove_effect")
+                                    plant_decor["effect"] = ""
+                                    state = state.replace("_0", "_1")
+                                    new_effect = state + ":" + plant + ":" + str(I.pg.time.get_ticks()) + ":" + full_time
+                                    Ff.update_map_view(id, plant_name, new_effect, "add_effect")
+                                    path = decorations.decor_dict[plant_name]["path"].replace("_0", "_1")
+                                    img = I.pg.image.load(path)
+                                    plant_decor["image"] = img
+                                elif state == "PLANTED_1" and int(int(time) + (int(full_time) / 4) * 1000 <= I.pg.time.get_ticks()):
+                                    """if state has changed and time has passed, change the state again and set new timer"""
+                                    Ff.update_map_view(id, plant_name, plant_decor["effect"], "remove_effect")
+                                    plant_decor["effect"] = ""
+                                    state = state.replace("_1", "_2")
+                                    new_effect = state + ":" + plant + ":" + str(I.pg.time.get_ticks()) + ":" + full_time
+                                    Ff.update_map_view(id, plant_name, new_effect, "add_effect")
+                                    path = decorations.decor_dict[plant_name]["path"].replace("_0", "_2")
+                                    img = I.pg.image.load(path)
+                                    plant_decor["image"] = img
+                                elif state == "PLANTED_2" and int(int(time) + (int(full_time) / 4) * 1000 <= I.pg.time.get_ticks()):
+                                    """if state has changed and time has passed, change the state again and set new timer"""
+                                    Ff.update_map_view(id, plant_name, plant_decor["effect"], "remove_effect")
+                                    plant_decor["effect"] = ""
+                                    state = state.replace("_2", "_3")
+                                    new_effect = state + ":" + plant + ":" + str(I.pg.time.get_ticks()) + ":" + full_time
+                                    Ff.update_map_view(id, plant_name, new_effect, "add_effect")
+                                    path = decorations.decor_dict[plant_name]["path"].replace("_0", "_3")
+                                    img = I.pg.image.load(path)
+                                    plant_decor["image"] = img
+                                elif state == "PLANTED_3" and int(int(time) + (int(full_time) / 4) * 1000 <= I.pg.time.get_ticks()):
+                                    """final state change occured"""
+                                    Ff.update_map_view(id, plant_name, plant_decor["effect"], "remove_effect")
+                                    plant_decor["effect"] = ""
+                                    state = state.replace("_2", "_3")
+                                    count = Ff.update_map_view(0, plant, 0, "get")
+                                    if decorations.decor_dict[plant].get(count) == None:
+                                        Ff.update_map_view(count, plant, plant_decor["rect"], "add")
+                                    else:
+                                        for i in range(count, count + 1000):
+                                            if decorations.decor_dict[plant].get(i) == None:
+                                                Ff.update_map_view(i, plant, plant_decor["rect"], "add")
+                                                break
+                                    remove_list.append((plant_name, id))
+                                if state == "PLANTED_1":
+                                    path = decorations.decor_dict[plant_name]["path"].replace("_0", "_1")
+                                    img = I.pg.image.load(path)
+                                    plant_decor["image"] = img
+                                elif state == "PLANTED_2":
+                                    path = decorations.decor_dict[plant_name]["path"].replace("_0", "_2")
+                                    img = I.pg.image.load(path)
+                                    plant_decor["image"] = img
+                                elif state == "PLANTED_3":
+                                    path = decorations.decor_dict[plant_name]["path"].replace("_0", "_3")
+                                    img = I.pg.image.load(path)
+                                    plant_decor["image"] = img
+                        else:
+                            """this decor that can hold seeds and has no effect"""
+        for (option, id) in remove_list:
+            Ff.update_map_view(id, option, (0, 0, 0, 0), "remove")
+            del decorations.decor_dict[option][id]
+        I.t.sleep(interval)

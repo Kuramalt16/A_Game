@@ -2,6 +2,7 @@ from Values import Settings as S
 from utils import Frequent_functions as Ff, Imports as I
 class Gif:
     def __init__(self, name, count, path, delay, start):
+        self.args = (name, count, path, delay, start)
         self.gif_dict = {}
         self.name = name
         self.frame_count = count
@@ -20,6 +21,7 @@ class Gif:
         self.read_image()
         self.repeat = 1
         self.pause = 0
+        self.frame_changed = False
 
 
     def read_image(self):
@@ -36,18 +38,23 @@ class Gif:
         # self.name += 1
         self.start_gif = True
         self.current_frame = 0
+        self.frame_changed = False
         self.frame_time = I.pg.time.get_ticks()
         self.rect = rect #  if not a mob, make 1
 
     def next_frame(self, repeat):
         # Check if gif time has passed:
+
         if self.start_gif == False:
+            self.frame_changed = False
             return self.images[self.current_frame]
         if repeat == -1 and self.repeat != 999:
             self.repeat = 1
         if I.pg.time.get_ticks() - self.frame_time > self.delay:
             self.current_frame += 1
+            self.frame_changed = True
             self.frame_time = I.pg.time.get_ticks()
+
             if self.current_frame > self.frame_count:
                 if repeat == self.repeat and repeat != -1 or self.repeat == 999:
                     self.start_gif = False
@@ -60,6 +67,7 @@ class Gif:
                 return self.images[self.current_frame - 1]
         else:
             # if frame time hasnt passed:
+            self.frame_changed = False
             if self.current_frame == 0:
                 return self.images[self.current_frame]
             else:

@@ -68,7 +68,7 @@ def BackPack(screen, items, player):
                         selected = 0
                 elif event.key == I.pg.K_z:
                     pressed = I.pg.K_z
-                elif event.key in [I.pg.K_1, I.pg.K_KP1, I.pg.K_2, I.pg.K_KP2, I.pg.K_3, I.pg.K_KP3]:
+                elif event.key in [I.pg.K_1, I.pg.K_KP1, I.pg.K_2, I.pg.K_KP2, I.pg.K_3, I.pg.K_KP3, I.pg.K_KP_1]:
                     handle_place_item_in_useSlot_inBackpack(block, event.key)
                 block = key_press_get_block(event, block, 14, 26, "backpack")
             elif event.type == I.pg.KEYUP:
@@ -266,6 +266,8 @@ def handle_consumption(items, player, use):
         I.info.BACKPACK_CONTENT[use] = (value[0] - 1, value[1], value[2])
     else:
         del I.info.BACKPACK_CONTENT[use]
+    if "Potion" in use:
+        Ff.add_to_backpack("Potion_Empty", 1, items)
 
 def get_equipment_coordinates(block):
     coordinates = {

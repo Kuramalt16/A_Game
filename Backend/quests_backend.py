@@ -10,7 +10,7 @@ def handle_q_click(screen, song, items):
     song[curr_song].channel0.pause()
     for quest in I.info.QUESTS:
         if quest["TYPE"] == "Tutorial":
-            if quest["ACTION"] == "QUEST_BACKPACK" and quest["COMPLETION"] != 1:
+            if quest["ACTION"] == "QUEST_BACKPACK" and quest["COMPLETION"] == 0:
                 quest["COMPLETION"] += 0.5
 
     quest_render(screen, items)
@@ -161,8 +161,8 @@ def tutorial_hit():
 def tutorial_backpack():
     for quest in I.info.QUESTS:
         if quest["TYPE"] == "Tutorial":
-            if quest["ACTION"] == "QUEST_BACKPACK" and quest["COMPLETION"] != 1:
-                quest["COMPLETION"] += 0.5
+            if quest["ACTION"] == "QUEST_BACKPACK" and quest["COMPLETION"] == 0.5:
+                quest["COMPLETION"] = 1
 
 def set_tutorial_flag():
     I.info.tutorial_flag = 1
@@ -263,8 +263,107 @@ def handle_meet_quests(name, player):
                 player["Gold"] += 0.1
                 Ff.display_text_player("Recieved 1 Sp for completing a quest", 4000)
 
-
 def remove_completed_quests():
     for completed_quest in I.info.COMPLETED_QUESTS:
         if completed_quest in I.info.QUESTS:
             I.info.QUESTS.remove(completed_quest)
+
+def handle_quest_mark_render(sub_image, npc, decorations, gifs, rooms, data):
+    if I.A.QUEST_SHOW_MARKS == {}:
+        not_in_Completed_quests = {}
+        not_in_started_quests = {}
+        for npc_name in npc.keys():
+            """Checking if from all the quests if they exist in the list of completed quests"""
+            if npc[npc_name]["quest"] != 'False' and npc_name in rooms.decor:
+                quest = npc[npc_name]["quest"]
+                # print(quest)
+                quests = quest.split(",,,")
+                for q in quests:
+                    quest_describtion_str_id = q.find("DESC:")
+                    q = q[quest_describtion_str_id:].replace("DESC:", "")
+                    if "|" in q:
+                        q1 = q.split("|")[0]
+                        q2 = q.split("|")[1]
+                        if not any(q1 == completed_quest["DESC"] for completed_quest in I.info.COMPLETED_QUESTS):
+                            if not_in_Completed_quests.get(npc_name) == None:
+                                not_in_Completed_quests[npc_name] = q1 + "|" + q2
+                            else:
+                                not_in_Completed_quests[npc_name] += ",," + q1 + "|" + q2
+                    else:
+                        if not any(q == completed_quest["DESC"] for completed_quest in I.info.COMPLETED_QUESTS):
+                            if not_in_Completed_quests.get(npc_name) == None:
+                                not_in_Completed_quests[npc_name] = q
+                            else:
+                                not_in_Completed_quests[npc_name] += ",," + q
+
+        for giver in not_in_Completed_quests.keys():
+            """checking if the quests that dont exist in the completed quests exist in the current quests"""
+            quest_str = not_in_Completed_quests[giver]
+            quests = quest_str.split(",,")
+            for quest_desc in quests:
+                if "|" in quest_desc:
+                    q1, q2 = quest_desc.split("|")
+                    if not any(q1 == quest["DESC"] for quest in I.info.QUESTS):
+                        if not_in_started_quests.get(giver) == None:
+                            not_in_started_quests[giver] = q1 + "|" + q2
+                        else:
+                            not_in_started_quests[giver] += ",," + q1 + "|" + q2
+                else:
+                    if not any(quest_desc.replace("\n", " ") == quest["DESC"].replace("\\n", " ") for quest in I.info.QUESTS):
+                        if not_in_started_quests.get(giver) == None:
+                            not_in_started_quests[giver] = quest_desc
+                        else:
+                            not_in_started_quests[giver] += ",," + quest_desc
+
+        """check if the quest is available if you talk to the quest giver"""
+        for giver in not_in_started_quests.keys():
+            current_iteration = npc[giver]["dialog"].iteration
+            for response, text in npc[giver]["dialog"].text.items():
+                if response[-1] == str(current_iteration):
+                    text_data = text.split("__")
+                    if len(text_data) == 3:
+                        t, r1, r2 = text_data
+                        response_data = r2.split("|")
+                        if response_data[0] == "quest":
+
+                            if I.A.QUEST_SHOW_MARKS.get(rooms.name) == None:
+                                I.A.QUEST_SHOW_MARKS[rooms.name] = {}
+                            rect = decorations.decor_dict[giver][0]["rect"]
+                            mark_img = I.pg.image.load(S.local_path + "/static/images/Playing/Quest Available.png")
+                            if rooms.size == ["1", "1", "1", "1"]:
+                                rect = (rect.x + rect.w / 6, rect.y - rect.h / 4, 20, 20)
+                            else:
+                                rect = (rect.x + 10, rect.y - rect.h / 2, 40, 40)
+                            mark_img = I.pg.transform.scale(mark_img, (rect[2], rect[3]))
+                            I.A.QUEST_SHOW_MARKS[rooms.name][giver] = ["!", mark_img, rect]
+                            break
+                    else:
+                        """only two responses definately not got a quest"""
+
+        if I.A.QUEST_SHOW_MARKS == {}:
+            I.A.QUEST_SHOW_MARKS = None
+    elif I.A.QUEST_SHOW_MARKS not in [{}, None]:
+        for room_name in I.A.QUEST_SHOW_MARKS:
+            for giver in I.A.QUEST_SHOW_MARKS[room_name]:
+                mark, image, rect = I.A.QUEST_SHOW_MARKS[room_name][giver]
+                sub_image.blit(image, (rect[0] - data["Zoom_rect"].x, rect[1]  - data["Zoom_rect"].y))
+                # I.T.Make_rect_visible(sub_image, (rect[0]  - data["Zoom_rect"].x, rect[1] - data["Zoom_rect"].y, rect[2], rect[3]), "red")
+
+def set_quest_mark_complete(rooms):
+    if I.info.QUESTS != []:
+        for quest in I.info.QUESTS:
+            if quest["COMPLETION"] >= 1:
+                giver = quest["GIVER"]
+                if giver == "Purple Wizard":
+                    giver = "Tutorial Man"
+                if I.A.QUEST_SHOW_MARKS[rooms.name][giver][0] == "!":
+                    image = I.pg.image.load(S.local_path + "/static/images/Playing/Quest Completed.png")
+                    mark, old_image, rect = I.A.QUEST_SHOW_MARKS[rooms.name][giver]
+                    image = I.pg.transform.scale(image, (rect[2], rect[3]))
+                    I.A.QUEST_SHOW_MARKS[rooms.name][giver] = ["?", image, rect]
+
+
+
+
+
+

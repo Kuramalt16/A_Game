@@ -98,6 +98,7 @@ def run_game(screen, clock):
 
 
                                 # map_name =
+                                S.THREADS = True
                                 rooms = I.rooms.Room()
                                 rooms.select_room(map_name)
                                 I.info.CURRENT_ROOM = {"name": map_name, "Spells": True, "Backpack": True, "Running": True, "Mobs": rooms.mobs, "Type": rooms.type}

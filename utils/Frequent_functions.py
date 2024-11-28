@@ -1,3 +1,5 @@
+from http.cookiejar import cut_port_re
+
 from utils import Imports as I
 from Values import Settings as S
 from Render import Settings_render as sr
@@ -517,6 +519,63 @@ def get_visible(target, current_mob, obstacles, zoom_rect):
     else:
         return True
 
+
+def move_away_new(target, rect, mob, speed, current_mob):
+    new_x, new_y = target
+    direction = I.pg.math.Vector2(new_x - rect.x, new_y - rect.y)
+    distance = direction.length()  # Length of the vector (distance to target)
+
+    if distance > 100:  # If already far enough away, stop moving
+        return rect.x, rect.y, False
+
+    if direction[0] > 0:
+        current_mob["flip"] = "left"
+    else:
+        current_mob["flip"] = "right"
+    # Normalize the direction vector (gives it a length of 1)
+    if distance != 0:  # Avoid division by zero
+        direction = direction.normalize()
+
+    # Invert the direction vector to move away from the target
+    direction *= -1
+
+    # Scale the direction vector by a constant speed
+    velocity = direction * speed
+
+    # Update the sprite's position using the velocity
+    if mob.frame_change:  # Adjusting condition for movement
+        rect.x += velocity.x
+        rect.y += velocity.y
+
+    return rect.x, rect.y, True
+
+
+def move_towards_new(target, rect, mob, speed, current_mob):
+    new_x, new_y = target
+    direction = I.pg.math.Vector2(new_x - rect.x, new_y - rect.y)
+    distance = direction.length()  # Length of the vector (distance to target)
+    if distance > 100:
+        return rect.x, rect.y, False
+
+    if direction[0] < 0:
+        current_mob["flip"] = "left"
+    else:
+        current_mob["flip"] = "right"
+    # Normalize the direction vector (gives it a length of 1)
+    if distance != 0:  # Avoid division by zero
+        direction = direction.normalize()
+
+
+
+    # Scale the direction vector by a constant speed
+    velocity = direction * speed
+
+    # Update the sprite's position using the velocity
+    if distance > speed and mob.frame_change:  # If we're farther than one step away, keep moving
+        rect.x += velocity.x
+        rect.y += velocity.y
+    return rect.x, rect.y, True
+
 def move_towards(target, current_mob, step_size, obstacles, zoom_rect):
     """
     Move the mob towards the target position while avoiding obstacles.
@@ -665,6 +724,8 @@ def draw_pixel(screen, left, top, color):
 def draw_character(screen, d, gender, race, options):
     # in options give a list of options to recreate
     d.update_for_gender_race(gender, race)
+    # d.orientation = "Left"
+    # d.walking = 2 #change walk possision
     options = d.get_character_options(options)
     # print(options)
     for option in options:
@@ -701,7 +762,7 @@ def read_one_column_from_db(table, name):
     Returns:
         list: A list of values from the specified column.
     """
-    conn = I.sqlite3.connect("./static/data/A_Game.db")
+    conn = I.sqlite3.connect(S.local_path + "/static/data/A_Game.db")
     cursor = conn.cursor()
 
     query = f"SELECT * FROM {table} WHERE Name = ?"
@@ -1038,63 +1099,174 @@ def find_open_space():
                 continue
             return row, column
 
-def update_map_view(id: int, item_name: str, coordinates: tuple, case: str, current_room=0):
+# def update_map_view(id: int, item_name: str, rect: tuple, case: str, current_room=0):
+#     if current_room == 0:
+#         """get the name of the current room"""
+#         current_room = I.info.CURRENT_ROOM["name"]
+#     if current_room not in I.info.MAP_CHANGE.keys():
+#         """if the name of the map isnt here, create a dict for it"""
+#         I.info.MAP_CHANGE[current_room] = {"add": {},
+#                                            "remove": {},
+#                                            "add_bypassed": {}}
+#     if case == "add":
+#         """adding a new decoration"""
+#         if I.info.MAP_CHANGE[current_room]["add"].get(item_name) == None:
+#             """if the item name was not yet added, add it"""
+#             I.info.MAP_CHANGE[current_room]["add"][item_name] = []
+#         if id >= 0:
+#             """if the id is more than or equal to 0 add the id to the dict with rect"""
+#             I.info.MAP_CHANGE[current_room]["add"][item_name].append((id, rect))
+#         else:
+#             print("Id too low")
+#     elif case == "remove":
+#         if item_name in list(I.info.MAP_CHANGE[current_room]["add"].keys()):
+#             for ida, coordinates in I.info.MAP_CHANGE[current_room]["add"][item_name]:
+#                 x = coordinates[0]
+#                 y = coordinates[1]
+#                 if ida == id:
+#                     if isinstance(I.info.MAP_CHANGE[current_room]["add"][item_name][0][1], tuple) and len(I.info.MAP_CHANGE[current_room]["add"][item_name][0][1]) == 2:
+#                         I.info.MAP_CHANGE[current_room]["add"][item_name].remove((id, (x, y)))
+#                     else:
+#                         I.info.MAP_CHANGE[current_room]["add"][item_name].remove((id, coordinates))
+#
+#                     if I.info.MAP_CHANGE[current_room]["remove"].get(item_name) == None:
+#                         I.info.MAP_CHANGE[current_room]["remove"][item_name] = []
+#                     I.info.MAP_CHANGE[current_room]["remove"][item_name].append(id)
+#         else:
+#             if I.info.MAP_CHANGE[current_room]["remove"].get(item_name) == None:
+#                 I.info.MAP_CHANGE[current_room]["remove"][item_name] = []
+#             I.info.MAP_CHANGE[current_room]["remove"][item_name].append(id)
+#     elif case == "get":
+#         if I.info.MAP_CHANGE[current_room]["add"].get(item_name) == None:
+#             return 0
+#         else:
+#             return len(I.info.MAP_CHANGE[current_room]["add"][item_name])
+
+
+
+def update_map_view(decor_id, decor_name, rect, case, current_room=0, decorations=0):
     if current_room == 0:
         current_room = I.info.CURRENT_ROOM["name"]
-    if current_room not in I.info.MAP_CHANGE.keys():
+    if case not in ["get", "add_effect", "remove_gif", "remove_effect"]:
+        rect = (rect[0], rect[1], rect[2], rect[3])
+    if I.info.MAP_CHANGE.get(current_room) == None:
         I.info.MAP_CHANGE[current_room] = {"add": {},
                                            "remove": {},
-                                           "add_bypassed": {}}
+                                           "remove_gif": {},
+                                           "add_bypassed": {},
+                                           "gif_ended": {},
+                                           "add_effect": {},
+                                           "remove_effect": {}
+                                           }
     if case == "add":
-        if I.info.MAP_CHANGE[current_room]["add"].get(item_name) == None:
-            I.info.MAP_CHANGE[current_room]["add"][item_name] = []
-        if id >= 0:
-            I.info.MAP_CHANGE[current_room]["add"][item_name].append((id, coordinates))
-        else:
-            print("Id too low")
+        if I.info.MAP_CHANGE[current_room][case].get(decor_name) == None:
+            I.info.MAP_CHANGE[current_room][case][decor_name] = {}
+        I.info.MAP_CHANGE[current_room][case][decor_name][decor_id] = rect
+        # if I.info.MAP_CHANGE[current_room]["remove"].get(decor_name) == None:
+        #     """item was not previously removed by this function"""
+        #     if I.info.MAP_CHANGE[current_room][case].get(decor_name) == None:
+        #         I.info.MAP_CHANGE[current_room][case][decor_name] = {}
+        #     I.info.MAP_CHANGE[current_room][case][decor_name][decor_id] = rect
+        # else:
+        #     """item may have been previously removed by this function"""
+        #     if I.info.MAP_CHANGE[current_room]["remove"][decor_name].get(decor_id) == None:
+        #         """item was not previously removed by this function"""
+        #         if I.info.MAP_CHANGE[current_room][case].get(decor_name) == None:
+        #             I.info.MAP_CHANGE[current_room][case][decor_name] = {}
+        #         I.info.MAP_CHANGE[current_room][case][decor_name][decor_id] = rect
+        #     else:
+        #         """item was previously removed by this function"""
+        #         del I.info.MAP_CHANGE[current_room]["remove"][decor_name][decor_id]
+        #         """ after refreshing the map the item will appear"""
     elif case == "remove":
-        if item_name in list(I.info.MAP_CHANGE[current_room]["add"].keys()):
-            for ida, coordinates in I.info.MAP_CHANGE[current_room]["add"][item_name]:
-                x = coordinates[0]
-                y = coordinates[1]
-                if ida == id:
-                    print(I.info.MAP_CHANGE[current_room]["add"][item_name][0][1])
-                    if isinstance(I.info.MAP_CHANGE[current_room]["add"][item_name][0][1], tuple) and len(I.info.MAP_CHANGE[current_room]["add"][item_name][0][1]) == 2:
-                        I.info.MAP_CHANGE[current_room]["add"][item_name].remove((id, (x, y)))
-                    else:
-                        I.info.MAP_CHANGE[current_room]["add"][item_name].remove((id, coordinates))
+        if I.info.MAP_CHANGE[current_room][case].get(decor_name) == None:
+            """decoration was not removed by this function before"""
+            I.info.MAP_CHANGE[current_room][case][decor_name] = {}
+        if I.info.MAP_CHANGE[current_room][case][decor_name].get(decor_id) == None:
+            """decoration was not removed by this function"""
+            I.info.MAP_CHANGE[current_room][case][decor_name][decor_id] = 0
+        if rect == (0,0,0,0):
+            rect = 0
+        """removing from batch"""
+        I.info.MAP_CHANGE[current_room][case][decor_name][decor_id] = rect
 
-                    if I.info.MAP_CHANGE[current_room]["remove"].get(item_name) == None:
-                        I.info.MAP_CHANGE[current_room]["remove"][item_name] = []
-                    I.info.MAP_CHANGE[current_room]["remove"][item_name].append(id)
-        else:
-            if I.info.MAP_CHANGE[current_room]["remove"].get(item_name) == None:
-                I.info.MAP_CHANGE[current_room]["remove"][item_name] = []
-            I.info.MAP_CHANGE[current_room]["remove"][item_name].append(id)
+        # if I.info.MAP_CHANGE[current_room]["add"].get(decor_name) == None:
+        #     """item was not previously created by this function"""
+        #     if I.info.MAP_CHANGE[current_room][case].get(decor_name) == None:
+        #         I.info.MAP_CHANGE[current_room][case][decor_name] = {}
+        #     if rect == (0,0,0,0):
+        #         rect = 0
+        #     I.info.MAP_CHANGE[current_room][case][decor_name][decor_id] = rect
+        #     """will remove the item from decor dict"""
+        # else:
+        #     """item may have been previously created by this function"""
+        #     if I.info.MAP_CHANGE[current_room]["add"][decor_name].get(decor_id) == None:
+        #         """the actual item was not previously created by this function"""
+        #         if I.info.MAP_CHANGE[current_room][case].get(decor_name) != None:
+        #             """so that errors don't occur when the plant has been actually removed from the list and tries again to remove it"""
+        #             I.info.MAP_CHANGE[current_room][case][decor_name][decor_id] = rect
+        #
+        #     else:
+        #         """the actual item was generated with this function"""
+        #         print("was generated by this function before", decor_name, decor_id)
+        #         if decorations != 0:
+        #             print("was forecefully removed", decor_name, decor_id)
+        #             del decorations.decor_dict[decor_name][decor_id]
+        #         del I.info.MAP_CHANGE[current_room]["add"][decor_name][decor_id]
+        #         """it's as if the item was never created in the first place"""
+    if case == "remove_gif":
+        gifs = rect # in the rect category gifs were placed instead
+        if I.info.MAP_CHANGE[current_room].get("remove_gif") == None:
+            I.info.MAP_CHANGE[current_room]["remove_gif"] = {}
+        if I.info.MAP_CHANGE[current_room]["remove_gif"].get(decor_name) == None:
+            I.info.MAP_CHANGE[current_room]["remove_gif"][decor_name] = {}
+        # I.info.MAP_CHANGE["remove_gif"].append(gifs[decor_name].name)
+        I.info.MAP_CHANGE[current_room]["remove_gif"][decor_name][decor_id] = gifs[decor_name].name
+    elif case == "add_bypassed":
+        if I.info.MAP_CHANGE[current_room]["add_bypassed"].get(decor_name) == None:
+            I.info.MAP_CHANGE[current_room]["add_bypassed"][decor_name] = {}
+            if decor_id >= 0:
+                I.info.MAP_CHANGE[current_room]["add_bypassed"][decor_name][decor_id] = rect
+            else:
+                print("Id too low")
     elif case == "get":
-        if I.info.MAP_CHANGE[current_room]["add"].get(item_name) == None:
+        if I.info.MAP_CHANGE[current_room]["add"].get(decor_name) == None:
             return 0
         else:
-            return len(I.info.MAP_CHANGE[current_room]["add"][item_name])
-    if case == "remove_gif":
-        gifs = coordinates
-        if I.info.MAP_CHANGE.get("remove_gif") == None:
-            I.info.MAP_CHANGE["remove_gif"] = []
-        I.info.MAP_CHANGE["remove_gif"].append(gifs[item_name].name)
-    if case == "add_bypassed":
-        if I.info.MAP_CHANGE[current_room]["add_bypassed"].get(item_name) == None:
-            I.info.MAP_CHANGE[current_room]["add_bypassed"][item_name] = []
-        if id >= 0:
-            I.info.MAP_CHANGE[current_room]["add_bypassed"][item_name].append((id, coordinates))
-        else:
-            print("Id too low")
-
+            return len(I.info.MAP_CHANGE[current_room]["add"][decor_name])
+    elif case == "gif_ended":
+        if I.info.MAP_CHANGE[current_room][case].get(decor_name) == None:
+            I.info.MAP_CHANGE[current_room][case][decor_name] = {}
+        I.info.MAP_CHANGE[current_room][case][decor_name][decor_id] = rect
+    elif case == "add_effect":
+        effect = rect
+            # I.th.start_thread(time, "planting", decorations)
+        if I.info.MAP_CHANGE[current_room].get(case) == None:
+            I.info.MAP_CHANGE[current_room][case] = {}
+        if I.info.MAP_CHANGE[current_room][case].get(decor_name) == None:
+            """decor doesnt have an effect in this list"""
+            I.info.MAP_CHANGE[current_room][case][decor_name] = {}
+        if I.info.MAP_CHANGE[current_room][case][decor_name].get(decor_id) == None:
+            """decor trully doesnt have an effect in this list"""
+            I.info.MAP_CHANGE[current_room][case][decor_name][decor_id] = 0
+        I.info.MAP_CHANGE[current_room][case][decor_name][decor_id] = effect
+    elif case == "remove_effect":
+        effect = rect
+        """Only removes effect from the add effect list"""
+        # I.th.start_thread(time, "planting", decorations)
+        if effect in I.info.MAP_CHANGE[current_room]["add_effect"][decor_name][decor_id]:
+            if len(I.info.MAP_CHANGE[current_room]["add_effect"][decor_name][decor_id].split(",,")) == 1:
+                I.info.MAP_CHANGE[current_room]["add_effect"][decor_name][decor_id] = I.info.MAP_CHANGE[current_room]["add_effect"][decor_name][decor_id].replace(effect, "")
+                # print("removed", I.info.MAP_CHANGE[current_room]["add_effect"][decor_name][decor_id])
+            else:
+                # print("IN UPDATE MAP VIEW REMOVE EFFECT", I.info.MAP_CHANGE[current_room]["add_effect"][decor_name][decor_id])
+                I.info.MAP_CHANGE[current_room]["add_effect"][decor_name][decor_id] = I.info.MAP_CHANGE[current_room]["add_effect"][decor_name][decor_id].replace(effect, "")
 
 
 def get_decor_coordinates(option, id, decorations):
     if decorations.decor_dict.get(option) != None and decorations.decor_dict[option].get(id) != None:
         rect = decorations.decor_dict[option][id]["rect"]
-        return rect.x, rect.y
+        return rect
     else:
         I.t.sleep(0.5)
         # print("error decor coordinates")
@@ -1181,3 +1353,18 @@ def point_in_polygon(point, polygon):
                         inside = not inside
         px, py = sx, sy
     return inside
+
+def get_decor_by_id(index, decorations, rooms):
+    decor_list = []
+    for option in rooms.decor:
+        for id in decorations.decor_dict[option].keys():
+            if isinstance(id, int):
+                decor_list.append(decorations.decor_dict[option][id])
+    if index < len(decor_list):
+        return decor_list[index]
+
+def weighted_random():
+    if I.random.random() < 0.6:  # 30% probability
+        return I.random.randint(-40, 40)
+    else:  # 70% probability
+        return 0

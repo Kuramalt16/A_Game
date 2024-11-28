@@ -28,8 +28,9 @@ from static.data.Character_byte_data import CharacterData
 import sqlite3
 import random
 import webcolors
+import queue
 from utils import threads as th
 from Backend import (Tool_backend as TB, Spell_Backend as SB, Dialog_backend as DialB, Item_backend as IB,
                      guard_backend as GB, quests_backend as QB, appliance_backend as AB, Backpack_backend as BB,
                      Player_Backend as PB, shop_backend as SHB, Containers_backend as CB, folower_backend as FB,
-                     Mob_Backend as MB, update_game as UG)
+                     Mob_Backend as MB, update_game as UG, map_backend as MapB, Plants_backend as PlantB, Sprites as S)

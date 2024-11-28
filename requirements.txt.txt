@@ -1,3 +1,5 @@
 pygame
 PIL
 numpy
+git
+

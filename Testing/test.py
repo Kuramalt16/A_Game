@@ -1,3 +1,5 @@
+from scipy.stats import false_discovery_control
+
 from utils import Imports as I, Frequent_functions as Ff
 from Values import Settings as S
 
@@ -166,6 +168,13 @@ def end_mesure(start_time):
     execution_time = end_time - start_time - 0.0000017
     I.T.AVERAGE_TIME = (I.T.AVERAGE_TIME[0] + execution_time, I.T.AVERAGE_TIME[1] + 1)
     print("overall time in ms: ", execution_time * 1000, "AVERAGE: ", (I.T.AVERAGE_TIME[0] / I.T.AVERAGE_TIME[1]) * 1000, " ms")
+    return (I.T.AVERAGE_TIME[0] / I.T.AVERAGE_TIME[1]) * 1000
+
+def end_mesure_no_print(start_time):
+    end_time = I.t.perf_counter()
+    execution_time = end_time - start_time - 0.0000017
+    I.T.AVERAGE_TIME = (I.T.AVERAGE_TIME[0] + execution_time, I.T.AVERAGE_TIME[1] + 1)
+    return (I.T.AVERAGE_TIME[0] / I.T.AVERAGE_TIME[1]) * 1000
     # if execution_time * 1000 > 30:
     #     pause_pygame()
 
@@ -312,7 +321,6 @@ def rename_images_in_folder(folder_path):
 
 # Example usage
 
-# rename_images_in_folder("C:/Users/gytis.monstvilas/Documents/GitHub/A_Game/static/images/Background/Appliances/Melter")  #at the end of the path last folder doesn't need /
 
 
 
@@ -442,5 +450,158 @@ def upload_data_to_db(table, data):
 #     "decor",
 #     ["Tree_M_2", 'AXE:Light Wood,,HARVESTABLE:Apple', "True,,10"])
 
+# import os
+# I.pg.init()
+#
+# # Screen setup
+# screen = I.pg.display.set_mode((800, 600))
+# I.pg.display.set_caption("Sprite Example")
+#
+# clock = I.pg.time.Clock()
+# FPS = 60
+#
+# def get_collision_side(rect1, rect2):
+#     """
+#     Determine which side of rect1 is colliding with rect2.
+#     Returns a string: 'left', 'right', 'top', 'bottom'.
+#     """
+#     # Calculate overlap on each side
+#     dx_left = abs(rect1.right - rect2.left)  # Distance from rect1's right to rect2's left
+#     dx_right = abs(rect1.left - rect2.right)  # Distance from rect1's left to rect2's right
+#     dy_top = abs(rect1.bottom - rect2.top)  # Distance from rect1's bottom to rect2's top
+#     dy_bottom = abs(rect1.top - rect2.bottom)  # Distance from rect1's top to rect2's bottom
+#
+#     # Find the smallest overlap
+#     min_dx = min(dx_left, dx_right)
+#     min_dy = min(dy_top, dy_bottom)
+#
+#     if min_dx < min_dy:  # Horizontal collision
+#         if dx_left < dx_right:
+#             return [-1, 0]
+#         else:
+#             return [1, 0]
+#     else:  # Vertical collision
+#         if dy_top < dy_bottom:
+#             return [0, 1]
+#         else:
+#             return [0, -1]
+#
+# class Decoration(I.pg.sprite.Sprite):
+#     def __init__(self, rect, path, hp):
+#         super().__init__()
+#         image = I.pg.image.load(path)
+#
+#         self.image = I.pg.transform.scale(image, (rect[2], rect[3]))
+#
+#         self.rect = rect
+#
+# class Mob(I.pg.sprite.Sprite):
+#     def __init__(self, init_x, init_y, path, frame_count, delay):
+#         # I.pg.sprite.Sprite.__init__(self)
+#         super().__init__()
+#         self.images = []
+#         self.frame_count = frame_count
+#         self.current_frame = 0
+#         self.frame_time = I.pg.time.get_ticks()
+#         self.frame_change = False
+#         self.delay = delay
+#         for i in range(0, self.frame_count):
+#             self.images.append(I.pg.image.load(path.replace("0", str(i))))
+#
+#         self.rect = I.pg.Rect(init_x, init_y, 100, 100)
+#         self.target_position = I.pg.math.Vector2(init_x, init_y)
+#
+#         self.blocking_movement = [0, 0]
+#     def update(self):
+#         if self.frame_time + self.delay < I.pg.time.get_ticks():
+#             self.current_frame += 1
+#             self.frame_time = I.pg.time.get_ticks()
+#             self.frame_change = True
+#             if self.current_frame >= self.frame_count:
+#                 self.current_frame = 0
+#         else:
+#             self.frame_change = False
+#         self.image = self.images[self.current_frame]
+#         self.image = I.pg.transform.scale(self.image, (100, 100))
+#         self.go(self.target_position.x, self.target_position.y)
+#
+#     def set_target(self, x, y):
+#         # Set a new target position
+#         self.target_position = I.pg.math.Vector2(x, y)
+#
+#     def go(self, new_x, new_y):
+#         # Calculate the direction vector
+#         direction = I.pg.math.Vector2(new_x - self.rect.x, new_y - self.rect.y)
+#         distance = direction.length()  # Length of the vector (distance to target)
+#
+#         # Normalize the direction vector (gives it a length of 1)
+#         if distance != 0:  # Avoid division by zero
+#             direction = direction.normalize()
+#         # Scale the direction vector by a constant speed
+#         speed = 5  # Pixels per frame (adjust for desired pace)
+#         velocity = direction * speed
+#
+#         # Update the sprite's position using the velocity
+#         if distance > speed and self.frame_change:  # If we're farther than one step away, keep moving
+#             if self.blocking_movement[0] == -1 and velocity.x < 0:
+#                 self.rect.x += 0
+#                 print("blocking_left")
+#             elif self.blocking_movement[0] == 1 and velocity.x > 0:
+#                 self.rect.x += 0
+#                 print("blocking right")
+#             else:
+#                 self.rect.x += velocity.x
+#             print(velocity, self.blocking_movement)
+#             if self.blocking_movement[1] == 1 and velocity.y < 0:
+#                 self.rect.y += 0
+#                 print("blocking up")
+#             elif self.blocking_movement[1] == -1 and velocity.y > 0:
+#                 self.rect.y += 0
+#                 print("blocking down")
+#             else:
+#                 self.rect.y += velocity.y
+#         self.blocking_movement = [0, 0]
+#
+#
+# path = os.getcwd().replace("Testing", "/static/images/Mobs/Ooze/Slime_S/Slime_S_0.png")
+# mob = Mob(400, 200, path, 10, 50)
+# path = os.getcwd().replace("Testing", "/static/images/Background/Trees/Tree_M_1.png")
+#
+# decor = Decoration(I.pg.Rect(350, 350, 100, 100), path, 10)
+# decor1 = Decoration(I.pg.Rect(300, 330, 100, 100), path.replace("M_1", "M_2"), 10)
+# mobs = I.pg.sprite.Group()
+# decorations = I.pg.sprite.Group()
+# decorations.add(decor)
+# decorations.add(decor1)
+# mobs.add(mob)
+#
+# running = True
+# while running:
+#     screen.fill("black")
+#     for event in I.pg.event.get():
+#         if event.type == I.pg.MOUSEMOTION:
+#             pos = I.pg.mouse.get_pos()
+#             mob.set_target(pos[0], pos[1])
+#         elif event.type == I.pg.QUIT:
+#             running = False
+#     decorations.draw(screen)
+#     mobs.update()
+#     mobs.draw(screen)
+#     collisions = I.pg.sprite.groupcollide(mobs, decorations, False, False)
+#     if collisions:
+#         for mob, colliding_decorations in collisions.items():
+#             # print(f"{mob} is colliding with {colliding_decorations}")
+#             for decor in colliding_decorations:
+#                 mob.blocking_movement = get_collision_side(decor.rect, mob.rect)
+#                 # print(side)
+#
+#
+#     I.pg.display.flip()
+# I.pg.quit()
+#
+# print(mobs)
+
+
 
 #  pyinstaller --onefile --icon=.\static\images\Icon.ico .\A_Game.py
+# rename_images_in_folder("C:/Users/gytis.monstvilas/Documents/GitHub/A_Game/static/images/Mobs/Plant/Ent_Hidden")  #at the end of the path last folder doesn't need /

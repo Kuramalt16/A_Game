@@ -16,7 +16,6 @@ CURRENT_STANCE = 0
 LAST_ORIENT = ["Front.png", "_Walk.png", "_Walk1.png"]
 
 HARVESTABLE = {}
-ENTERABLE = [] # Place holder for places that can be entered
 
 BACKPACK_CONTENT = {} # changes values in add to backpack, remove from backpack and in backpack when items are switching possisions
 BACKPACK_COORDINATES_X = {}
@@ -116,3 +115,5 @@ LIGHT = [0, 0]
 RESET = False
 
 dropped_items_lock = threading.Lock()
+
+Closed_door_darkness = {}

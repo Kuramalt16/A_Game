@@ -246,14 +246,15 @@ class CharacterData:
                                        self.shirt_color, self.shirt_color, self.chest_variable[7], self.skin_color, (0, 0, 0, 254),
                                        (0, 0, 0, 254), (0, 0, 0, 254)]
         elif part == "Slee":
-            if value == 0:
-                self.sleeve_variable = [self.skin_color, self.skin_color, self.skin_color, self.skin_color, self.skin_color, self.skin_color]
-            elif value == 1:
-                self.sleeve_variable = [self.shirt_color, self.shirt_color, (0, 0, 0, 254), self.skin_color, self.skin_color, self.skin_color]
-            elif value == 2:
-                self.sleeve_variable = [self.shirt_color, self.shirt_color, self.shirt_color, self.shirt_color, (0, 0, 0, 255), self.shirt_color]
-            elif value == 3:
-                self.sleeve_variable = [self.shirt_color, self.skin_color, self.shirt_color, self.shirt_color, (0, 0, 0, 255), self.skin_color]
+            sleeve_dict = {
+                0: [self.skin_color, self.skin_color, self.skin_color, self.skin_color, self.skin_color, self.skin_color, (0, 0, 0, 0), (0, 0, 0, 0), self.skin_color, (0, 0, 0, 255), (0, 0, 0, 255), self.skin_color2],
+                1: [self.shirt_color, self.shirt_color, (0, 0, 0, 254), self.skin_color, self.skin_color, self.skin_color, (0, 0, 0, 0), (0, 0, 0, 0), self.skin_color, (0, 0, 0, 255), (0, 0, 0, 255), self.skin_color2],
+                2: [self.shirt_color, self.shirt_color, self.shirt_color, self.shirt_color, (0, 0, 0, 255), self.shirt_color, (0, 0, 0, 0), (0, 0, 0, 0), self.skin_color, (0, 0, 0, 255), (0, 0, 0, 255), self.skin_color2],
+                3: [self.shirt_color, self.skin_color, self.shirt_color, self.shirt_color, (0, 0, 0, 255), self.skin_color, (0, 0, 0, 0), (0, 0, 0, 0), self.skin_color, (0, 0, 0, 255), (0, 0, 0, 255), self.skin_color2],
+                4: [self.shirt_color, self.shirt_color, self.shirt_color, self.shirt_color, self.shirt_color, self.shirt_color, (0, 0, 0, 255), self.shirt_color,  self.shirt_color, self.shirt_color, (0, 0, 0, 255), self.shirt_color]
+                           }
+            self.sleeve_variable = sleeve_dict[value]
+
         elif part == "Pant":
             if value == 0:
                 self.pants_variable = [self.front_skin_color, self.front_skin_color, self.front_skin_color, self.front_skin_color, (0, 0, 0, 0),
@@ -287,13 +288,15 @@ class CharacterData:
                                        (0, 0, 0, 255), (0, 0, 0, 255), self.pants_color, self.pants_color, (0, 0, 0, 255)]
         elif part == "Shoe":
             if value == 0:
-                self.shoes_variable = [self.skin_color, self.skin_color, self.skin_color, self.skin_color]
+                self.shoes_variable = [self.skin_color, self.skin_color, self.skin_color, self.skin_color, self.skin_color]
             elif value == 1:
-                self.shoes_variable = [self.shoes_color, (255, 255, 255, 255), self.shoes_color, (255, 255, 255, 255),]
+                self.shoes_variable = [self.shoes_color, (255, 255, 255, 255), self.shoes_color, (255, 255, 255, 255), self.shoes_color]
             elif value == 2:
-                self.shoes_variable = [self.shoes_color, self.shoes_color, self.shoes_color, self.shoes_color,]
+                self.shoes_variable = [self.shoes_color, self.shoes_color, self.shoes_color, self.shoes_color, self.shoes_color]
             elif value == 3:
-                self.shoes_variable = [self.skin_color, self.skin_color, self.shoes_color, self.shoes_color,]
+                self.shoes_variable = [self.skin_color, self.skin_color, self.shoes_color, self.shoes_color, self.skin_color]
+            elif value == 4:
+                self.shoes_variable = [self.shoes_color, self.shoes_color, self.shoes_color, self.shoes_color, self.skin_color]
 
         elif part == "Hair":
             if value == 0:
@@ -422,7 +425,6 @@ class CharacterData:
                 self.front_skin_color = self.skin_color
             elif orientation == 4:
                 self.walking = 1
-                print("LEFT1")
                 self.back_skin_color = self.skin_color2
                 self.front_skin_color = self.skin_color
                 # self.SIDE_HAND_WALKF = rotate_ranges_degrees(self.SIDE_HAND, 45, (620, 300))
@@ -435,7 +437,6 @@ class CharacterData:
                 self.orientation = "Left"
             elif orientation == 5:
                 self.walking = 2
-                print("LEFT2")
                 self.back_skin_color = self.skin_color
                 self.front_skin_color = self.skin_color2
                 # self.SIDE_HAND_WALKF = rotate_ranges_degrees(self.SIDE_HAND, -45, (640, 300))
@@ -483,7 +484,6 @@ class CharacterData:
                 self.orientation = "Right"
                 self.front_skin_color = self.skin_color
             elif orientation == 10:
-                print("RIGHT1")
                 self.walking = 1
                 self.back_skin_color = self.skin_color2
                 self.front_skin_color = self.skin_color
@@ -493,7 +493,6 @@ class CharacterData:
                 # self.LEFT_LEGB = {}
                 self.orientation = "Right"
             elif orientation == 11:
-                print("RIGHT2")
                 self.walking = 2
                 self.back_skin_color = self.skin_color
                 self.front_skin_color = self.skin_color2 # NOTHING bug
@@ -598,14 +597,14 @@ class CharacterData:
                                    self.chest_variable[5], self.chest_variable[6], self.chest_variable[7], self.skin_color, self.skin_color,
                                    self.skin_color, self.chest_variable[7]]
 
-            self.sleeve_variable = [self.skin_color, self.skin_color, self.skin_color, self.skin_color, self.skin_color, self.skin_color]
+            self.sleeve_variable = [self.skin_color, self.skin_color, self.skin_color, self.skin_color, self.skin_color, self.skin_color, (0, 0, 0, 0), (0, 0, 0, 0), self.skin_color, (0, 0, 0, 255), (0, 0, 0, 255), self.skin_color2, self.skin_color2]
 
             self.pants_variable = [self.skin_color, self.skin_color, self.skin_color, self.skin_color, (0, 0, 0, 0),
                                    (0, 0, 0, 255), self.skin_color, self.skin_color, self.leg_variable[1], self.leg_variable[0],
                                    self.skin_color, self.leg_variable[1], self.leg_variable[0], self.skin_color, self.skin_color,
                                    (0, 0, 0, 255), self.skin_color, (0, 0, 0, 255), (0, 0, 0, 255), self.skin_color ]
 
-            self.shoes_variable = [self.skin_color, self.skin_color, self.skin_color, self.skin_color]
+            self.shoes_variable = [self.skin_color, self.skin_color, self.skin_color, self.skin_color, self.skin_color]
         self.HEAD = {
             # (510, 600, 170, 180): (255, 255, 255, 255),  # 1 line
             (600, 650, 170 + self.push_up, 180 + self.push_up): (0, 0, 0, 255),
@@ -804,11 +803,12 @@ class CharacterData:
             (570 + self.foot_push, 580 + self.foot_push, 460 + self.push_up - self.leg_raise[0], 490 + self.push_up - self.leg_raise[0]): (0, 0, 0, 255),  # 32, 33, 34
 
             (580 + self.foot_push, 590 + self.foot_push, 460 + self.push_up - self.leg_raise[0], 470 + self.push_up - self.leg_raise[0]): self.shoes_variable[3],
-            (590 + self.foot_push, 620, 460 + self.push_up - self.leg_raise[0], 470 + self.push_up - self.leg_raise[0]): self.shoes_variable[0],
+            (590 + self.foot_push, 600, 460 + self.push_up - self.leg_raise[0], 470 + self.push_up - self.leg_raise[0]): self.shoes_variable[0],
+            (600, 620, 460 + self.push_up - self.leg_raise[0], 470 + self.push_up - self.leg_raise[0]): self.shoes_variable[4],
 
             (580 + self.foot_push, 590, 470 + self.push_up - self.leg_raise[0], 480 + self.push_up - self.leg_raise[0]): self.shoes_variable[0],
             (590, 600, 470 + self.push_up - self.leg_raise[0], 480 + self.push_up - self.leg_raise[0]): self.shoes_variable[2],
-            (600, 620, 470 + self.push_up - self.leg_raise[0], 480 + self.push_up - self.leg_raise[0]): self.shoes_variable[0],
+            (600, 620, 470 + self.push_up - self.leg_raise[0], 480 + self.push_up - self.leg_raise[0]): self.shoes_variable[4],
 
             (580 + self.foot_push, 600, 480 + self.push_up - self.leg_raise[0], 490 + self.push_up - self.leg_raise[0]): self.shoes_variable[0],
             (600, 610, 480 + self.push_up - self.leg_raise[0], 490 + self.push_up - self.leg_raise[0]): self.shoes_variable[2],
@@ -825,10 +825,11 @@ class CharacterData:
 
             (620, 630, 460 + self.push_up - self.leg_raise[1], 490 + self.push_up - self.leg_raise[1]): (0, 0, 0, 255),
             # 32, 33, 34
-            (630, 660, 460 + self.push_up - self.leg_raise[1], 470 + self.push_up - self.leg_raise[1]): self.shoes_variable[0],
+            (630, 650, 460 + self.push_up - self.leg_raise[1], 470 + self.push_up - self.leg_raise[1]): self.shoes_variable[4],
+            (650, 660, 460 + self.push_up - self.leg_raise[1], 470 + self.push_up - self.leg_raise[1]): self.shoes_variable[0],
             (660 - self.foot_push, 670, 460 + self.push_up - self.leg_raise[1], 470 + self.push_up - self.leg_raise[1]): self.shoes_variable[3], # second
 
-            (630, 650, 470 + self.push_up - self.leg_raise[1], 480 + self.push_up - self.leg_raise[1]): self.shoes_variable[0],
+            (630, 650, 470 + self.push_up - self.leg_raise[1], 480 + self.push_up - self.leg_raise[1]): self.shoes_variable[4],
             (650, 660, 470 + self.push_up - self.leg_raise[1], 480 + self.push_up - self.leg_raise[1]): self.shoes_variable[2], # third
             (660, 670 - self.foot_push, 470 + self.push_up - self.leg_raise[1], 480 + self.push_up - self.leg_raise[1]): self.shoes_variable[0],
 
@@ -842,18 +843,18 @@ class CharacterData:
         }
         self.LEFT_SHOE = {
             (600, 620, 450 + self.push_up, 460 + self.push_up): (0, 0, 0, 255),
-            (620, 650, 450 + self.push_up, 460 + self.push_up): self.shoes_variable[0],
+            (620, 650, 450 + self.push_up, 460 + self.push_up): self.shoes_variable[4],
             (650, 660, 450 + self.push_up, 460 + self.push_up): (0, 0, 0, 255),
 
             (590, 600, 460 + self.push_up, 490 + self.push_up): (0, 0, 0, 255),
 
             (600, 610, 460 + self.push_up, 470 + self.push_up): self.shoes_variable[1], # 1st (white) 2nd
-            (610, 620, 460 + self.push_up, 470 + self.push_up): self.shoes_variable[2], # all
-            (620, 650, 460 + self.push_up, 470 + self.push_up): self.shoes_variable[0], # 1st 2nd
+            (610, 620, 460 + self.push_up, 470 + self.push_up): self.shoes_variable[2], # all red
+            (620, 650, 460 + self.push_up, 470 + self.push_up): self.shoes_variable[4], # 1st 2nd red others skin
 
             (600, 610, 470 + self.push_up, 480 + self.push_up): self.shoes_variable[0],
             (610, 620, 470 + self.push_up, 480 + self.push_up): self.shoes_variable[2],
-            (620, 650, 470 + self.push_up, 480 + self.push_up): self.shoes_variable[0],
+            (620, 650, 470 + self.push_up, 480 + self.push_up): self.shoes_variable[4],
 
             (600, 610, 480 + self.push_up, 490 + self.push_up): self.shoes_variable[0],
             (610, 620, 480 + self.push_up, 490 + self.push_up): self.shoes_variable[2],
@@ -866,15 +867,15 @@ class CharacterData:
         self.RIGHT_SHOE = {
 
             (590, 600, 450 + self.push_up, 460 + self.push_up): (0, 0, 0, 255),
-            (600, 630, 450 + self.push_up, 460 + self.push_up): self.shoes_variable[0],
+            (600, 630, 450 + self.push_up, 460 + self.push_up): self.shoes_variable[4],
             (630, 650, 450 + self.push_up, 460 + self.push_up): (0, 0, 0, 255),
 
             (590, 600, 460 + self.push_up, 490 + self.push_up): (0, 0, 0, 255),
-            (600, 630, 460 + self.push_up, 470 + self.push_up): self.shoes_variable[0],
+            (600, 630, 460 + self.push_up, 470 + self.push_up): self.shoes_variable[4],
             (630, 640, 460 + self.push_up, 470 + self.push_up): self.shoes_variable[2],
             (640, 650, 460 + self.push_up, 470 + self.push_up): self.shoes_variable[1],
 
-            (600, 630, 470 + self.push_up, 480 + self.push_up): self.shoes_variable[0],
+            (600, 630, 470 + self.push_up, 480 + self.push_up): self.shoes_variable[4],
             (630, 640, 470 + self.push_up, 480 + self.push_up): self.shoes_variable[2],
             (640, 650, 470 + self.push_up, 480 + self.push_up): self.shoes_variable[0],
 
@@ -1167,7 +1168,7 @@ class CharacterData:
 
         (670, 690, 470 + self.push_up, 480 + self.push_up): (0, 0, 0, 255),
         }
-
+        """from x1 to x2 left to right and then from y1 to y2 up to down im talking about arm left, arm_push is for gender changes ig, pushup is for walking straiht"""
         self.ARM_LEFT = {
             (550 + self.arm_push, 580, 270 + self.push_up, 280 + self.push_up): (0, 0, 0, 255),  # 11 line
 
@@ -1198,6 +1199,14 @@ class CharacterData:
             (530 + self.arm_push, 540 + self.arm_push, 310 + self.push_up, 390 + self.push_up + self.arm_raise[0]): (0, 0, 0, 255),
             (570, 580, 310 + self.push_up, 390 + self.push_up + self.arm_raise[0]): (0, 0, 0, 255),
             (540 + self.arm_push, 570, 390 + self.push_up + self.arm_raise[0], 400 + self.push_up + self.arm_raise[0]): (0, 0, 0, 255),  # 23 line
+
+            (530 + self.arm_push, 540 + self.arm_push, 340 + self.push_up, 410 + self.push_up): self.sleeve_variable[6],
+            (570 + self.arm_push, 580, 340 + self.push_up, 410 + self.push_up): self.sleeve_variable[6],
+            (540 + self.arm_push, 570, 340 + self.push_up, 410 + self.push_up): self.sleeve_variable[7],
+
+            (540 + self.arm_push, 570, 410 + self.push_up, 420 + self.push_up): self.sleeve_variable[6]
+
+
         }
         self.ARM_RIGHT = {
             (670 - self.arm_push, 700 - self.arm_push, 270 + self.push_up, 280 + self.push_up): (0, 0, 0, 255),
@@ -1228,8 +1237,16 @@ class CharacterData:
             (710 - self.arm_push, 720 - self.arm_push, 310 + self.push_up, 390 + self.push_up + self.arm_raise[1]): (0, 0, 0, 255),
             # outside black line of arm
 
-            (
-            680, 710 - self.arm_push, 390 + self.push_up + self.arm_raise[1], 400 + self.push_up + self.arm_raise[1]): (0, 0, 0, 255),
+            (680, 710 - self.arm_push, 390 + self.push_up + self.arm_raise[1], 400 + self.push_up + self.arm_raise[1]): (0, 0, 0, 255),
+
+            (710 - self.arm_push, 720 - self.arm_push, 360 + self.push_up, 410 + self.push_up + self.arm_raise[1]): self.sleeve_variable[6],
+            (670 + self.arm_push, 710 - self.arm_push, 360 + self.push_up, 410 + self.push_up + self.arm_raise[1]): self.sleeve_variable[7],
+            (670 + self.arm_push, 680 - self.arm_push, 360 + self.push_up, 410 + self.push_up + self.arm_raise[1]): self.sleeve_variable[6],
+
+
+            (680, 710 - self.arm_push, 410 + self.push_up, 420 + self.push_up + self.arm_raise[1]): self.sleeve_variable[6]
+
+
             # end of arm black
         }
 
@@ -1260,6 +1277,9 @@ class CharacterData:
             (640, 650, 300 + self.push_up, 400 + self.push_up): (0, 0, 0, 255),
 
             (600, 650, 400 + self.push_up, 410 + self.push_up): (0, 0, 0, 255),
+
+            (610, 640, 360 + self.push_up, 410 + self.push_up): self.sleeve_variable[7],
+            (600, 650, 410 + self.push_up, 420 + self.push_up): self.sleeve_variable[6],
 
         }
 
@@ -1310,7 +1330,42 @@ class CharacterData:
             (570, 580, 380 + self.push_up, 390 + self.push_up): self.front_skin_color,
             (580, 590, 380 + self.push_up, 390 + self.push_up): (0, 0, 0, 255),
 
-            (570, 580, 390 + self.push_up, 400 + self.push_up): (0, 0, 0, 255),
+            (570, 580, 390 + self.push_up, 400 + self.push_up): (0, 0, 0, 255), # idk hand
+
+            (560, 610, 350 + self.push_up, 360 + self.push_up): self.sleeve_variable[8], # front hand
+
+            (550, 600, 360 + self.push_up, 370 + self.push_up): self.sleeve_variable[8], # front hand
+
+            (540, 550, 370 + self.push_up, 380 + self.push_up): self.sleeve_variable[6], # front hand
+            (550, 560, 370 + self.push_up, 380 + self.push_up): self.sleeve_variable[9], # front hand
+            (560, 590, 370 + self.push_up, 380 + self.push_up): self.sleeve_variable[8], # front hand
+
+            (540, 550, 380 + self.push_up, 390 + self.push_up): self.sleeve_variable[6], # front hand
+            (550, 560, 380 + self.push_up, 390 + self.push_up): self.sleeve_variable[7], # front hand
+            (560, 570, 380 + self.push_up, 390 + self.push_up): self.sleeve_variable[9], # front hand
+            (570, 580, 380 + self.push_up, 390 + self.push_up): self.sleeve_variable[8], # front hand
+
+            (550, 570, 390 + self.push_up, 400 + self.push_up): self.sleeve_variable[6], # front hand
+            (570, 580, 390 + self.push_up, 400 + self.push_up): self.sleeve_variable[10], # front hand
+
+
+            (670, 690, 350 + self.push_up, 360 + self.push_up): self.sleeve_variable[11],# back hand 4: shirt color others: skin2 color
+
+            (660, 700, 360 + self.push_up, 370 + self.push_up): self.sleeve_variable[11],# back hand 4: shirt color others: skin2 color
+
+            (660, 690, 370 + self.push_up, 380 + self.push_up): self.sleeve_variable[11], # back hand 4: shirt color others: skin2 color
+            (690, 700, 370 + self.push_up, 380 + self.push_up): self.sleeve_variable[9], # back hand 4: shirt color others: black
+            (700, 710, 370 + self.push_up, 380 + self.push_up): self.sleeve_variable[6], # back hand 4: black others: seethrough
+
+            (670, 680, 380 + self.push_up, 390 + self.push_up): self.sleeve_variable[11], # back hand 4: shirt color others: skin2 color
+            (680, 690, 380 + self.push_up, 390 + self.push_up): self.sleeve_variable[9], # back hand 4: shirt color others: black
+            (690, 700, 380 + self.push_up, 390 + self.push_up): self.sleeve_variable[7], # back hand 4: shirt color others: seethrough
+            (700, 710, 380 + self.push_up, 390 + self.push_up): self.sleeve_variable[6], # back hand 4: black others: seethrough
+
+            (680, 710, 390 + self.push_up, 400 + self.push_up): self.sleeve_variable[6], # back hand
+
+
+
 
         }
         self.SIDE_HAND_WALKB = {
@@ -1361,6 +1416,18 @@ class CharacterData:
         (680, 690, 380 + self.push_up, 390 + self.push_up): (0, 0, 0, 255),
 
         (670, 680, 390 + self.push_up, 400 + self.push_up): (0, 0, 0, 255),
+
+        (640, 690, 350 + self.push_up, 360 + self.push_up): self.sleeve_variable[11],
+
+        (650, 700, 360 + self.push_up, 370 + self.push_up): self.sleeve_variable[11],
+
+        (660, 690, 370 + self.push_up, 380 + self.push_up): self.sleeve_variable[11],
+        (690, 700, 370 + self.push_up, 380 + self.push_up): self.sleeve_variable[9],
+
+        (670, 680, 380 + self.push_up, 390 + self.push_up): self.sleeve_variable[11],
+        (680, 690, 380 + self.push_up, 390 + self.push_up): self.sleeve_variable[9],
+
+
         }
 
         if I.TD.Appearance != {}:
@@ -1525,6 +1592,114 @@ class CharacterData:
                     return [self.HEAD, self.ELF_EAR_TIPS, self.CHEST,self.EYES, self.SMILE_HAPPY,self.ARM_LEFT,
                             self.ARM_RIGHT, self.LEG_LEFT, self.LEG_RIGHT,self.FOOT_LEFT, self.FOOT_RIGHT]
         else:
+            # clothing_dict = {
+            #     "Human": {
+            #         "Boy": {
+            #             "Front": [
+            #                 self.HEAD, self.CHEST, self.EYES, self.SMILE_HAPPY, self.ARM_LEFT,
+            #                 self.ARM_RIGHT, self.FOOT_LEFT,self.FOOT_RIGHT, self.LEG_LEFT, self.LEG_RIGHT, self.HAIR
+            #             ],
+            #             "Back": [
+            #                 self.HEAD, self.CHEST, self.ARM_LEFT,self.ARM_RIGHT, self.FOOT_LEFT,self.FOOT_RIGHT,
+            #                 self.LEG_LEFT, self.LEG_RIGHT,self.HAIR
+            #             ],
+            #             "Left": {
+            #                 1: [self.HEAD, self.LEFT_SMILE, self.LEFT_EYE, self.SIDE_HAND_WALKB, self.LEFT_LEGF, self.SIDE_CHEST, self.LEFT_LEGB, self.SIDE_HAND_WALKF, self.HAIR],
+            #                 2: [self.HEAD, self.LEFT_SMILE, self.LEFT_EYE, self.SIDE_HAND_WALKF, self.LEFT_LEGB, self.SIDE_CHEST, self.LEFT_LEGF, self.SIDE_HAND_WALKB, self.HAIR],
+            #                 0: [self.HEAD, self.LEFT_SMILE, self.LEFT_EYE, self.SIDE_CHEST, self.SIDE_LEGS, self.LEFT_SHOE, self.SIDE_HAND, self.HAIR]
+            #             },
+            #             "Right": {
+            #                 1: [self.HEAD, self.RIGHT_EYE, self.RIGHT_SMILE, self.SIDE_HAND_WALKB, self.LEFT_LEGF, self.SIDE_CHEST, self.SIDE_HAND_WALKF, self.LEFT_LEGB, self.HAIR],
+            #                 2: [self.HEAD, self.RIGHT_EYE, self.RIGHT_SMILE, self.SIDE_HAND_WALKF, self.LEFT_LEGB, self.SIDE_CHEST, self.SIDE_HAND_WALKB, self.LEFT_LEGF, self.HAIR],
+            #                 0: [self.HEAD, self.RIGHT_EYE, self.RIGHT_SMILE, self.SIDE_CHEST, self.SIDE_LEGS, self.RIGHT_SHOE, self.SIDE_HAND, self.HAIR]
+            #             }
+            #         },
+            #         "Girl": {
+            #             "Front": [
+            #                 self.HEAD, self.CHEST,self.EYES, self.SMILE_HAPPY, self.ARM_LEFT, self.ARM_RIGHT,
+            #                 self.FOOT_LEFT, self.FOOT_RIGHT, self.LEG_LEFT, self.LEG_RIGHT, self.HAIR
+            #             ],
+            #             "Back": [
+            #                 self.HEAD, self.CHEST,self.ARM_LEFT,self.ARM_RIGHT, self.FOOT_LEFT, self.FOOT_RIGHT,
+            #                 self.LEG_LEFT, self.LEG_RIGHT, self.HAIR
+            #             ],
+            #             "Left": {
+            #                 1: [self.HEAD, self.LEFT_EYE, self.LEFT_SMILE, self.SIDE_HAND_WALKB, self.LEFT_LEGF,
+            #                         self.SIDE_CHEST, self.SIDE_HAND_WALKF, self.LEFT_LEGB, self.HAIR],
+            #                 2: [self.HEAD, self.LEFT_EYE, self.LEFT_SMILE, self.SIDE_HAND_WALKF, self.LEFT_LEGB,
+            #                         self.SIDE_CHEST, self.SIDE_HAND_WALKB, self.LEFT_LEGF, self.HAIR],
+            #                 0: [ self.HEAD, self.LEFT_SMILE, self.LEFT_EYE, self.SIDE_CHEST, self.SIDE_LEGS, self.LEFT_SHOE, self.SIDE_HAND, self.HAIR]
+            #             },
+            #             "Right": {
+            #                 1: [self.HEAD, self.RIGHT_EYE, self.RIGHT_SMILE, self.SIDE_HAND_WALKB, self.LEFT_LEGF,
+            #                         self.SIDE_CHEST, self.SIDE_HAND_WALKF, self.LEFT_LEGB, self.HAIR],
+            #                 2: [self.HEAD, self.RIGHT_EYE, self.RIGHT_SMILE, self.SIDE_HAND_WALKF, self.LEFT_LEGB,
+            #                         self.SIDE_CHEST, self.SIDE_HAND_WALKB, self.LEFT_LEGF, self.HAIR],
+            #                 0: [self.HEAD, self.RIGHT_EYE, self.RIGHT_SMILE, self.SIDE_CHEST, self.SIDE_LEGS, self.RIGHT_SHOE, self.SIDE_HAND, self.HAIR]
+            #             }
+            #         }
+            #     },
+            #     "Elf": {
+            #         "Boy": {
+            #             "Front": [
+            #                 self.HEAD,  self.CHEST, self.EYES, self.SMILE_HAPPY, self.ARM_LEFT,
+            #                 self.ARM_RIGHT, self.FOOT_LEFT,self.FOOT_RIGHT, self.LEG_LEFT, self.LEG_RIGHT, self.HAIR, self.ELF_EAR_TIPS
+            #             ],
+            #             "Back": [
+            #                 self.HEAD,  self.CHEST, self.ARM_LEFT,
+            #                 self.ARM_RIGHT, self.FOOT_LEFT,self.FOOT_RIGHT, self.LEG_LEFT, self.LEG_RIGHT, self.HAIR, self.ELF_EAR_TIPS
+            #             ],
+            #             "Left": {
+            #                 1: [self.HEAD, self.LEFT_SMILE,self.LEFT_EYE, self.SIDE_HAND_WALKB, self.LEFT_LEGF,
+            #                         self.SIDE_CHEST, self.SIDE_HAND_WALKF, self.LEFT_LEGB, self.HAIR, self.LEFT_ELF_EAR_TIPS],
+            #                 2: [self.HEAD, self.LEFT_SMILE,self.LEFT_EYE, self.SIDE_HAND_WALKF, self.LEFT_LEGB,
+            #                         self.SIDE_CHEST, self.SIDE_HAND_WALKB, self.LEFT_LEGF, self.HAIR, self.LEFT_ELF_EAR_TIPS],
+            #                 0: [self.HEAD, self.LEFT_SMILE, self.LEFT_EYE, self.SIDE_CHEST, self.SIDE_LEGS,
+            #                         self.LEFT_SHOE, self.SIDE_HAND, self.HAIR, self.LEFT_ELF_EAR_TIPS]
+            #             },
+            #             "Right": {
+            #                 1: [self.HEAD, self.RIGHT_EYE,
+            #                         self.RIGHT_SMILE, self.SIDE_HAND_WALKB, self.LEFT_LEGF, self.SIDE_CHEST,
+            #                         self.SIDE_HAND_WALKF, self.LEFT_LEGB, self.HAIR, self.RIGHT_ELF_EAR_TIPS],
+            #                 2: [self.HEAD, self.RIGHT_EYE,
+            #                         self.RIGHT_SMILE, self.SIDE_HAND_WALKF, self.LEFT_LEGB, self.SIDE_CHEST,
+            #                         self.SIDE_HAND_WALKB, self.LEFT_LEGF, self.HAIR, self.RIGHT_ELF_EAR_TIPS],
+            #                 0: [self.HEAD, self.RIGHT_EYE,
+            #                         self.RIGHT_SMILE, self.SIDE_CHEST, self.SIDE_LEGS, self.RIGHT_SHOE, self.SIDE_HAND, self.HAIR, self.RIGHT_ELF_EAR_TIPS]
+            #             }
+            #         },
+            #         "Girl": {
+            #             "Front": [
+            #                 self.HEAD, self.CHEST,self.EYES, self.SMILE_HAPPY,self.ARM_LEFT,
+            #                 self.ARM_RIGHT, self.FOOT_LEFT, self.FOOT_RIGHT, self.LEG_LEFT, self.LEG_RIGHT, self.HAIR, self.ELF_EAR_TIPS
+            #             ],
+            #             "Back": [
+            #                 self.HEAD, self.CHEST,self.ARM_LEFT, self.ARM_RIGHT,
+            #                 self.FOOT_LEFT, self.FOOT_RIGHT, self.LEG_LEFT,self.LEG_RIGHT, self.HAIR, self.ELF_EAR_TIPS
+            #             ],
+            #             "Left": {
+            #                 1: [self.HEAD, self.LEFT_SMILE, self.LEFT_EYE, self.SIDE_HAND_WALKB, self.LEFT_LEGF,
+            #                         self.SIDE_CHEST, self.SIDE_HAND_WALKF, self.LEFT_LEGB, self.HAIR, self.LEFT_ELF_EAR_TIPS],
+            #                 2: [self.HEAD, self.LEFT_SMILE, self.LEFT_EYE, self.SIDE_HAND_WALKF, self.LEFT_LEGB,
+            #                         self.SIDE_CHEST, self.SIDE_HAND_WALKB, self.LEFT_LEGF, self.HAIR, self.LEFT_ELF_EAR_TIPS],
+            #                 0: [self.HEAD, self.LEFT_SMILE, self.LEFT_EYE, self.SIDE_CHEST, self.SIDE_LEGS,
+            #                         self.LEFT_SHOE, self.SIDE_HAND, self.HAIR, self.LEFT_ELF_EAR_TIPS]
+            #             },
+            #             "Right": {
+            #                 1: [self.HEAD, self.RIGHT_SMILE, self.RIGHT_EYE, self.SIDE_HAND_WALKB, self.LEFT_LEGF,
+            #                         self.SIDE_CHEST, self.SIDE_HAND_WALKF, self.LEFT_LEGB, self.HAIR, self.RIGHT_ELF_EAR_TIPS],
+            #                 2: [self.HEAD, self.RIGHT_SMILE, self.RIGHT_EYE, self.SIDE_HAND_WALKF, self.LEFT_LEGB,
+            #                         self.SIDE_CHEST, self.SIDE_HAND_WALKB, self.LEFT_LEGF, self.HAIR, self.RIGHT_ELF_EAR_TIPS],
+            #                 0: [self.HEAD, self.RIGHT_SMILE, self.RIGHT_EYE, self.SIDE_CHEST, self.SIDE_LEGS,
+            #                         self.RIGHT_SHOE, self.SIDE_HAND, self.HAIR, self.RIGHT_ELF_EAR_TIPS]
+            #             }
+            #         }
+            #     }
+            # }
+            # if self.orientation in ["Left", "Right"]:
+            #     print(clothing_dict[self.race][self.gender][self.orientation][self.walking])
+            # else:
+            #     print(clothing_dict[self.race][self.gender][self.orientation])
         # print("eye color: ", self.eye_color)
             if self.race == "Human":
                 if self.gender == "Boy":
@@ -1596,13 +1771,16 @@ class CharacterData:
                     elif self.orientation == "Left":
                         if self.walking == 1:
                             # return [self.LEFT_LEGF]
-                            return [self.HEAD, self.LEFT_SMILE,self.LEFT_EYE, self.SIDE_HAND_WALKB, self.LEFT_LEGF, self.SIDE_CHEST, self.SIDE_HAND_WALKF, self.LEFT_LEGB, self.HAIR, self.LEFT_ELF_EAR_TIPS]
+                            return [self.HEAD, self.LEFT_SMILE,self.LEFT_EYE, self.SIDE_HAND_WALKB, self.LEFT_LEGF,
+                                    self.SIDE_CHEST, self.SIDE_HAND_WALKF, self.LEFT_LEGB, self.HAIR, self.LEFT_ELF_EAR_TIPS]
                         elif self.walking == 2:
                             # return [self.LEFT_LEGF]
-                            return [self.HEAD, self.LEFT_SMILE,self.LEFT_EYE, self.SIDE_HAND_WALKF, self.LEFT_LEGB, self.SIDE_CHEST, self.SIDE_HAND_WALKB, self.LEFT_LEGF, self.HAIR, self.LEFT_ELF_EAR_TIPS]
+                            return [self.HEAD, self.LEFT_SMILE,self.LEFT_EYE, self.SIDE_HAND_WALKF, self.LEFT_LEGB,
+                                    self.SIDE_CHEST, self.SIDE_HAND_WALKB, self.LEFT_LEGF, self.HAIR, self.LEFT_ELF_EAR_TIPS]
                         else:
                             # return [self.LEFT_LEGF]
-                            return [self.HEAD, self.LEFT_SMILE, self.LEFT_EYE, self.SIDE_CHEST, self.SIDE_LEGS, self.LEFT_SHOE, self.SIDE_HAND, self.HAIR, self.LEFT_ELF_EAR_TIPS,]
+                            return [self.HEAD, self.LEFT_SMILE, self.LEFT_EYE, self.SIDE_CHEST, self.SIDE_LEGS,
+                                    self.LEFT_SHOE, self.SIDE_HAND, self.HAIR, self.LEFT_ELF_EAR_TIPS]
                     elif self.orientation == "Right":
                         if self.walking == 1:
                             return [self.HEAD, self.RIGHT_EYE,
@@ -1628,16 +1806,22 @@ class CharacterData:
                         ]
                     elif self.orientation == "Left":
                         if self.walking == 1:
-                            return [self.HEAD, self.LEFT_SMILE, self.LEFT_EYE, self.SIDE_HAND_WALKB, self.LEFT_LEGF, self.SIDE_CHEST, self.SIDE_HAND_WALKF, self.LEFT_LEGB, self.HAIR, self.LEFT_ELF_EAR_TIPS]
+                            return [self.HEAD, self.LEFT_SMILE, self.LEFT_EYE, self.SIDE_HAND_WALKB, self.LEFT_LEGF,
+                                    self.SIDE_CHEST, self.SIDE_HAND_WALKF, self.LEFT_LEGB, self.HAIR, self.LEFT_ELF_EAR_TIPS]
                         elif self.walking == 2:
-                            return [self.HEAD, self.LEFT_SMILE, self.LEFT_EYE, self.SIDE_HAND_WALKF, self.LEFT_LEGB, self.SIDE_CHEST, self.SIDE_HAND_WALKB, self.LEFT_LEGF, self.HAIR, self.LEFT_ELF_EAR_TIPS]
+                            return [self.HEAD, self.LEFT_SMILE, self.LEFT_EYE, self.SIDE_HAND_WALKF, self.LEFT_LEGB,
+                                    self.SIDE_CHEST, self.SIDE_HAND_WALKB, self.LEFT_LEGF, self.HAIR, self.LEFT_ELF_EAR_TIPS]
                         else:
-                            return [self.HEAD, self.LEFT_SMILE, self.LEFT_EYE, self.SIDE_CHEST, self.SIDE_LEGS, self.LEFT_SHOE, self.SIDE_HAND, self.HAIR, self.LEFT_ELF_EAR_TIPS]
+                            return [self.HEAD, self.LEFT_SMILE, self.LEFT_EYE, self.SIDE_CHEST, self.SIDE_LEGS,
+                                    self.LEFT_SHOE, self.SIDE_HAND, self.HAIR, self.LEFT_ELF_EAR_TIPS]
                     elif self.orientation == "Right":
                         if self.walking == 1:
-                            return [self.HEAD, self.RIGHT_SMILE, self.RIGHT_EYE, self.SIDE_HAND_WALKB, self.LEFT_LEGF, self.SIDE_CHEST, self.SIDE_HAND_WALKF, self.LEFT_LEGB, self.HAIR, self.RIGHT_ELF_EAR_TIPS]
+                            return [self.HEAD, self.RIGHT_SMILE, self.RIGHT_EYE, self.SIDE_HAND_WALKB, self.LEFT_LEGF,
+                                    self.SIDE_CHEST, self.SIDE_HAND_WALKF, self.LEFT_LEGB, self.HAIR, self.RIGHT_ELF_EAR_TIPS]
                         elif self.walking == 2:
-                            return [self.HEAD, self.RIGHT_SMILE, self.RIGHT_EYE, self.SIDE_HAND_WALKF, self.LEFT_LEGB, self.SIDE_CHEST, self.SIDE_HAND_WALKB, self.LEFT_LEGF, self.HAIR, self.RIGHT_ELF_EAR_TIPS]
+                            return [self.HEAD, self.RIGHT_SMILE, self.RIGHT_EYE, self.SIDE_HAND_WALKF, self.LEFT_LEGB,
+                                    self.SIDE_CHEST, self.SIDE_HAND_WALKB, self.LEFT_LEGF, self.HAIR, self.RIGHT_ELF_EAR_TIPS]
                         else:
-                            return [self.HEAD, self.RIGHT_SMILE, self.RIGHT_EYE, self.SIDE_CHEST, self.SIDE_LEGS, self.RIGHT_SHOE, self.SIDE_HAND, self.HAIR, self.RIGHT_ELF_EAR_TIPS]
+                            return [self.HEAD, self.RIGHT_SMILE, self.RIGHT_EYE, self.SIDE_CHEST, self.SIDE_LEGS,
+                                    self.RIGHT_SHOE, self.SIDE_HAND, self.HAIR, self.RIGHT_ELF_EAR_TIPS]
             # return []

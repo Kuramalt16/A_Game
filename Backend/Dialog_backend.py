@@ -29,16 +29,16 @@ def check_quest_completion(id=None):
         if id != None and I.info.QUESTS[id] == quest:
             return remainder
 
-def init_dialog(name, player, screen, npc, items, decorations, data, gifs, rooms, clock, spells):
-    dim_surface = I.pg.Surface((S.SCREEN_WIDTH, S.SCREEN_HEIGHT), I.pg.SRCALPHA)
-    dim_surface.fill((0, 0, 0, 180))
-    screen.blit(dim_surface, (0, 0))
+def init_dialog(name, player, screen, npc, items, decorations, data, gifs, rooms, clock, spells, mobs):
+    # dim_surface = I.pg.Surface((S.SCREEN_WIDTH, S.SCREEN_HEIGHT), I.pg.SRCALPHA)
+    # dim_surface.fill((0, 0, 0, 180))
+    # screen.blit(dim_surface, (0, 0))
     dialog_obj = npc[name]["dialog"]
     I.QB.handle_meet_quests(name, player)
     dialog_obj.name = name
     check_quest_completion()
-    handle_sign_display(screen, dialog_obj, player, items, decorations, data, gifs)
-    handle_dialog_outcome(dialog_obj, player, screen, items, npc, rooms, clock, data, spells)
+    handle_text_display(screen, dialog_obj, player, items, decorations, data, gifs)
+    handle_dialog_outcome(dialog_obj, player, screen, items, npc, rooms, clock, data, spells, decorations, mobs, name, gifs)
 
     dialog_obj.conv_key = "Start"
 
@@ -92,7 +92,7 @@ def handle_functions_in_text(text, response, dialog, screen, items, decorations,
             rand_addon = str(I.random.randint(0, 1))
             dialog.conv_key = dialog.conv_key.split("|")[0] + "-" + rand_addon
             dialog.data = (None, None, None, None)
-            handle_sign_display(screen, dialog, data["Player"], items, decorations, data, gifs)
+            handle_text_display(screen, dialog, data["Player"], items, decorations, data, gifs)
             running = False
         elif dialog.data[0] == "Crime":
             if dialog.data[1] == "PayFine":
@@ -135,7 +135,7 @@ def handle_functions_in_text(text, response, dialog, screen, items, decorations,
 
     return text, response, running
 
-def handle_sign_display(screen, dialog, player, items, decorations, data, gifs):
+def handle_text_display(screen, dialog, player, items, decorations, data, gifs):
     # print(dialog.type, dialog.data, dialog.conv_key)
     # print("Name: id: ",dialog.name, dialog.iteration)
     text = dialog.get_text()
@@ -159,7 +159,11 @@ def handle_sign_display(screen, dialog, player, items, decorations, data, gifs):
                 if a > len(text):
                     running = False
                     dialog.conv_key = response[1]
-                    dialog.friendlyness += int(response[1].split("|")[1]) # CRASH DETECTED
+                    # print("Friendlyness, response: ", dialog.friendlyness, response)
+                    if response[1] != '':
+                        dialog.friendlyness += int(response[1].split("|")[1]) # CRASH DETECTED
+                    else:
+                        dialog.friendlyness += int(response[0].split("|")[1]) # CRASH DETECTED
             if event.type == I.pg.KEYDOWN and event.key == I.pg.K_c:
                 if a > len(text):
                     running = False
@@ -167,15 +171,16 @@ def handle_sign_display(screen, dialog, player, items, decorations, data, gifs):
                     if response[0] != "": # when talking to a sign there are no responses
                         dialog.friendlyness += int(response[0].split("|")[1])
             if event.type == I.pg.KEYDOWN and event.key == I.pg.K_z:
-                for i in range(20):
+                for i in range(100):
                     if a + i >= len(text):
+                        a += i
                         break
                     else:
                         if text[a + i] == "\n":
                             a += i
                             break
                 else:
-                     a += 20
+                     a += 100
 
         if not a > len(text) and text[a-1] == "\n":
             collumn += 20
@@ -199,9 +204,9 @@ def handle_sign_display(screen, dialog, player, items, decorations, data, gifs):
 
     if not running:
         if not dialog.has_conversation_ended():
-            handle_sign_display(screen, dialog, player, items, decorations, data, gifs)
+            handle_text_display(screen, dialog, player, items, decorations, data, gifs)
 
-def handle_dialog_outcome(dialog, player, screen, items, npc, rooms, clock, data, spells):
+def handle_dialog_outcome(dialog, player, screen, items, npc, rooms, clock, data, spells, decorations, mobs, name, gifs):
     if dialog.data != (None, None, None, None):
         if "quest" in dialog.data[0]:
             giver = dialog.data[1].replace("GIVER:", "")
@@ -216,7 +221,13 @@ def handle_dialog_outcome(dialog, player, screen, items, npc, rooms, clock, data
                 dialog.iteration = 0
                 dialog.data = (None, None, None, None)
             elif "questcomplete" in dialog.data[0]:
+                I.A.QUEST_SHOW_MARKS = {}
                 I.QB.handle_completed_quest_dialog(player, dialog)
+                old_iteration = dialog.iteration
+                dialog.select_id()
+                if old_iteration != dialog.iteration:
+                    dialog.conv_key = "Start"
+                    init_dialog(name, player, screen, npc, items, decorations, data, gifs, rooms, clock, spells, mobs)
             else:
                 I.QB.get_quest_dict(npc[giver]["quest"].split(",,,")[int(iteration)], giver) # QUESTS GET ASSIGNED HERE
                 check_quest_completion()
@@ -243,23 +254,13 @@ def handle_dialog_outcome(dialog, player, screen, items, npc, rooms, clock, data
                     Ff.add_to_backpack(name, amount, items)
                 dialog.data = (None, None, None, None)
         elif "Crime" in dialog.data[0]:
-            # if "Assault" in dialog.data[1]:
-            #     I.info.CRIMINAL["Fine"] = 50
-            #     I.info.CRIMINAL["Prison_time"] = 360
-            #     I.info.CRIMINAL["Charge"] = dialog.data[1]
-
-            # elif "Abuse" in dialog.data[1]:
-            #     I.info.CRIMINAL["Fine"] = 10
-            #     I.info.CRIMINAL["Prison_time"] = 60
-            #     I.info.CRIMINAL["Charge"] = dialog.data[1]
-
             if "PayFine" in dialog.data[1]:
                 if "Gold" in dialog.data[2]:
                     player["Gold"] -= int(I.info.CRIMINAL["Fine"])
                     I.GB.reset_criminal_record(dialog)
                 if "Time" in dialog.data[2]:
                     I.GB.reset_criminal_record(dialog)
-
+                    I.GB.restore_guard_decor(rooms)
                     rooms.select_room("Village_10_10")
                     I.info.CURRENT_ROOM = {"name": "Village_10_10", "Spells": True, "Backpack": True, "Running": True, "Mobs": rooms.mobs, "Type": rooms.type}
                     I.info.ENTRY_POS = (330, 50)
@@ -267,9 +268,8 @@ def handle_dialog_outcome(dialog, player, screen, items, npc, rooms, clock, data
                     I.PB.update_character_stats('static/data/created_characters/' + I.info.SELECTED_CHARACTER + "/" + I.info.SELECTED_CHARACTER + ".txt", data["Player"], spells.selected_spell, npc)
                     # Play.Start(screen, clock, rooms)
                     I.info.RESET = True
-
-
             elif "Prison" in dialog.data[1]:
+                I.GB.restore_guard_decor(rooms)
                 rooms.select_room("Prison1")
                 I.info.CURRENT_ROOM = {"name": "Prison1", "Spells": True, "Backpack": True, "Running": True, "Mobs": rooms.mobs, "Type": rooms.type}
                 I.info.ENTRY_POS = (1, 1)

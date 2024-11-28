@@ -43,6 +43,7 @@ class Dialog():
         if key == "Funds":
             self.iteration = "0"
             id = "0"
+        # print(key, id)
         # print("text: ", self.text[key + str(id)])
 
         text = self.text[key + str(id)]
@@ -121,8 +122,8 @@ class Dialog():
                         self.iteration = 9
                     elif any(completed_quest["TYPE"] == "Tutorial" and completed_quest["ACTION"] == "EAT" for completed_quest in I.info.COMPLETED_QUESTS) and self.iteration == 9:
                         self.iteration = 10
-                    elif self.iteration == 10:
-                        self.iteration = 11
+                    # elif self.iteration == 10:
+                    #     self.iteration = 11
                 else:
                     self.iteration = 11
         elif self.name == "Castle_Guard":
@@ -147,6 +148,7 @@ class Dialog():
         self.select_id()
         id = self.iteration
         key = self.conv_key.split("|")[0]
+        # print("check if continue: ", key + str(id), self.text.keys())
         # print("dictionary: ", self.text)
         # print("list of posible responses: ", list(self.text.keys()))
         # print("has conv ended key: ",key + str(id))

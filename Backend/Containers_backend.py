@@ -54,7 +54,7 @@ def handle_containers(container_name, container_size, items, screen, player, dec
                     else:
                         # print("if selected is not 0: ", selected)
                         if pickup[0] != 0 and pickup[0] != None:
-                            remove_from_container = handle_container_backpack_switching(pickup, selected, container_name, id, block, items, rooms)
+                            remove_from_container = handle_container_backpack_switching(pickup, selected, container_name, id, block, items, rooms, container_size)
                         pickup = (0, 0, 0)
                         selected = 0
                 elif event.key == I.pg.K_UP:
@@ -88,16 +88,18 @@ def handle_containers(container_name, container_size, items, screen, player, dec
                         pickup = (Ff.find_item_by_slot(block[0], block[1]), block[0], block[1])
                         new_block = (-2, 0)
                         cancel = False
-                        for key, value in I.info.CONTAINERS[rooms.name].items():
-                            for sub_key, sub_value in value.items():
-                                if new_block == sub_key:
+                        for key_cont_name, value in I.info.CONTAINERS[rooms.name].items():
+                            for sub_key_possision, sub_value in value.items():
+                                # print(sub_key_possision, new_block)
+                                if new_block == sub_key_possision:
+
                                     new_block = new_block[0] - 2, new_block[1]
                                     if new_block[0] < -2 - container_size[1]:  # handles switching to lower container levels (Y axis)
                                         new_block = -2, new_block[1] + 2
                                         if new_block[1] > container_size[0] * 2 - 2: # Handles not overfilling the container. if the new block Y pos is higher than the size of container multiplied by 2 ( block format is in twos) and removed -2 (block format starts from 0) then dont add
                                             cancel = True
                         if not cancel and pickup[0] != None:
-                            handle_container_storage(pickup[0], container_name, new_block, id, selected, rooms)
+                            handle_container_storage(pickup[0], container_name, new_block, id, selected, rooms, container_size)
 
 
                     selected = 0
@@ -183,7 +185,7 @@ def get_container_block(input_tuple, size_tuple):
 
     return int(output2), int(output1)
 
-def handle_container_storage(item_name, container, possision, id, rect, rooms):
+def handle_container_storage(item_name, container, possision, id, rect, rooms, container_size):
     if I.info.CONTAINERS.get(rooms.name) == None:
         I.info.CONTAINERS[rooms.name] = {}
 
@@ -191,8 +193,7 @@ def handle_container_storage(item_name, container, possision, id, rect, rooms):
         # print("first")
         # THIS MEANS NO DATA ABOUT THIS CONTAINER EXISTS
         I.info.CONTAINERS[rooms.name][container, id] = {
-            possision: (item_name, 1)
-                                            }
+            possision: (item_name, 1)}
     else:
         # THIS MEANS CONTAINER WAS ALREADY MADE AND WE CAN NOW ADD EXTRA ITEMS TO IT
         if I.info.CONTAINERS[rooms.name][container, id].get(possision) == None:
@@ -201,8 +202,19 @@ def handle_container_storage(item_name, container, possision, id, rect, rooms):
             I.info.CONTAINERS[rooms.name][container, id][possision] = item_name, 1
         else:
             # pass
-            print("item already exists here need to skip to another location in container")
-
+            if len(list(I.info.CONTAINERS[rooms.name][container, id].keys())) >= container_size[0] * container_size[1]:
+                print("container already full")
+            else:
+                break_loop = False
+                for vertic in range(0, container_size[0]):
+                    for horiz in range(1, container_size[1] + 1):
+                        if I.info.CONTAINERS[rooms.name][container, id].get((horiz * -2, vertic * 2)) == None:
+                            I.info.CONTAINERS[rooms.name][container, id][(horiz * -2, vertic * 2)] = item_name, 1
+                            Ff.remove_from_backpack(item_name, 1)
+                            break_loop = True
+                            break
+                    if break_loop:
+                        break
             rect = 10, 800
             # THIS MEANS AN ITEM ALREADY EXISTS HERE
             # old_item = I.info.CONTAINERS[rooms.name][container, id][possision]
@@ -215,7 +227,7 @@ def handle_container_storage(item_name, container, possision, id, rect, rooms):
         if I.info.BACKPACK_CONTENT[item_name][0] == 0:
             del I.info.BACKPACK_CONTENT[item_name]
 
-def handle_container_backpack_switching(pickup, selected, container_name, id, block, items, rooms):
+def handle_container_backpack_switching(pickup, selected, container_name, id, block, items, rooms, container_size):
     remove_from_container = []
 
     # HANDLE OLD POSSISION, (Delete if it's from the container, get value if its from the backpack)
@@ -248,7 +260,7 @@ def handle_container_backpack_switching(pickup, selected, container_name, id, bl
         #  IF THE SPOT WE WANT TO ASSIGN IS NOT TAKEN CONTINUE
         if block[0] < 0 and pickup[0] != None:
             # print("if the new possision is in the container:")
-            handle_container_storage(pickup[0], container_name, block, id, selected, rooms)
+            handle_container_storage(pickup[0], container_name, block, id, selected, rooms, container_size)
         else:
             # print("if the new possision is in the backpack")
             # FIRST LET's CHECK IF THE VALUE DIDN'T ALREADY EXIST:

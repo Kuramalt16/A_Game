@@ -4,6 +4,7 @@ from Values import Settings as S
 
 
 def Settings(screen):
+    screen.fill("white")
     apply = False
     cancel = False
     clicked_button = ""

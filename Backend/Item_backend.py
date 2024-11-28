@@ -18,8 +18,8 @@ def add_dropped_items_to_var(item_name:str, amount:int, rooms:classmethod, locat
             new_x = x + I.random.randint(0, 20)
             new_y = y + I.random.randint(0, 20)
         else:
-            new_x = x + I.random.randint(0, 100)
-            new_y = y + I.random.randint(0, 100)
+            new_x = x + I.random.randint(50, 100)
+            new_y = y + I.random.randint(50, 100)
         if dropped_items[rooms.name].get((new_x, new_y)) == None:
             dropped_items[rooms.name][(new_x, new_y)] = [item_name]
         else:

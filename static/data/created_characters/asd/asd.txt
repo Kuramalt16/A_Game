@@ -1,0 +1,61 @@
+Name: asd
+
+Gender: Boy
+Age: 23
+Race: Elf
+
+Eyes: (33, 150, 243, 255)
+Skin: (162, 168, 170, 255)
+Skin2: (132, 138, 160, 255)
+
+Hair: Hair_3
+Shir: Shir_5
+Pant: Pant_1
+Shoe: Shoe_2
+
+Color_Hair: (1, 128, 128, 255)
+Color_Shir: (165, 170, 0, 255)
+Color_Pant: (165, 169, 1, 255)
+Color_Shoe: (46, 151, 57, 255)
+
+Last Save: 2024/11/27 21:30
+
+
+
+Level: 1
+Experience: 0
+Health: 11
+Mana: 14
+Exhaustion: 100
+
+Gold: 5.0
+
+Alignment: Unaligned
+
+Class: Not trained
+
+Stats: {"Slashing": 0, "Bashing": 0, "Piercing": 0, "Blocking": 0, "Archery": 0, "Healing": 0, "Sorcery": 0, "Summoning": 0, "Pet handle": 0, "Botany": 3, "Smithing": 0, "Mining": 0, "Felling": 0, "Cooking": 0, "Alchemy": 0, "Fishing": 0, "Digging": 0, "Archeology": 0, "Farming": 0, "Lockpicking": 0, "Sleigh of hand": 0, "Arcane": 0, "Inlaying": 0, "Arsonist": 0}
+
+Backpack: Gold__0.4__0__0,,Light Berries__2.0__2__0,,
+
+Spells: 
+
+Dialog: Luna__0__0,,Bear__0__0,,Joseph__0__0,,Mayor__0__0,,Gwen__0__0,,Sign__0__0,,Tutorial Man__10__4,,Castle_Guard__0__0,,Rina__0__0,,
+
+Quests: []
+
+Completed_quests: [{"COMPLETION": 1, "GIVER": "Purple Wizard", "TYPE": "Tutorial", "ACTION": "WALK", "REWARD": "1 Sp", "DESC": "Press [LEFT], [RIGHT], [UP], [DOWN]"}, {"COMPLETION": 1, "GIVER": "Purple Wizard", "TYPE": "Tutorial", "ACTION": "RUN", "REWARD": "1 Sp", "DESC": "Press [LEFT], [RIGHT], [UP], [DOWN] while holding [Z]"}, {"COMPLETION": 1, "GIVER": "Purple Wizard", "TYPE": "Tutorial", "ACTION": "PUNCH", "REWARD": "1 Sp", "DESC": " Press [X] to hit"}, {"COMPLETION": 1, "GIVER": "Purple Wizard", "TYPE": "Tutorial", "ACTION": "QUEST_BACKPACK", "REWARD": "1 Sp", "DESC": " Press [Q] to open Quest Catalog \\n Press [I] to open Backpack"}, {"COMPLETION": 1, "GIVER": "Purple Wizard", "TYPE": "Tutorial", "ACTION": "EAT", "REWARD": "1 Sp", "DESC": "Collect one Light Berry from a bush by pressing [C] on it open Backpack\\nand place the berry to a diferent location with the [C] button \\neat the berry with the key [X]"}]
+
+Containers: {}
+
+Titles: 
+
+Save_point: Village_10_10:330:1:0:0
+
+DEATH_SAVE: 0
+
+Criminal: {"Charge": "", "Fine": 0, "Prison_time": 0}
+
+Map_change: {"Village_10_10": {"add": {"Bush_S_2_Harvested": {"9": [540, 160, 17, 10]}}, "remove": {"Bush_S_2": {"9": [152, 86, 17, 10]}}, "remove_gif": {"Tutorial Man": "Tutorial Man"}, "add_bypassed": {}, "gif_ended": {}, "add_effect": {}, "remove_effect": {}}}
+
+Spawn: Village_10_9:330:820:0:300

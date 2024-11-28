@@ -9,6 +9,8 @@ from Values import Settings as S
 
 def handle_appliances(items, screen, gifs, data, decorations, rooms, collide):
     appliance_name = collide[0]
+    appliance_id = collide[2]
+    appliance_rect = collide[1]
     item = I.info.EQUIPED["Sword"][0]
     item_dict = items.item_dict
     if item != 0 and len(I.info.APPLIANCE_CLICK) != 4 and appliance_name in ["Furnace", "Blast Furnace", "Potion_stand", "Melter", "Anvil"]:
@@ -44,8 +46,8 @@ def handle_appliances(items, screen, gifs, data, decorations, rooms, collide):
             Ff.display_text_player(str(item.split("|"[0].replace("0", "").replace("1",""))[0]) + " can not be smelt", 3000)
         elif appliance_name == "Potion_stand":
             if "Potion_Empty" in I.info.EQUIPED["Sword"][0] and I.info.EQUIPED["Sword"][0] not in rooms.decor:
-                rect = I.pg.Rect(decorations.decor_dict[appliance_name][0]["rect"].x + decorations.decor_dict[appliance_name][0]["rect"].w / 3, 90, 10, 20)
-                Ff.update_map_view(0, I.info.EQUIPED["Sword"][0], rect, "add", 0)
+                rect = I.pg.Rect(appliance_rect.x + appliance_rect.w / 3, appliance_rect.y, 10, 20)
+                Ff.update_map_view(appliance_id, I.info.EQUIPED["Sword"][0], rect, "add", rooms.name)
                 Ff.remove_from_backpack(I.info.EQUIPED["Sword"][0], 1)
             elif "Potion_Empty" in rooms.decor:
                 handle_potion_making(screen, items, data, decorations, rooms)
@@ -113,12 +115,14 @@ def handle_potion_making(screen, items, data, decorations, rooms):
                     potion_name = path[path_str_id:].replace(".png", "")
                     path = items.item_dict["Potion_Empty"]["path"]
                     strength = potion_strength[potion_name]
-
+                    name = items.item_dict[potion_name]["describtion"].split("\\n")[0]
+                    Ff.display_text_player("Brew: " + name, 5000)
                     Ff.add_to_backpack(potion_name, strength, items)
-
+                    data["Player"]["stats"]["Alchemy"] = data["Player"]["stats"]["Alchemy"] + 5
                     x = decorations.decor_dict["Potion_Empty"][0]["rect"].x
                     y = decorations.decor_dict["Potion_Empty"][0]["rect"].y
-                    Ff.update_map_view(0, "Potion_Empty", (x, y), "remove")
+                    Ff.update_map_view(0, "Potion_Empty", (0,0,0,0), "remove")
+                    del decorations.decor_dict["Potion_Empty"][0]
                     rooms.decor.remove("Potion_Empty")
                     running = False
                 elif event.key == I.pg.K_x:
@@ -159,11 +163,12 @@ def handle_potion_making(screen, items, data, decorations, rooms):
                                 blended_color = blended_color[0], blended_color[1], blended_color[2]
                                 color_name = Ff.get_color_by_RGB(blended_color)
                                 if color_name != -1:
-                                    potion_name = "Potion_" + color_name
+                                    potion_name = I.A.POTION_COLORS[color_name]
                                     path_str_id = path.find("Potion_")
                                     path = path[:path_str_id] + potion_name + ".png"
                                     potion_strength = {str(potion_name): 1}
-
+                                else:
+                                    print("color failed: ", blended_color)
                         else:
                             potion_name = "Potion_" + property_list[0]
                             potion_strength = {potion_name:1}
@@ -377,15 +382,19 @@ def handle_cooking_food(items, rooms, data):
             if any(char.isdigit() for char in I.info.APPLIANCE_CLICK[1]):  # if name has a number. like Meat1 or Meat0
                 I.info.APPLIANCE_CLICK[1] = I.info.APPLIANCE_CLICK[1][:-1]
             Ff.display_text_player("Cooked " + I.info.APPLIANCE_CLICK[1], 5000)
+            data["Player"]["stats"]["Cooking"] = data["Player"]["stats"]["Cooking"] + 5
+
         else:
             I.IB.add_dropped_items_to_var("Ashes", 1, rooms, (980,100), data, "decor")
             Ff.display_text_player("Burned " + I.info.APPLIANCE_CLICK[1], 3000)
+            data["Player"]["stats"]["Cooking"] = data["Player"]["stats"]["Cooking"] + 1
+
     elif I.info.APPLIANCE_CLICK[0] == "Blast Furnace":
         I.info.APPLIANCE_CLICK[0] = ""
         if I.info.APPLIANCE_CLICK[3] == "smelt":
             item = get_smelted_item(I.info.APPLIANCE_CLICK[1], items)
             I.IB.add_dropped_items_to_var(item, 1, rooms, (980,200), data, "decor")
-
+            data["Player"]["stats"]["Smithing"] = data["Player"]["stats"]["Smithing"] + 5
             Ff.display_text_player("Smelted " + I.info.APPLIANCE_CLICK[1], 5000)
         # else:
         #     Ff.display_text_player("This item can not be smelted", 5000)
@@ -395,10 +404,11 @@ def handle_cooking_food(items, rooms, data):
         I.info.APPLIANCE_CLICK[0] = ""
         if I.info.APPLIANCE_CLICK[3] == "melt":
             coordinates = decorations.decor_dict[I.info.APPLIANCE_CLICK[1].split(":")[0].split(" ")[-1]][0]["rect"]
-            Ff.update_map_view(0, I.info.APPLIANCE_CLICK[1].split(":")[0].split(" ")[-1], (coordinates.x, coordinates.y), "remove")
+            Ff.update_map_view(0, I.info.APPLIANCE_CLICK[1].split(":")[0].split(" ")[-1], (0,0,0,0), "remove")
             item = get_melted_item(I.info.APPLIANCE_CLICK[1], items)
             I.IB.add_dropped_items_to_var(I.info.APPLIANCE_CLICK[1].split(":")[0], 1, rooms, (coordinates.x,coordinates.y + 20), data, "decor")
             I.IB.add_dropped_items_to_var(item, 1, rooms, (coordinates.x,coordinates.y + 20), data, "decor")
+            data["Player"]["stats"]["Smithing"] = data["Player"]["stats"]["Smithing"] + 5
 
             Ff.display_text_player("Melted " + I.info.APPLIANCE_CLICK[1].split(":")[1], 5000)
     I.info.APPLIANCE_CLICK = [""]
@@ -508,5 +518,4 @@ def get_melted_item(item_name, items):
     melted_item = items.item_dict[casing]["Properties"][find_id:].split(",,,")[0].replace("CAST:", "")
     if item_name == "Sand":
         item_name = "Glass"
-    print(item_name + " " + melted_item)
     return item_name + " " + melted_item

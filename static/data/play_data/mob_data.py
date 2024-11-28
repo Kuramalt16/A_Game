@@ -16,11 +16,18 @@ class Mob:
         # 7 - Chaotic good, ( helps attack others )
         # 8 - Chaotic neutral, ( attacks and runs away )
         # 9 - Chaotic evil ( attacks all unprovoked )
+
+        if name not in I.info.CURRENT_ROOM["Mobs"]:
+            I.info.CURRENT_ROOM["Mobs"] += ", " + name + ":" + str(count)
+            if I.info.CURRENT_ROOM["Mobs"][0] == ",":
+                I.info.CURRENT_ROOM["Mobs"] = I.info.CURRENT_ROOM["Mobs"][1:]
+
         self.decor = decor
         self.count = (count, count)
         self.damage = damage
         self.speed = speed
         self.path = path
+        self.frame_change = False
         self.delay = delay
         list_drop = drop.split(",, ")
         self.drop = []
@@ -61,8 +68,10 @@ class Mob:
                 "image": [],  # Placeholder for the Pygame image list
                 "previous_pos": (0, 0, 0, 0),
                 "current_pos": (0, 0, 0, 0),
-                "flip": False,
-                "guard_post": 0
+                "flip": "right",
+                "guard_post": 0,
+                "target_posision": (0, 0),
+                "gifs": {}
             }
         else:
             return {
@@ -76,6 +85,7 @@ class Mob:
                 "Fire": 0,
                 "Cold": 0,
                 "Force": 0,
+                "Necrotic": 0
             },
             "decor": self.decor,
             "damage_type": "",
@@ -86,10 +96,12 @@ class Mob:
             "image": [],  # Placeholder for the Pygame image list
             "previous_pos": (0, 0, 0, 0),
             "current_pos": (0, 0, 0, 0),
-            "flip": False
+            "flip": "right",
+            "target_posision": (0, 0),
+            "gifs": {}
             }
 
-    def spawn_mobs(self, background_size, path, mob_gif_count, x1=0, y1=0):
+    def spawn_mobs(self, background_size, path, mob_gif_count, gifs, x1=0, y1=0):
         """Spawn mobs at random positions on the screen."""
         for mob in self.mobs:
             x = random.randint(0, background_size[0] - 100)
@@ -108,7 +120,14 @@ class Mob:
                 else:
                     mob["rect"].append(image.get_rect(topleft=(x, y)))
             mob["current_pos"] = mob["rect"][mob_gif_count-1]
+            if mob["target_posision"] == (0, 0):
+                mob["target_posision"] = mob["current_pos"][0:2]
             mob["previous_pos"] = mob["rect"][mob_gif_count-1]
+
+            mob["gifs"]["Fire"] = I.gifs.Gif(*gifs["Fire"].args)  # Pass required arguments to create a new instance
+            mob["gifs"]["Cold"] = I.gifs.Gif(*gifs["Cold"].args)
+            mob["gifs"]["Force"] = I.gifs.Gif(*gifs["Force"].args)
+            mob["gifs"]["Necrotic"] = I.gifs.Gif(*gifs["Necrotic"].args)
 
     def spawn_mob_acurate(self, path, mob_gif_count, id, x, y):
         for a in range(mob_gif_count):
@@ -120,63 +139,63 @@ class Mob:
         self.mobs[id]["current_pos"] = self.mobs[id]["rect"][mob_gif_count - 1]
         self.mobs[id]["previous_pos"] = self.mobs[id]["rect"][mob_gif_count - 1]
 
-    def move_mobs_randomly(self, decorations, data):
-        """Move all mobs by random offsets, avoiding and escaping collisions."""
-        for mob in self.mobs:
-            if not mob["visible"]:
-                # Randomly generate movement offsets
-                speed = mob["speed"]
-                if speed[1] == 0:
-                    mob["speed"] = speed[0], speed[0]
-                    x_offset = random.randint(-1, 1)
-                    y_offset = random.randint(-1, 1)
-                    if mob["rect"] != []:
-                        new_rect = mob["rect"][0].copy()
-                        new_rect.x += x_offset - data["Zoom_rect"].x
-                        new_rect.y += y_offset - data["Zoom_rect"].y
+    # def move_mobs_randomly(self, decorations, data):
+    #     """Move all mobs by random offsets, avoiding and escaping collisions."""
+    #     for mob in self.mobs:
+    #         if not mob["visible"]:
+    #             # Randomly generate movement offsets
+    #             speed = mob["speed"]
+    #             if speed[1] == 0:
+    #                 mob["speed"] = speed[0], speed[0]
+    #                 x_offset = random.randint(-1, 1)
+    #                 y_offset = random.randint(-1, 1)
+    #                 if mob["rect"] != []:
+    #                     new_rect = mob["rect"][0].copy()
+    #                     new_rect.x += x_offset - data["Zoom_rect"].x
+    #                     new_rect.y += y_offset - data["Zoom_rect"].y
+    #
+    #                     if not any(new_rect.colliderect(displayed_rect) for displayed_rect in decorations.displayed_rects):
+    #                         self._update_mob_position(mob, x_offset, y_offset)
+    #                     else:
+    #                         self._escape_collision(mob, decorations, data, 1)
+    #             else:
+    #                 mob["speed"] = speed[0], speed[1] - 1
+    #
+    # def _update_mob_position(self, mob, x_offset, y_offset):
+    #     """Update the mob's position by the given offsets."""
+    #
+    #     for rect in mob["rect"]:
+    #         rect.x += x_offset
+    #         rect.y += y_offset
+    #
+    #     if x_offset != 0:
+    #         mob["flip"] = x_offset < 0
+    #
+    #     mob["current_pos"] = mob["rect"][0].copy()
+    # def _escape_collision(self, mob, decorations, data, level):
+    #     """Move the mob out of any collisions."""
+    #     stuck = 0
+    #     escape_directions = [(level, 0), (-level, 0), (0, level), (0, -level)]
+    #
+    #     for x_offset, y_offset in escape_directions:
+    #         new_rect = mob["rect"][0].copy()
+    #         new_rect.x += x_offset - data["Zoom_rect"].x
+    #         new_rect.y += y_offset - data["Zoom_rect"].y
+    #
+    #         if not any(new_rect.colliderect(displayed_rect) for displayed_rect in decorations.displayed_rects):
+    #             self._update_mob_position(mob, x_offset, y_offset)
+    #             return
+    #         else:
+    #             stuck += 1
+    #     if stuck == 4:
+    #         self._escape_collision(mob, decorations, data, level + 1)
 
-                        if not any(new_rect.colliderect(displayed_rect) for displayed_rect in decorations.displayed_rects):
-                            self._update_mob_position(mob, x_offset, y_offset)
-                        else:
-                            self._escape_collision(mob, decorations, data, 1)
-                else:
-                    mob["speed"] = speed[0], speed[1] - 1
-
-    def _update_mob_position(self, mob, x_offset, y_offset):
-        """Update the mob's position by the given offsets."""
-
-        for rect in mob["rect"]:
-            rect.x += x_offset
-            rect.y += y_offset
-
-        if x_offset != 0:
-            mob["flip"] = x_offset < 0
-
-        mob["current_pos"] = mob["rect"][0].copy()
-    def _escape_collision(self, mob, decorations, data, level):
-        """Move the mob out of any collisions."""
-        stuck = 0
-        escape_directions = [(level, 0), (-level, 0), (0, level), (0, -level)]
-
-        for x_offset, y_offset in escape_directions:
-            new_rect = mob["rect"][0].copy()
-            new_rect.x += x_offset - data["Zoom_rect"].x
-            new_rect.y += y_offset - data["Zoom_rect"].y
-
-            if not any(new_rect.colliderect(displayed_rect) for displayed_rect in decorations.displayed_rects):
-                self._update_mob_position(mob, x_offset, y_offset)
-                return
-            else:
-                stuck += 1
-        if stuck == 4:
-            self._escape_collision(mob, decorations, data, level + 1)
-
-    def update_visibility(self, screen, rect, id):
-        screen_rect = screen.get_rect()
-        if rect.colliderect(screen_rect):
-            self.mobs[id]["visible"] = True
-        else:
-            self.mobs[id]["visible"] = False
+    # def update_visibility(self, screen, rect, id):
+    #     screen_rect = screen.get_rect()
+    #     if rect.colliderect(screen_rect):
+    #         self.mobs[id]["visible"] = True
+    #     else:
+    #         self.mobs[id]["visible"] = False
 
     def knockback(self, victim, spaces):
         push = {"Back": (0, -spaces),
@@ -222,6 +241,9 @@ class Mob:
                 else:
                     print("some other material staff")
             damage = weapon["damage"]
+            if "max" in damage:
+                maxId = damage.find("max")
+                damage = damage[maxId:].split(",,")[1:][0]
             damage = random.randint(int(damage.split("d")[0]), int(damage.split("d")[1])) + extra
             knockback = weapon["knockback"] + extra
             type = weapon["type"]
@@ -244,7 +266,7 @@ class Mob:
             else:
                 # choose = random.randint(0, len(victim["drop"]) - 1)
                 if victim["drop"] != 0 and victim["drop"] != []:
-                    print(victim["drop"])
+                    # print(victim["drop"])
                     amount1 = victim["drop"][0][1] if random.randint(0, victim["drop"][0][2]) == 0 else 0
                     amount2 = victim["drop"][1][1] if random.randint(0, victim["drop"][1][2]) == 0 else 0
                     I.IB.add_dropped_items_to_var(victim["drop"][0][0], amount1, rooms,(victim["rect"][0][0], victim["rect"][0][1]), data, "mob")
@@ -263,22 +285,15 @@ class Mob:
 
     def effect(self, victim, type):
         if type == "Cold":
-            duration = random.randint(1,3)
-            if victim["effect"].get(type) == None:
-                victim["effect"][type] = duration
-            else:
-                victim["effect"][type] += duration
+            duration = random.randint(2,4)
 
-        elif type == "Force":
-            victim["effect"][type] = 1
+        elif type in ["Force", "Necrotic"]:
+            duration = 1
 
         elif type == "Fire":
-            duration = random.randint(1, 2)
-            if victim["effect"].get(type) == None:
-                victim["effect"][type] = duration
-            else:
-                victim["effect"][type] += duration
-
+            duration = random.randint(2, 3)
+        if type not in ["Slashing", "Blunt", "Piercing"]:
+            victim["effect"][type] = duration
 
     def update_position(self, new_x, new_y, mob):
         mob['previous_pos'][0] = mob['current_pos'][0]
@@ -289,7 +304,7 @@ class Mob:
             rect.topleft = (new_x, new_y)
 
 def read_db():
-    db_data = Ff.read_data_from_db("mobs", ["name", "exp", "health", "allignment", "damage", "speed", "path", "delay", "drops"])
+    db_data = Ff.read_data_from_db("mobs", ["name", "exp", "health", "allignment", "damage", "speed", "path", "delay", "drops", "class"])
     db_dict = {}
     for data in db_data:
         db_dict[data[0]] = {"exp": int(data[1]),
@@ -300,5 +315,6 @@ def read_db():
                            "path": data[6],
                            "delay": int(data[7]),
                            "drop": data[8],
+                           "class": data[9]
                            }
     return db_dict

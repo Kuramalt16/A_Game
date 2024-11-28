@@ -1,0 +1,35 @@
+* DESC: Iron Bow
+* PRIORITY: LOW
+* ID: 3
+
+* DESC: Arrows
+* PRIORITY: LOW
+* ID: 4
+
+* DESC: Fishing rod
+* PRIORITY: LOW
+* ID: 5
+
+* DESC: Dungeon Map
+* PRIORITY: MEDIUM
+* ID: 14
+
+* DESC: New pants
+* PRIORITY: LOW
+* ID: 15
+
+* DESC: Magnesium Axe
+* PRIORITY: MEDIUM
+* ID: 17
+
+* DESC: dead pig
+* PRIORITY: MEDIUM
+* ID: 21
+
+* DESC: Meat2 ( chicken meat, cooked and uncooked)
+* PRIORITY: HIGH
+* ID: 24
+
+* DESC: Draw new tree (pine, birtch)
+* PRIORITY: LOW
+* ID: 26

@@ -3,214 +3,324 @@
 * DESC: Create FPS Slider
 * PRIORITY: LOW
 * NEEDS: willpower
+* ID: 1
 
 * DESC: Add harvest delay to item class
 * PRIORITY: LOW
 * NEEDS: a reason ( The reason: when entering exiting rooms the counters reset so the delay should be acounted for or maybe in some other way)
+* ID: 2
 
 * DESC: Add respawn delay to mob class
 * PRIORITY: LOW
 * NEEDS: willpower ( reason: when entering exiting houses it resets)
+* ID: 3
 
 * DESC: redo mob class to include multiple diferent mobs
 * PRIORITY: HIGH
-* NEEDS: willpower
+* NEEDS: willpower Why??  Because all mobs move at the exact same pattern
+* ID: 4
 
 * DESC: redo gif class to include multiple diferent gifs
 * PRIORITY: HIGH
-* NEEDS: willpower
+* NEEDS: willpower Why??
+* ID: 5
 
 * DESC: Add new mobs
 * PRIORITY: HIGH
 * NEEDS: willpower, i added pigs, i added guards
+* ID: 6
 
 * DESC: Add ghost hunting mobs
 * PRIORITY: Low
 * NEEDS: willpower
+* ID: 7
 
 * DESC: Add a spell that goes through multiple mobs. add it to class properties
 * PRIORITY: Low
 * NEEDS:  Search in Background_Render.py for: # IF COMMENTED OUT, MAKES A SPELL GO THROUGH MULTIPLE ENEMIES
+* ID: 8
 
 * DESC: Add animal handeling mastery or survival idk. bet esme kad atpazintu skirtuma tarp blogos / geros mesos (meat0 - pork, meat1 - kidney) skirtingi paruosimo budai kad neapsinuodyti.
 * PRIORITY: Low
 * NEEDS:  Mastery display. tracking of experience.
+* ID: 9
 
 * DESC: in Handle_music: create a function that chooses a sound effect when mob hits player. in mob class add an effect for the mob. (fire elemental will use fire sound)
 * PRIORITY: Low
 * NEEDS:  willpower and a reason ( when hit by a slime it should sound like a slime not like a brick)
+* ID: 10
 
 * DESC: Use this sound effect to hold down the key and for how long it is held the amount of damage is increesed.
 * PRIORITY: Low
 * NEEDS:  spell for using this
         effect = songs[curr_song].generate_charging_up_sound()
         songs[curr_song].play_effect(effect)
+* ID: 11
 
 * DESC: if shot down with a fire spell, cooks the meat.
 * PRIORITY: Low
 * NEEDS: Willpower
+* ID: 12
 
 * DESC: do allignments 9 - Chaotic evil ( attacks all unprovoked )
 * PRIORITY: HIGH
 * NEEDS: implementation where mobs can "see" other mobs.
+* ID: 13
 
 * DESC: do allignments 8 - Chaotic neutral, ( attacks and runs away )
 * PRIORITY: HIGH
 * NEEDS: function for running away from player
+* ID: 14
 
 * DESC: do allignments 7 - Chaotic good, ( helps attack others )
 * PRIORITY: HIGH
 * NEEDS: implementation where mobs can "see" you attacking others (seeing is less than 100 distance) function for efficient checking how far mobs are.
+* ID: 15
 
 * DESC: do allignments 3 - lawful evil ( debufs you or steals from you unprovoked, attacks if you attack )
 * PRIORITY: HIGH
 * NEEDS: coin, str, dex, con, int, wis, cha modifyers
+* ID: 16
 
 * DESC: do allignments 2 - lawful neutral ( only hits if sees you hitting others )
 * PRIORITY: HIGH
 * NEEDS: implementation where mobs can "see" you attacking others (seeing is less than 100 distance) function for efficient checking how far mobs are.
+* ID: 17
 
 * DESC: make diferent mobs have diferent visibilities
 * PRIORITY: Medium
 * NEEDS: needs mobs in db
+* ID: 18
 
 * DESC: make diferent spells shoot slower/faster
 * PRIORITY: Medium
 * NEEDS: put it in db and handle it
+* ID: 19
 
 * DESC: add teleportation spell
 * PRIORITY: Medium
 * NEEDS: spawnpoints
+* ID: 20
 
 * DESC: add blinker spell ( teleports player a few feet away, need a clever way to handle it. )
 * PRIORITY: Medium
 * NEEDS: willpower
+* ID: 21
 
-* DESC: add necrotic, lighting, thunder, radiant, acid, poison, psychic bolts
+* DESC: add lighting, thunder, radiant, acid, poison, psychic bolts
 * PRIORITY: Medium
 * NEEDS: willpower
-
-* DESC: make levelup a thing. when level up a window appears that a level up has been reached. all hp, mana is restored.
-* PRIORITY: Medium
-* NEEDS: skilltree, music, window
+* ID: 22
 
 * DESC: make effect last on more than one mob (currently runs out on a single mob not an issue when dealing with only lv 1 players)
 * PRIORITY: Medium
 * NEEDS: willpower
-
-* DESC: display embers, ashes instead of deleting objects
-* PRIORITY: Medium
-* NEEDS: willpower
-
-* DESC: add levels (mastery) experience bars to a seperate window let's say the letter "Q" controlls it.
-* PRIORITY: LOW
-* NEEDS: drawing
-
-* DESC: add map view
-* PRIORITY: LOW
-* NEEDS: drawing, willpower, more areas.
+* ID: 24
 
 * DESC: add soothing sound for house/inn
 * PRIORITY: MEDIUM
 * NEEDS: willpower
+* ID: 28
 
 * DESC: click sound for furnace and for burning. (it sound should be sth like click žžŽŽŽŽ)
 * PRIORITY: MEDIUM
 * NEEDS: willpower
+* ID: 29
 
 * DESC: Add Titles : (Alcoholic, Hero, Thief, Murderer) change in the dialog some parts when addressing the character to use {Player} and then in display text change that to the title.
 * PRIORITY: MEDIUM
 * NEEDS: willpower
+* ID: 30
 
 * DESC: Friend list and enemy list. for npc interractions, friends call by name, offer discounts, converse. enemies ignore, talk diferently, harass, attack
 * PRIORITY: MEDIUM
 * NEEDS: willpower
-
-* DESC: All doors should be secondary rects. made to open only once they are clicked. its easyer than drawing extra rects on the doors. plus it's easyer for the motion
-* PRIORITY: MEDIUM
-* NEEDS: willpower
-
-* DESC: Add chest.
-* PRIORITY: MEDIUM
-* NEEDS: willpower
-
-* DESC: Add NPCS to db. Collumns: Type: (bartender, blacksmith, mayor, maid, story-teller), Quests: (names of quests or False), Conversations: big list of all the things a character can say.
-* PRIORITY: HIGH
-* NEEDS: willpower
-
-* DESC: Quests to db. Collums: Name, Level requirement, quest giver, type of quest, reward, what to do?
-* PRIORITY: HIGH
-* NEEDS: willpower
+* ID: 31
 
 * DESC: Make Bow and arrows
 * PRIORITY: HIGH
 * NEEDS: willpower
+* ID: 36
 
 * DESC: Make a sound effect for walking on stone, sand, grass, wooden planks.
 * PRIORITY: HIGH
-* NEEDS: willpower
+* NEEDS: sound remake
+* ID: 37
 
 * DESC: Spell effects all do the same damage. check in mob_data.deal_damage under "effect" in weapon: it is only fire damage, so its fine now, but in the future needs to be handled diferantly
 * PRIORITY: LOW
 * NEEDS: spells with effects.
+* ID: 38
 
 * DESC: add diferent knockbacks and animations for diferent type weapons (blunt, slashing, piercing)
 * PRIORITY: LOW
 * NEEDS: spells with effects.
+* ID: 39
 
 * DESC: High level spells require arrowkey codes to efficiently cast the spell
 * PRIORITY: LOW
 * NEEDS: willpower
+* ID: 40
 
 * DESC: change spell book display to an actual book with page flipping.
 * PRIORITY: LOW
 * NEEDS: Beta version
+* ID: 41
 
 * DESC: add spell to transform to decorations (later also maybe mobs) use the function to transform into an item. once you are an item you are hidden. every room has diferent surroundings. so if casting a spell in a village. transform to a tree, if in a house, a barrel if in an armory into an anvil or sth.
 * PRIORITY: LOW
 * NEEDS: willpower and how to change to diferent items
 * HOW: Ff.add_image_to_screen(screen, decorations.decor_dict["Tree_M_2"]["path"],[S.SCREEN_WIDTH / 2 - S.SCREEN_WIDTH / 20 + I.info.OFFSCREEN[0], S.SCREEN_HEIGHT / 2 - S.SCREEN_HEIGHT / 20 * 2 + I.info.OFFSCREEN[1], decorations.decor_dict["Tree_M_2"][0]["rect"].w * 4, decorations.decor_dict["Tree_M_2"][0]["rect"].h * 4])  # walking possision could be legs spread
+* ID: 42
 
 * DESC: when thieving will be achieved also make items in containers "mysteriously" dissappear. and appear on some random people.
 * PRIORITY: LOW
 * NEEDS: Beta version
+* ID: 43
 
 * DESC: when smelting. make the player set the temperature and see what happens, if player intterracts with others he finds out what temperature normal things need to be at.
 * PRIORITY: LOW
 * NEEDS: smelter
+* ID: 44
 
 * DESC: when in containers, each item has to have it's specific containing size, aka if there are 6 spots you cant expect to fit the same amount of pebbles and the same amount of armor or weapons.
 * PRIORITY: LOW
 * NEEDS: willpower
+* ID: 45
 
 * DESC: Make pet levels a thing. will increese damage, knockback, speed, rideability. search for "# based on pet's level in mob_data.py"
 * PRIORITY: LOW
 * NEEDS: levelup for character, pet raise mastery, stat block for pet.
+* ID: 46
 
 * DESC: Make pet sometimes find something and bring it to owner
 * PRIORITY: LOW
 * NEEDS: levelup for character, pet raise mastery, stat block for pet.
+* ID: 47
 
 * DESC: can collect grass type plants only with a sythe or maybe just using a sythe is wayyy easyer
 * PRIORITY: LOW
 * NEEDS: plants
+* ID: 48
 
 * DESC: When killed by guards you loose all of your items (make grave not spawn in)
 * PRIORITY: LOW
 * NEEDS: willpower
+* ID: 49
 
-* DESC: add quest icon above quest havers
+* DESC: durability of tool is decided by it's sharpness. one variable keeps track of how many uses it has been like 100 uses untill it needs to be sharpened. if not sharpened, deal twice less damage. if sharpened noice, but second argument counts how many sharpens it has been if its like 5 sharpens, that's it the tool dies.
 * PRIORITY: High
 * NEEDS: willpower
+* ID: 51
+
+* DESC: Trolls. stone statues at day, alive at night
+* Priority: LOW
+* NEEDS: fix mob, decor functions
+* ID: 52
+
+* DESC: When a tree is chopped to the chopped state make it regrow after some time.
+* Priority: LOW
+* NEEDS: will power
+* ID: 53
+
+* DESC: Add gold ore
+* Priority: LOW
+* NEEDS: Mountainous areas (maybe in river beds)
+* ID: 54
+
+* DESC: add Copper ore
+* Priority: LOW
+* NEEDS: need mine shafts
+* ID: 55
+
+* DESC: add Sword slash spell
+* Priority: MEDIUM
+* NEEDS: WillPower
+* ID: 56
+
+* DESC: add describtions in backpack of the item currently selected
+* Priority: MEDIUM
+* NEEDS: WillPower
+* ID: 57
+
+* DESC: Magnesium fire effect
+* Priority: LOW
+* NEEDS: WillPower
+* ID: 58
+
+* DESC: Weapon/tool decay
+* Priority: LOW
+* NEEDS: WillPower
+* ID: 59
+
+* DESC: add effects to player (poisoned, haste, slow)
+* Priority: LOW
+* NEEDS: WillPower
+* ID: 60
+
+* DESC: add strawberries
+* Priority: LOW
+* NEEDS: WillPower
+* ID: 61
+
+* DESC: add oranges
+* Priority: LOW
+* NEEDS: WillPower
+* ID: 62
+
+* DESC: make better sticks (take a plank, craft it into a wooden pole, thats ya better stick)
+* Priority: HIGH
+* NEEDS: Drawing
+* ID: 63
+
+* DESC: Make Necrotic resurect dead mobs as followers, only works on beasts under
+* Priority: LOW
+* NEEDS: Drawing
+* ID: 64
+
+* DESC: vulnerabilities and ressistances and immunities to mobs.
+* Priority: LOW
+* NEEDS: Drawing
+* ID: 65
+
+* DESC: mobs all have gif classes, now need to implement them
+* Priority: LOW
+* NEEDS: willpower and three energy drinks
+* ID: 66
+
+* DESC: dug hole can sometimes drop gold dust
+* Priority: LOW
+* NEEDS: willpower and gold dust drawing
+* ID: 67
+
+* DESC: dug holes in the sand near the water can sometimes drop clay
+* Priority: LOW
+* NEEDS: willpower and three energy drinks
+* ID: 68
+
+* DESC: dug holes in the sand can sometimes spawn a treasure chest.
+* Priority: LOW
+* NEEDS: willpower and three energy drinks
+* ID: 69
+
+* DESC: somehow cover up holes/make them smaller overtime
+* Priority: LOW
+* NEEDS: willpower and three energy drinks
+* ID: 70
+
+* DESC: Save button to save info in esc
+* Priority: HIGH
+* NEEDS: willpower
+* ID: 71
 
 
 UNTILL FULL ALPHA:
 * 20 QUESTS (16 Remain) (Tutorial quest, get:slimeballs, get:Meat0, get:logs, sticks)
 * Make Levelup (need to make music)
-* Stat changes
+* Stat changes (Done)
 * Allignment changes
 * Rock mining (only pebbles can be mined)
-* 10 Areas ( 6 remaining)
+* 10 Areas ( 2 remaining)
 * Fishing
 * Smelting (Done)
 * Smithing (Done)
@@ -220,8 +330,8 @@ UNTILL FULL ALPHA:
 * Planting plants (done)
 * Hoe for seed beds (Done)
 * Blunt strikes (Done)
-* 10 spells (4 remaining) (firebolt, magicbolt, icebolt, healminor, spawnskeletons, flash)
+* 20 spells (11 remaining) (firebolt, magicbolt, icebolt, healminor, spawnskeletons, flash, Fire Sprite, Necrotic Bolt, Sword Slash)
 * Bow and arrows
-* Add masteries (fishing, smelting, mining, axing, hoeing, planting, hunter, wizard, glassblowing)
-* 20 mobs (15 remaining) (pigs, slimeballs, guards, chickens, skeletons)
+* Add masteries (fishing, smelting, mining, axing, hoeing, planting, hunter, wizard, glassblowing) Done
+* 20 mobs (14 remaining) (pigs, slimeballs, guards, chickens, skeletons, Ents)
 * make a house (rundown old building, get the mayor to sell it to you for too much money, ask wood carver for help in fixing it and then later other villagers on how to make other stuff (beds, cupboards, glass stuf etc)

@@ -12,7 +12,7 @@ FULLSCREEN_CH = False
 RESOLUTION = (SCREEN_WIDTH - 680) * 1 / 600
 
 # Framerate
-FRAMERATE = 60  #Default 60
+FRAMERATE = 30  #Default 60
 
 # Volume
 VOLUME = 0.0
@@ -122,6 +122,9 @@ DECOR_PATH = {
     "Grass_10_9":    'static/images/Background/Grass_10_9.png',
     "Grass_9_10":    'static/images/Background/Grass_9_10.png',
     "Grass_10_11":    'static/images/Background/Grass_10_11.png',
+    "Grass_11_9":    'static/images/Background/Grass_11_9.png',
+    "Grass_12_9":    'static/images/Background/Grass_12_9.png',
+    "Grass_12_10":    'static/images/Background/Grass_12_10.png',
     "Wooden_tiles":  'static/images/Background/House/Wooden_tiles.png',
     "Wooden_tiles2":  'static/images/Background/House/Wooden_tiles2.png',
     "Wooden_tiles3":  'static/images/Background/House/Wooden_tiles3.png',
@@ -139,7 +142,9 @@ CHAR_SAVE_PATH = 'static/data/created_characters'
 #             "_Side_Walk11": "_Side_Walk11, Side1, _Side_Walk12, Side1"}
 
 # Dummy Values
-# DUMMY_VALUE1 = 0
-# DUMMY_VALUE2 = 0
+DUMMY_VALUE_list = []
+DUMMY_VALUE_int = 0
+
+PLAYING_BAR_SCREEN = 0
 
 GOD_MODE = False

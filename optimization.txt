@@ -1,0 +1,6 @@
+# Optimization
+
+* insted of recuring loop. only restart the start function before the while loop. recuring loops here are not efficient
+
+* Decreased Character selection processing time from 600 ms to 200 ms ( by adding ranges where to search for color pixels)
+* Decreased Character selection processing time from 200 ms to 80 ms  ( by adding dictionaries with preloaded values and variables responsible for shifting positional/color values)
