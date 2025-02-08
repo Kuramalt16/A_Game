@@ -236,7 +236,7 @@ def update_character_stats(file_path, player_data, selected_spells, npc):
             lines[i] = f'Completed_quests: {quest_str}\n'
 
         elif line.startswith('Spawn:'):
-            spawn_str = I.info.CURRENT_ROOM["name"] + ":" + str(I.info.ENTRY_POS[0]) + ":" + str(I.info.ENTRY_POS[1]) + ":" + str(I.info.OFFSCREEN[0]) + ":" + str(I.info.OFFSCREEN[1])
+            spawn_str = I.info.CURRENT_ROOM["name"] + ":" + str(int(I.info.ENTRY_POS[0])) + ":" + str(int(I.info.ENTRY_POS[1])) + ":" + str(int(I.info.OFFSCREEN[0])) + ":" + str(int(I.info.OFFSCREEN[1]))
             lines[i] = f'Spawn: {spawn_str}\n'
         elif line.startswith('Titles:'):
             titles = I.info.TITLES
@@ -297,23 +297,11 @@ def walking(dx, dy, collide, data, decorations, rooms, screen):
 
 def regular_walking(data, dx, dy):
     if I.info.CURRENT_ROOM["Type"] in ["Village"]:
-        if I.info.OFFSCREEN[0] in [0, 3, -3]:
-            # if no collisions walk properly. move screen in x axis
-            data["Zoom_rect"].x += dx * I.info.FAST
-            data["Zoom_rect"].y += 0
-        else:
-            data["Zoom_rect"].x += 0
-            data["Zoom_rect"].y += 0
-        if I.info.OFFSCREEN[1] in [0, 3, -3]:
-            # if no collisions walk properly. move screen in y axis
-            data["Zoom_rect"].x += 0
-            data["Zoom_rect"].y += dy * I.info.FAST
-        else:
-            data["Zoom_rect"].x += 0
-            data["Zoom_rect"].y += 0
-    else:
-        data["Zoom_rect"].x += 0
-        data["Zoom_rect"].y += 0
+        speed = int(I.info.BASE_WALK_SPEED * I.info.FAST)
+        if I.info.OFFSCREEN[0] in range(-3 * speed, 3 * speed):
+            data["Zoom_rect"].x += int(dx * speed)
+        if I.info.OFFSCREEN[1] in range(-3 * speed, 3 * speed):
+            data["Zoom_rect"].y += int(dy * speed)
 
 def update_char_bar(screen, data, gifs, items, rooms, clock, spells, npc):
     # Char_bar_screen = I.pg.Surface([data["Zoom_rect"][2], data["Zoom_rect"][3]], I.pg.SRCALPHA, 32).convert_alpha()
@@ -471,59 +459,57 @@ def Get_walking_on(rooms, data):
             I.info.WALKING_ON = I.A.WALKING_COLORS[color]
             # print(I.info.WALKING_ON, color)
         else:
-            print(color, " doesnt exist")
+            Ff.debug_print("color doesn't exist", color, debug="error")
 
 def handle_colliding_with_polygon(me_up, me_down, me_left, me_right, collide, dx, dy, data):
+    speed = I.info.FAST * I.info.BASE_WALK_SPEED
     if Ff.rect_polygon_collision(me_left, collide[1]) != False:
-        print("colliding left")
         if dx != 1:
-            I.info.OFFSCREEN = (I.info.OFFSCREEN[0] - dx * 3 * I.info.FAST, I.info.OFFSCREEN[1])
+            I.info.OFFSCREEN = (I.info.OFFSCREEN[0] - dx * 3 * speed, I.info.OFFSCREEN[1])
     elif dx != 1:
         regular_walking(data, dx, 0)
 
     if Ff.rect_polygon_collision(me_right, collide[1]) != False:
-        print("colliding right")
         if dx != -1:
-            I.info.OFFSCREEN = (I.info.OFFSCREEN[0] - dx * 3 * I.info.FAST, I.info.OFFSCREEN[1])
+            I.info.OFFSCREEN = (I.info.OFFSCREEN[0] - dx * 3 * speed, I.info.OFFSCREEN[1])
     elif dx != -1:
         regular_walking(data, dx, 0)
 
     if Ff.rect_polygon_collision(me_up, collide[1]) != False:
-        print("colliding up")
         if dy != 1:
-            I.info.OFFSCREEN = (I.info.OFFSCREEN[0], I.info.OFFSCREEN[1] - dy * 3 * I.info.FAST)
+            I.info.OFFSCREEN = (I.info.OFFSCREEN[0], I.info.OFFSCREEN[1] - dy * 3 * speed)
     elif dy != 1:
         regular_walking(data, 0, dy)
 
     if Ff.rect_polygon_collision(me_down, collide[1]) != False:
-        print("colliding down")
         if dy != -1:
-            I.info.OFFSCREEN = (I.info.OFFSCREEN[0], I.info.OFFSCREEN[1] - dy * 3 * I.info.FAST)
+            I.info.OFFSCREEN = (I.info.OFFSCREEN[0], I.info.OFFSCREEN[1] - dy * 3 * speed)
     elif dy != -1:
         regular_walking(data, 0, dy)
 
 def handle_rect_colliding(me_up, me_down, me_left, me_right, collide, dx, dy, data, decorations):
+    speed = I.info.FAST * I.info.BASE_WALK_SPEED
     if me_left.collidelist(decorations.displayed_rects) != -1:
         if dx != 1:
-            I.info.OFFSCREEN = (I.info.OFFSCREEN[0] - dx * 3 * I.info.FAST, I.info.OFFSCREEN[1])
+            I.info.OFFSCREEN = (I.info.OFFSCREEN[0] - dx * 3 * speed, I.info.OFFSCREEN[1])
     elif dx != 1:
         regular_walking(data, dx, 0)
 
     if me_right.collidelist(decorations.displayed_rects) != -1:
         if dx != -1:
-            I.info.OFFSCREEN = (I.info.OFFSCREEN[0] - dx * 3 * I.info.FAST, I.info.OFFSCREEN[1])
+            I.info.OFFSCREEN = (I.info.OFFSCREEN[0] - dx * 3 * speed, I.info.OFFSCREEN[1])
     elif dx != -1:
         regular_walking(data, dx, 0)
 
     if me_up.collidelist(decorations.displayed_rects) != -1:
         if dy != 1:
-            I.info.OFFSCREEN = (I.info.OFFSCREEN[0], I.info.OFFSCREEN[1] - dy * 3 * I.info.FAST)
+            I.info.OFFSCREEN = (I.info.OFFSCREEN[0], I.info.OFFSCREEN[1] - dy * 3 * speed)
     elif dy != 1:
         regular_walking(data, 0, dy)
 
     if me_down.collidelist(decorations.displayed_rects) != -1:
         if dy != -1:
-            I.info.OFFSCREEN = (I.info.OFFSCREEN[0], I.info.OFFSCREEN[1] - dy * 3 * I.info.FAST)
+            I.info.OFFSCREEN = (I.info.OFFSCREEN[0], I.info.OFFSCREEN[1] - dy * 3 * speed)
     elif dy != -1:
         regular_walking(data, 0, dy)
 

@@ -1,5 +1,3 @@
-from scipy.stats import false_discovery_control
-
 from utils import Imports as I, Frequent_functions as Ff
 from Values import Settings as S
 
@@ -7,129 +5,109 @@ AVERAGE_TIME = (0, 0)
 
 def testing_events(event):
     if event.type == I.pg.ACTIVEEVENT:
-        # print("ACTIVEEVENT")
         pass
     elif event.type == I.pg.WINDOWLEAVE:
-        # print("WINDOWLEAVE")
         pass
     elif event.type == I.pg.WINDOWMOVED:
-        # print("WINDOWMOVED")  # prints when screen was moved
         pass
     elif event.type == I.pg.VIDEOEXPOSE:
-        # print("VIDEOEXPOSE")  # prints once when the game is on screen after being moved
         pass
     elif event.type == I.pg.WINDOWEXPOSED:
-        # print("WINDOWEXPOSED")  # prints once when the game is on screen after being moved
         pass
     elif event.type == I.pg.WINDOWENTER:
-        # print("WINDOWENTER")  # prints once the game is in focus (mouse on window)
         pass
     elif event.type == I.pg.MOUSEMOTION:
-        # print("MOUSEMOTION")  # prints when mouse moves
         pass
     elif event.type == I.pg.AUDIODEVICEADDED:
-        # print("AUDIODEVICEADDED")  # prints once the game is launched
         pass
     elif event.type == I.pg.WINDOWSHOWN:
-        # print("WINDOWSHOWN")  # prints when the game first is opened
         pass
     elif event.type == I.pg.WINDOWFOCUSGAINED:
-        # print("WINDOWFOCUSGAINED")
         pass
     elif event.type == I.pg.TEXTEDITING:
-        # print("TEXTEDITING")  # prints once when minimized
         pass
     elif event.type == I.pg.WINDOWMINIMIZED:
-        # print("WINDOWMINIMIZED")
         pass
     elif event.type == I.pg.WINDOWFOCUSLOST:
-        # print("WINDOWFOCUSLOST")
         pass
     elif event.type == I.pg.WINDOWRESTORED:
-        # print("WINDOWRESTORED")
         pass
     elif event.type == I.pg.CLIPBOARDUPDATE:
-        # print("CLIPBOARDUPDATE")
         pass
     elif event.type == I.pg.WINDOWCLOSE:
-        # print("WINDOWCLOSE")
         pass
     elif event.type == I.pg.MOUSEBUTTONDOWN:
-        # print("MOUSEBUTTONDOWN")  # when mouse button was clicked
         pass
     elif event.type == I.pg.MOUSEBUTTONUP:
-        # print("MOUSEBUTTONUP")  # when mouse button was released
         pass
     elif event.type == I.pg.MOUSEWHEEL:
-        # print("MOUSEWHEEL")  # prints when mousewheel is scrolling
         pass
     elif event.type == I.pg.KEYDOWN:
-        # print("KEYDOWN")  # pritns when a key is pressed down
 
         if event.key == 27:
-            print("Esc_key")
+            Ff.debug_print("Esc_key")
         elif event.key == 13:
-            print("Enter_key")
+            Ff.debug_print("Enter_key")
         elif event.key == I.pg.K_F1:
-            print("F1")
+            Ff.debug_print("F1")
         elif event.key == I.pg.K_F2:
-            print("F2")
+            Ff.debug_print("F2")
         elif event.key == I.pg.K_F3:
-            print("F3")
+            Ff.debug_print("F3")
         elif event.key == I.pg.K_F4:
-            print("F4")
+            Ff.debug_print("F4")
         elif event.key == I.pg.K_F5:
-            print("F5")
+            Ff.debug_print("F5")
         elif event.key == I.pg.K_F6:
-            print("F6")
+            Ff.debug_print("F6")
         elif event.key == I.pg.K_F7:
-            print("F7")
+            Ff.debug_print("F7")
         elif event.key == I.pg.K_F8:
-            print("F8")
+            Ff.debug_print("F8")
         elif event.key == I.pg.K_F9:
-            print("F9")
+            Ff.debug_print("F9")
         elif event.key == I.pg.K_F10:
-            print("F10")
+            Ff.debug_print("F10")
         elif event.key == I.pg.K_F11:
-            print("F11")
+            Ff.debug_print("F11")
         elif event.key == I.pg.K_F12:
-            print("F12")
+            Ff.debug_print("F12")
         elif event.key == I.pg.K_DELETE:
-            print("DELETE")
+            Ff.debug_print("DELETE")
         elif event.key == I.pg.K_BACKSPACE:
-            print("Backspace")
+            Ff.debug_print("Backspace")
         elif event.key == I.pg.K_LSHIFT:
-            print("K_LSHIFT")
+            Ff.debug_print("K_LSHIFT")
         elif event.key == I.pg.K_LCTRL:
-            print("K_LCTRL")
+            Ff.debug_print("K_LCTRL")
         elif event.key == I.pg.K_LALT:
-            print("K_LALT")
+            Ff.debug_print("K_LALT")
         elif event.key == I.pg.K_RIGHT:
-            print("K_RIGHT")
+            Ff.debug_print("K_RIGHT")
         elif event.key == I.pg.K_LEFT:
-            print("K_LEFT")
+            Ff.debug_print("K_LEFT")
         elif event.key == I.pg.K_UP:
-            print("K_UP")
+            Ff.debug_print("K_UP")
         elif event.key == I.pg.K_DOWN:
-            print("K_DOWN")
+            Ff.debug_print("K_DOWN")
             # else:
-            # print(event.key)
+            # Ff.debug_print(event.key)
     elif event.type == I.pg.KEYUP:
-        # print("KEYUP")  # pritns when a key is pressed up
+        # Ff.debug_print("KEYUP")  # pritns when a key is pressed up
         pass
     elif event.type == I.pg.TEXTINPUT:
-        print(event.text)  # prints what key was pressed
-        # print("TEXTINPUT")
+        Ff.debug_print(event.text)  # prints what key was pressed
+        # Ff.debug_print("TEXTINPUT")
         # elif event.type == pygame.WINDOWFOCUSGAINED:
-        #     print("WINDOWFOCUSGAINED")
+        #     Ff.debug_print("WINDOWFOCUSGAINED")
         # elif event.type == pygame.WINDOWFOCUSGAINED:
-        #     print("WINDOWFOCUSGAINED")
+        #     Ff.debug_print("WINDOWFOCUSGAINED")
         # elif event.type == pygame.WINDOWFOCUSGAINED:
-        #     print("WINDOWFOCUSGAINED")
+        #     Ff.debug_print("WINDOWFOCUSGAINED")
         # elif event.type == pygame.WINDOWFOCUSGAINED:
-        #     print("WINDOWFOCUSGAINED")
+        #     Ff.debug_print("WINDOWFOCUSGAINED")
     else:
-        print(event.type)
+        Ff.debug_print(event.type)
 
 def Put_a_stone(screen):
     image = I.pg.image.load("static/images/Stone_mid.png")  # Replace with your image file path
@@ -143,12 +121,12 @@ def Make_rect_visible(screen, rect, color):
 def print_coordinates(event, coordinates):
     if event.key == I.pg.K_c:
         if I.info.CURRENT_ROOM["Type"] == "Village":
-            print(f"{int(coordinates.x + 145 + I.info.OFFSCREEN[0] / 4)},{int(coordinates.y + 72 + I.info.OFFSCREEN[1] / 4)},1,1,1,1,,")
+            Ff.debug_print(f"{int(coordinates.x + 145 + I.info.OFFSCREEN[0] / 4)},{int(coordinates.y + 72 + I.info.OFFSCREEN[1] / 4)},1,1,1,1,,")
         else:
-            print(f"{int(I.info.OFFSCREEN[0] + 528) },{int(I.info.OFFSCREEN[1] + 337)},3,3,3,3,,")
+            Ff.debug_print(f"{int(I.info.OFFSCREEN[0] + 528) },{int(I.info.OFFSCREEN[1] + 337)},3,3,3,3,,")
 
 def get_time_diferance(time1, time2):
-    print(time1-time2)
+    Ff.debug_print(time1-time2)
 
 def pause_pygame():
     I.pg.display.flip()
@@ -167,7 +145,7 @@ def end_mesure(start_time):
     end_time = I.t.perf_counter()
     execution_time = end_time - start_time - 0.0000017
     I.T.AVERAGE_TIME = (I.T.AVERAGE_TIME[0] + execution_time, I.T.AVERAGE_TIME[1] + 1)
-    print("overall time in ms: ", execution_time * 1000, "AVERAGE: ", (I.T.AVERAGE_TIME[0] / I.T.AVERAGE_TIME[1]) * 1000, " ms")
+    Ff.debug_print("overall time in ms: ", execution_time * 1000, "AVERAGE: ", (I.T.AVERAGE_TIME[0] / I.T.AVERAGE_TIME[1]) * 1000, " ms")
     return (I.T.AVERAGE_TIME[0] / I.T.AVERAGE_TIME[1]) * 1000
 
 def end_mesure_no_print(start_time):
@@ -187,7 +165,7 @@ def end_mesure_no_print(start_time):
 #     S_F_HEIGHT = S.SCREEN_HEIGHT / 10 * 8
 #     body_sizes = [int(S_LEFT) + int(S_F_WIDTH / 4), int(S_TOP) + int(S_F_HEIGHT / 6), int(S_F_WIDTH / 2), int(S_F_HEIGHT / 2)]
 #     Ff.add_image_to_screen(screen, "static/images/Race/Human/Girl/Human_Girl.png", body_sizes)
-#     # print(body_sizes)
+#     # Ff.debug_print(body_sizes)
 #     # screen.fill("white")
 #     # I.pg.display.flip()
 #     color_coordinates = {}
@@ -197,7 +175,7 @@ def end_mesure_no_print(start_time):
 #     options = {0: ["Right", "Right1","Right","Right2"]}
 #     for a in range(0, len(options)):
 #         for i in options[a]:
-#             # print(options[a])
+#             # Ff.debug_print(options[a])
 #             draw_character(screen, "boy", "Elf", i, options[a][0])
 
 
@@ -284,7 +262,7 @@ def rename_images_in_folder(folder_path):
     import glob
     # Check if the folder exists
     if not os.path.isdir(folder_path):
-        print(f"The folder '{folder_path}' does not exist.")
+        Ff.debug_print(f"The folder '{folder_path}' does not exist.")
         return
 
     # Get the folder name
@@ -298,13 +276,13 @@ def rename_images_in_folder(folder_path):
 
     # # Check if there are any image files in the folder
     if not image_files:
-        print(f"No image files found in the folder '{folder_path}'.")
+        Ff.debug_print(f"No image files found in the folder '{folder_path}'.")
         return
-    print(image_files)
+    Ff.debug_print(image_files)
     # # Rename each image file
     for image_path in image_files:
         folders = image_path.split("/")
-        # print(folders)
+        # Ff.debug_print(folders)
         new_path = ""
         for i in range(0, len(folders)-1):
             new_path += folders[i] + "/"
@@ -315,8 +293,8 @@ def rename_images_in_folder(folder_path):
             new_path += folder_name + "_" + number
             os.rename(image_path, new_path)
         except IndexError:
-            print("Completed")
-        # print(new_path)
+            Ff.debug_print("Completed")
+        # Ff.debug_print(new_path)
 
 
 # Example usage
@@ -545,19 +523,19 @@ def upload_data_to_db(table, data):
 #         if distance > speed and self.frame_change:  # If we're farther than one step away, keep moving
 #             if self.blocking_movement[0] == -1 and velocity.x < 0:
 #                 self.rect.x += 0
-#                 print("blocking_left")
+#                 Ff.debug_print("blocking_left")
 #             elif self.blocking_movement[0] == 1 and velocity.x > 0:
 #                 self.rect.x += 0
-#                 print("blocking right")
+#                 Ff.debug_print("blocking right")
 #             else:
 #                 self.rect.x += velocity.x
-#             print(velocity, self.blocking_movement)
+#             Ff.debug_print(velocity, self.blocking_movement)
 #             if self.blocking_movement[1] == 1 and velocity.y < 0:
 #                 self.rect.y += 0
-#                 print("blocking up")
+#                 Ff.debug_print("blocking up")
 #             elif self.blocking_movement[1] == -1 and velocity.y > 0:
 #                 self.rect.y += 0
-#                 print("blocking down")
+#                 Ff.debug_print("blocking down")
 #             else:
 #                 self.rect.y += velocity.y
 #         self.blocking_movement = [0, 0]
@@ -590,16 +568,16 @@ def upload_data_to_db(table, data):
 #     collisions = I.pg.sprite.groupcollide(mobs, decorations, False, False)
 #     if collisions:
 #         for mob, colliding_decorations in collisions.items():
-#             # print(f"{mob} is colliding with {colliding_decorations}")
+#             # Ff.debug_print(f"{mob} is colliding with {colliding_decorations}")
 #             for decor in colliding_decorations:
 #                 mob.blocking_movement = get_collision_side(decor.rect, mob.rect)
-#                 # print(side)
+#                 # Ff.debug_print(side)
 #
 #
 #     I.pg.display.flip()
 # I.pg.quit()
 #
-# print(mobs)
+# Ff.debug_print(mobs)
 
 
 

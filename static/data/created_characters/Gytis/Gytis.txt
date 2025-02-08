@@ -18,7 +18,7 @@ Color_Shir: (165, 170, 0, 255)
 Color_Pant: (0, 100, 201, 255)
 Color_Shoe: (166, 170, 0, 255)
 
-Last Save: 2024/12/26 03:21
+Last Save: 2025/02/08 22:37
 
 
 
@@ -26,7 +26,7 @@ Level: 6
 Experience: 170
 Health: 66
 Mana: 77
-Exhaustion: 42
+Exhaustion: 41
 
 Gold: 85.9
 
@@ -40,15 +40,15 @@ Backpack: Gold__85.9__0__0,,Slime Ball__6.0__2__0,,Light Berries__77.0__0__22,,W
 
 Spells: 0__Necrotic Bolt,,2__Fire Bolt,,4__Cold Bolt,,6__Flash,,8__Spawn Skeleton,,
 
-Dialog: Luna__0__0,,Bear__0__0,,Joseph__2__18,,Mayor__3__-7,,Gwen__0__41,,Sign__0__0,,Tutorial Man__11__10,,Castle_Guard__1__-6,,Rina__0__3,,
+Dialog: Luna__0__0,,Bear__0__0,,Joseph__2__19,,Mayor__4__-7,,Gwen__0__41,,Sign__0__0,,Tutorial Man__11__10,,Castle_Guard__1__-6,,Rina__0__3,,
 
-Quests: [{"COMPLETION": 0, "GIVER": "God", "TYPE": "MEET", "WHO": "Mayor", "REWARD": "1 Sp", "DESC": "Go to the Mayor"}, {"COMPLETION": 0, "GIVER": "God", "TYPE": "MEET", "WHO": "Mayor", "REWARD": "1 Sp", "DESC": "Go to the Mayor"}, {"COMPLETION": 0, "GIVER": "God", "TYPE": "MEET", "WHO": "Mayor", "REWARD": "1 Sp", "DESC": "Go to the Mayor"}]
+Quests: [{"COMPLETION": 0, "GIVER": "God", "TYPE": "MEET", "WHO": "Mayor", "REWARD": "1 Sp", "DESC": "Go to the Mayor"}, {"COMPLETION": 0, "GIVER": "God", "TYPE": "MEET", "WHO": "Mayor", "REWARD": "1 Sp", "DESC": "Go to the Mayor"}, {"COMPLETION": 0, "GIVER": "God", "TYPE": "MEET", "WHO": "Mayor", "REWARD": "1 Sp", "DESC": "Go to the Mayor"}, {"COMPLETION": 0, "GIVER": "God", "TYPE": "MEET", "WHO": "Mayor", "REWARD": "1 Sp", "DESC": "Go to the Mayor"}]
 
 Completed_quests: [{"COMPLETION": 4.6, "GIVER": "Mayor", "TYPE": "GET", "ITEM": "Meat0", "AMOUNT": "5", "REWARD": "50 Sp*{Friendlyness}", "DESC": "Get some steak"}, {"COMPLETION": 1, "GIVER": "God", "TYPE": "MEET", "WHO": "Mayor", "REWARD": "1 Sp", "DESC": "Go to the Mayor"}, {"COMPLETION": 2.4, "GIVER": "Mayor", "TYPE": "GET", "ITEM": "Slime Ball", "AMOUNT": "5", "REWARD": "70 Sp*{Friendlyness}", "DESC": "Get some slime balls"}, {"COMPLETION": 2.75, "GIVER": "Gwen", "TYPE": "GET", "ITEM": "Stick", "AMOUNT": "20", "REWARD": "10 Sp", "DESC": "Get some sticks"}, {"COMPLETION": 1.0, "GIVER": "Gwen", "TYPE": "GET", "ITEM": "Light Wood", "AMOUNT": "5", "REWARD": "40 Sp", "DESC": "Get some wood"}, {"COMPLETION": 1, "GIVER": "Purple Wizard", "TYPE": "Tutorial", "ACTION": "WALK", "REWARD": "1 Sp", "DESC": "Press [LEFT], [RIGHT], [UP], [DOWN]"}, {"COMPLETION": 1, "GIVER": "Purple Wizard", "TYPE": "Tutorial", "ACTION": "RUN", "REWARD": "1 Sp", "DESC": "Press [LEFT], [RIGHT], [UP], [DOWN] while holding [Z]"}, {"COMPLETION": 1, "GIVER": "Purple Wizard", "TYPE": "Tutorial", "ACTION": "PUNCH", "REWARD": "1 Sp", "DESC": " Press [X] to hit"}, {"COMPLETION": 1, "GIVER": "Purple Wizard", "TYPE": "Tutorial", "ACTION": "QUEST_BACKPACK", "REWARD": "1 Sp", "DESC": " Press [Q] to open Quest Catalog \\n Press [I] to open Backpack"}, {"COMPLETION": 1, "GIVER": "Purple Wizard", "TYPE": "Tutorial", "ACTION": "EAT", "REWARD": "1 Sp", "DESC": "Collect one Light Berry from a bush by pressing [C] on it open Backpack\\nand place the berry to a diferent location with the [C] button \\neat the berry with the key [X]"}]
 
 Containers: {"House1": {"[\"Barrel\", 0]": {"[-2, 0]": ["Slime Ball", 1], "[-4, 0]": ["Slime Ball", 1], "[-2, 2]": ["Slime Ball", 1], "[-4, 2]": ["Slime Ball", 1], "[-2, 4]": ["Slime Ball", 1], "[-4, 4]": ["Slime Ball", 1]}, "[\"Barrel\", 5]": {}}, "Prison1": {"[\"Barrel\", 0]": {"[-2, 0]": ["Slime Ball", 1], "[-4, 0]": ["Slime Ball", 1], "[-2, 2]": ["Meat1", 1], "[-4, 2]": ["Meat1", 1], "[-2, 4]": ["Meat1", 1], "[-4, 4]": ["Meat1", 1]}}}
 
-Titles: Alcoholic,Alcoholic,Alcoholic,Alcoholic,Alcoholic,Alcoholic,Alcoholic,Alcoholic,Alcoholic,Alcoholic,Alcoholic,Alcoholic,Alcoholic,Alcoholic,Alcoholic,Alcoholic,Alcoholic,Alcoholic
+Titles: Alcoholic,Alcoholic,Alcoholic,Alcoholic,Alcoholic,Alcoholic,Alcoholic,Alcoholic,Alcoholic,Alcoholic,Alcoholic,Alcoholic,Alcoholic,Alcoholic,Alcoholic,Alcoholic,Alcoholic,Alcoholic,Alcoholic,Alcoholic,Alcoholic,Alcoholic
 
 Save_point: Village_10_10:330:1:0:0
 
@@ -58,4 +58,4 @@ Criminal: {"Charge": "", "Fine": 0, "Prison_time": 0}
 
 Map_change: {"Village_10_10": {"add": {"Tree_M_1_Harvested": {"155": [543, 391, 24, 34], "151": [421, 331, 24, 34], "152": [421, 391, 24, 34], "153": [543, 271, 24, 34], "149": [678, 125, 24, 34]}, "Bush_S_2_Harvested": {"5": [420, 240, 17, 10]}}, "remove": {"Castle_Guard": {}, "Tree_M_1": {"154": [159, 67, 24, 34], "155": [149, 73, 24, 34], "151": [125, 59, 24, 34], "152": [143, 70, 24, 34], "153": [138, 70, 24, 34], "149": [125, 60, 24, 34]}, "Tree_M_1_Harvested": {}, "Bush_S_2": {"5": [146, 86, 17, 10]}}, "remove_gif": {}, "add_bypassed": {}, "gif_ended": {}, "add_effect": {}}, "Village_10_9": {"add": {"Plant bed": {}, "Tree_M_1": {}, "Tree_M_1_Harvested": {"1": [330, 790, 19, 15], "0": [370, 840, 19, 15]}, "Grass Hole": {"0": [552, 872, 27, 11], "1": [552, 910, 27, 11], "2": [576, 890, 27, 11], "3": [531, 890, 27, 11]}, "Sand Hole": {"0": [632, 785, 27, 11], "1": [634, 769, 27, 11], "2": [630, 754, 27, 11], "3": [627, 739, 27, 11], "4": [658, 782, 27, 11], "5": [710, 780, 27, 11], "6": [713, 762, 27, 11], "7": [716, 743, 27, 11], "8": [725, 726, 27, 11], "9": [744, 735, 27, 11], "10": [753, 750, 27, 11], "11": [763, 760, 27, 11], "12": [766, 766, 27, 11], "13": [735, 751, 27, 11], "14": [799, 711, 27, 11], "15": [810, 723, 27, 11], "16": [816, 735, 27, 11], "17": [822, 749, 27, 11], "18": [850, 757, 27, 11], "19": [859, 714, 27, 11], "20": [859, 753, 27, 11], "21": [859, 746, 27, 11], "22": [862, 731, 27, 11], "23": [851, 695, 27, 11], "24": [892, 740, 27, 11], "25": [892, 732, 27, 11], "26": [892, 719, 27, 11], "27": [892, 708, 27, 11], "28": [892, 697, 27, 11], "29": [912, 699, 27, 11], "30": [922, 712, 27, 11], "31": [925, 737, 27, 11], "32": [916, 723, 27, 11], "33": [952, 730, 27, 11], "34": [952, 722, 27, 11], "35": [952, 710, 27, 11], "36": [975, 737, 27, 11], "37": [975, 729, 27, 11], "38": [972, 723, 27, 11], "39": [958, 717, 27, 11]}}, "remove": {}, "remove_gif": {}, "add_bypassed": {}, "gif_ended": {}, "add_effect": {"Plant bed": {}}, "remove_effect": {}}, "Apothecary1": {"add": {"Potion_Empty": {}}, "remove": {}, "remove_gif": {}, "add_bypassed": {}, "gif_ended": {}, "add_effect": {}, "remove_effect": {}}, "Armory": {"add": {}, "remove": {}, "remove_gif": {}, "add_bypassed": {}, "gif_ended": {}, "add_effect": {}, "remove_effect": {}}, "House1B1": {"add": {"Wall_door_open": {"1": [746, 150, 196, 152]}}, "remove": {"Wall_door": {"1": 0}}, "remove_gif": {}, "add_bypassed": {}, "gif_ended": {}, "add_effect": {}, "remove_effect": {}}, "Village_9_10": {"add": {}, "remove": {}, "remove_gif": {}, "add_bypassed": {}, "gif_ended": {}, "add_effect": {}, "remove_effect": {}}}
 
-Spawn: Village_10_11:330:1:0:-330
+Spawn: Village_10_10:82:370:0:0

@@ -1,5 +1,3 @@
-from http.cookiejar import cut_port_re
-
 from utils import Imports as I
 from Values import Settings as S
 from Render import Settings_render as sr
@@ -7,6 +5,33 @@ import json
 
 image_cache = {}
 font_cache = {}
+
+def debug_print(text, variable, debug="INFO"):
+    RESET_COLOR = "\033[0m"
+    INFO_COLOR = "\033[32m"
+    WARNING_COLOR = "\033[33m"
+    ERROR_COLOR = "\033[31m"
+    DEBUG_COLOR = "\033[34m"
+
+    color = {
+        "info": INFO_COLOR,
+        "error": ERROR_COLOR,
+        "warning": WARNING_COLOR,
+        "debug": DEBUG_COLOR
+    }
+    if variable:
+        print(f"{color[debug.lower()]} [{debug.upper()}] {text}: {variable}{RESET_COLOR}")
+    else:
+        print(f"{color[debug.lower()]} [{debug.upper()}] {text}{RESET_COLOR}")
+
+def is_in_screen(rect, data):
+    # if rect.x not in range(int(data["Zoom"][0] * -0.3), int(data["Zoom"][0] * 1.1)) or rect.x + rect.w not in range(int(data["Zoom"][0] * -0.3), int(data["Zoom"][0] * 1.1)) or rect.y not in range(int(data["Zoom"][0] * -0.5), int(data["Zoom"][1] * 1.3)) or rect.y + rect.h not in range(int(data["Zoom"][0] * -0.3), int(data["Zoom"][1] * 1.3)):
+    """display decorations only if they are in screen and player should be able to see them"""
+    if rect.x in range(0, int(data["Zoom"][0] * 1.1)) or rect.y in range(0, int(data["Zoom"][1] * 1.1)):
+        return False
+    elif rect.x + rect.w in range(0, int(data["Zoom"][0] * 1.1)) or rect.y + rect.h in range(0, int(data["Zoom"][1] * 1.1)):
+        return False
+    return True
 
 def get_color_by_RGB(rgb):
     try:
@@ -137,7 +162,7 @@ def create_light_mask(radius, color):
 
 
 def base_settings_load():
-    print("base settings")
+    debug_print("base settings", debug="info")
 
 
 def display_text(screen ,text ,size, pos_tuple, color="black"):
@@ -196,7 +221,6 @@ def get_property(item, items, property):
                 outcomes.append(property.split("-")[1])
             return probabilities, outcomes
         elif property in prop and property == "ANVIL":
-            # print(property_list, prop)
             property_str = prop.replace("ANVIL(", "")
             property_str = property_str.replace(")", "")
             result = property_str.split(",,")
@@ -378,11 +402,9 @@ def str_to_tuple(input_str):
     except (SyntaxError, ValueError):
         raise ValueError("Invalid input string for tuple conversion.")
 # def Gif_maker(image_folder, duration, name):
-#     print("use the movement parts to create four gifs for moving up down left right also do this in save character to properly save the character moving")
 #     # Get all the image files in the folder
 #     orientation_keys = S.GIF_DICT.keys()
 #     image_files = [I.os.path.join(image_folder, file) for file in I.os.listdir(image_folder) if file.endswith(('png', 'jpg', 'jpeg'))]
-#     print(image_files)
 #
 #     # Sort the image files by name to ensure correct order
 #     for key in orientation_keys:
@@ -716,7 +738,6 @@ def draw_character(screen, d, gender, race, options):
     # d.orientation = "Left"
     # d.walking = 2 #change walk possision
     options = d.get_character_options(options)
-    # print(options)
     for option in options:
         for ranges, color in option.items():
             if color == (0, 0, 0, 0): # skips a color if it is 0, 0, 0, 0
@@ -725,7 +746,6 @@ def draw_character(screen, d, gender, race, options):
                 continue
             if d.orientation == "Left" and ranges[1] < 610 and color == d.hair_color or d.orientation == "Left" and ranges[1] < 620 and color == (0, 0, 0, 254):
                 continue
-            # print(color)
             for left in range(ranges[0], ranges[1], 10):
                 for top in range(ranges[2], ranges[3], 10):
                     draw_pixel(screen, left, top, color)
@@ -938,19 +958,15 @@ def move_closer(point, target, step_size, decorations, sub_image, data, recursio
     # I.T.Make_rect_visible(sub_image, new_rect_top, "black")
     # I.T.Make_rect_visible(sub_image, new_rect_bot, "blue")
     if not is_valid_move(new_rect_left, decorations):
-        # print("left collision move right")
         new_point = new_point[0] + 1  * recursion, new_point[1]
 
     if not is_valid_move(new_rect_right, decorations):
-        # print("right collision move left")
         new_point = new_point[0] - 1  * recursion, new_point[1]
 
     if not is_valid_move(new_rect_top, decorations):
-        # print("top collision move bottom")
         new_point = new_point[0], new_point[1] + 1 * recursion
 
     if not is_valid_move(new_rect_bot, decorations):
-        # print("bottom collision move top")
         new_point = new_point[0], new_point[1] - 1 * recursion
         # return slide_around_obstacle(point, direction, step_size, decorations)
     if new_point == point and recursion == 2:
@@ -997,7 +1013,7 @@ def remove_from_backpack(item, amount):
             else:
                 del I.info.BACKPACK_CONTENT[item + "|STACK0"]
     else:
-        print("amount not a normal number")
+        debug_print("amount not a normal number", debug="error")
 
 def add_to_backpack(item, amount, items, row=0, collumn=0):
     if amount != 0:
@@ -1009,7 +1025,6 @@ def add_to_backpack(item, amount, items, row=0, collumn=0):
                 if I.info.BACKPACK_CONTENT[item_name][0] < stack:  # IF THE STACK HAS EMPTY SPACES CONTINUE
                     in_backpack = 2
                     if amount + I.info.BACKPACK_CONTENT[item_name][0] <= stack:  # IF THE AMOUNT OF NEW ITEMS PLUS THE ALREADY EXISTING ITEMS DOESNT OVERFLOW THE STACK
-                        # print("stack wasnt overflowed")
                         I.info.BACKPACK_CONTENT[item_name] = I.info.BACKPACK_CONTENT[item_name][0] + amount, I.info.BACKPACK_CONTENT[item_name][1], I.info.BACKPACK_CONTENT[item_name][2]
                         break
                     else:  # IF THE AMOUNT OF NEW ITEMS PLUS THE ALREADY EXISTING ITEMS OVERFLOWS THE STACK CREATE A NEW ONE
@@ -1024,14 +1039,10 @@ def add_to_backpack(item, amount, items, row=0, collumn=0):
                             row, collumn = find_open_space()
                         if int(amount + I.info.BACKPACK_CONTENT[item_name][0] - stack) != 0:
                             I.info.BACKPACK_CONTENT[new_name] = int(amount + I.info.BACKPACK_CONTENT[item_name][0] - stack), row, collumn  # FIRST CREATED NEW STACK CUZ THE OLD STACK VALUE WAS USED
-                            # print("stack overflowed creating new stack: ", I.info.BACKPACK_CONTENT[new_name])
                         I.info.BACKPACK_CONTENT[item_name] = int(stack), I.info.BACKPACK_CONTENT[item_name][1], I.info.BACKPACK_CONTENT[item_name][2]  # THEN UPDATED OLD STACK
                         break
-                # else:
-                    # print("this stack is full")
 
         if in_backpack == 1:
-            # print("all stacks were exactly full creating new stack")
             highest_stack_item_name = 0
             for item_name in I.info.BACKPACK_CONTENT.keys():
                 if item in item_name:
@@ -1044,7 +1055,6 @@ def add_to_backpack(item, amount, items, row=0, collumn=0):
             I.info.BACKPACK_CONTENT[new_name] = int(amount), row, collumn  # FIRST CREATED NEW STACK CUZ THE OLD STACK VALUE WAS USED
 
         if in_backpack == 0:
-            # print("didn't find empty stacks \n")
             if row == 0 and collumn == 0:
                 row, collumn = find_open_space()
 
@@ -1069,8 +1079,6 @@ def add_to_backpack(item, amount, items, row=0, collumn=0):
                             I.info.BACKPACK_CONTENT[item + addon + str(i)] = (int(stack), int(row), int(collumn))
                 else:
                     I.info.BACKPACK_CONTENT[item] = (float(value[0] + float(amount)), value[1], value[2])
-
-    # print("input: ", I.info.BACKPACK_CONTENT)
 
     # merge_stacks(items)
 def find_item_by_slot(x, y):
@@ -1105,8 +1113,6 @@ def find_open_space():
 #         if id >= 0:
 #             """if the id is more than or equal to 0 add the id to the dict with rect"""
 #             I.info.MAP_CHANGE[current_room]["add"][item_name].append((id, rect))
-#         else:
-#             print("Id too low")
 #     elif case == "remove":
 #         if item_name in list(I.info.MAP_CHANGE[current_room]["add"].keys()):
 #             for ida, coordinates in I.info.MAP_CHANGE[current_room]["add"][item_name]:
@@ -1197,9 +1203,7 @@ def update_map_view(decor_id, decor_name, rect, case, current_room=0, decoration
         #
         #     else:
         #         """the actual item was generated with this function"""
-        #         print("was generated by this function before", decor_name, decor_id)
         #         if decorations != 0:
-        #             print("was forecefully removed", decor_name, decor_id)
         #             del decorations.decor_dict[decor_name][decor_id]
         #         del I.info.MAP_CHANGE[current_room]["add"][decor_name][decor_id]
         #         """it's as if the item was never created in the first place"""
@@ -1218,6 +1222,7 @@ def update_map_view(decor_id, decor_name, rect, case, current_room=0, decoration
                 I.info.MAP_CHANGE[current_room]["add_bypassed"][decor_name][decor_id] = rect
             else:
                 print("Id too low")
+                debug_print("ID TOO LOW in add bypassed", debug="ERROR")
     elif case == "get":
         if I.info.MAP_CHANGE[current_room]["add"].get(decor_name) == None:
             return 0
@@ -1246,9 +1251,7 @@ def update_map_view(decor_id, decor_name, rect, case, current_room=0, decoration
         if effect in I.info.MAP_CHANGE[current_room]["add_effect"][decor_name][decor_id]:
             if len(I.info.MAP_CHANGE[current_room]["add_effect"][decor_name][decor_id].split(",,")) == 1:
                 I.info.MAP_CHANGE[current_room]["add_effect"][decor_name][decor_id] = I.info.MAP_CHANGE[current_room]["add_effect"][decor_name][decor_id].replace(effect, "")
-                # print("removed", I.info.MAP_CHANGE[current_room]["add_effect"][decor_name][decor_id])
             else:
-                # print("IN UPDATE MAP VIEW REMOVE EFFECT", I.info.MAP_CHANGE[current_room]["add_effect"][decor_name][decor_id])
                 I.info.MAP_CHANGE[current_room]["add_effect"][decor_name][decor_id] = I.info.MAP_CHANGE[current_room]["add_effect"][decor_name][decor_id].replace(effect, "")
 
 
@@ -1258,7 +1261,7 @@ def get_decor_coordinates(option, id, decorations):
         return rect
     else:
         I.t.sleep(0.5)
-        # print("error decor coordinates")
+        debug_print("ERROR DECOR COORDINATES", debug="ERROR")
 
 def dict_to_string(data):
     import json

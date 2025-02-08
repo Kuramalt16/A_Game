@@ -322,7 +322,10 @@ def keypress_handle(screen, data, song, items, spells, gifs, rooms, clock, decor
         song[song["Playing"]].play_effect(I.info.WALKING_ON)
     I.QB.tutorial_quest_walk(dx, dy)
     if keys[I.pg.K_z] and data["Player"]["Exhaustion"][0] > 30:
-        I.info.FAST = 2
+        if I.info.BASE_WALK_SPEED == 1:
+            I.info.FAST = 2
+        elif I.info.BASE_WALK_SPEED == 2:
+            I.info.FAST = 1.5
     elif data["Player"]["Exhaustion"][0] < 30 and keys[I.pg.K_z]:
         Ff.display_text_player("Too Exhausted to run", 1000)
     elif not keys[I.pg.K_z]:
@@ -410,7 +413,6 @@ def handle_combat(items, gifs, rooms):
         I.info.COMBAT_RECT = [I.pg.Rect(attack_direction[orientation][0] * 4 + I.info.OFFSCREEN[0] + 600 ,attack_direction[orientation][1] * 5 + I.info.OFFSCREEN[1] + 300, 40, 50), float(speed) * I.info.BASE_ATTACKING_SPEED]  # Player rect (if it gets hit with other rect. colide is set to True
 
 def handle_music(song, collide, data, items):
-    # print(song["Playing"])
     if data["Player"]["dead"]:
         if song["Playing"] != "Ghost":
             song["Playing"] = "Ghost"
@@ -436,10 +438,8 @@ def handle_music(song, collide, data, items):
     # else:
     #     duration = song[curr_song].music[song[curr_song].current_note][1]
     #     I.pg.time.set_timer(I.pg.USEREVENT + 10, duration)
-    # print(duration)
 
     if song[curr_song].effect_flag and I.pg.time.get_ticks() - song[curr_song].effect_time > 500: # HARDCODED TO ONLY PLAY 500 ms OF EFFECT
-        print("stoping: ", I.pg.time.get_ticks())
         song[curr_song].channel1.stop()
         song[curr_song].effect_flag = False
 
@@ -573,9 +573,7 @@ def queue_checks(data, decorations, gifs, mob, rooms):
                     mob[mob_name].count = mob[mob_name].count[0] + 1, mob[mob_name].count[1] + 1
                     mob[mob_name].mobs.append(mob[mob_name].create_mob(mob[mob_name].count[0]))
                     # self.mobs = [self.create_mob(i) for i in range(count)]  # Create initial list of mobs
-                print(mob[mob_name].count)
                 mob[mob_name].spawn_mob_acurate(cur_dict["path"], frame_count, mob[mob_name].count[0] - 1, rect[0], rect[1])
                 get = 1
     if get == 1:
         data["Queue_to_be_removed"].get()
-        print("mobs:", I.info.CURRENT_ROOM["Mobs"])

@@ -14,7 +14,6 @@ from static.data.play_data import info
 from static.data.play_data import mob_data
 from static.data.play_data import gifs
 from static.data.play_data import decor
-from scipy.ndimage import zoom
 from static.dialog import Dialog as dialog, Title_handle as Titles
 from static.items import items
 from static.Spells import Spells

@@ -136,7 +136,7 @@ def tutorial_quest_walk(dx, dy):
                 if dy == 1 and quest["COMPLETION"] == 0.75:
                     quest["COMPLETION"] = 1
             elif quest["ACTION"] == "RUN" and quest["COMPLETION"] != 1:
-                if I.info.FAST == 2:
+                if I.info.FAST > 1:
                     if dx == -1 and quest["COMPLETION"] == 0:
                         quest["COMPLETION"] = 0.25
                     if dx == 1 and quest["COMPLETION"] == 0.25:

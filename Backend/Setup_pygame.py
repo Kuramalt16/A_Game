@@ -24,6 +24,7 @@ def startup_clear():
 
 
 def Set_up():
+    Ff.debug_print("YOUR PATH", S.local_path, debug="DEBUG")
     icon_image = I.pg.image.load('static/images/Icon.png')
     I.pg.display.set_icon(icon_image)
     I.pg.init()  # initializes all game modules
