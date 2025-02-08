@@ -12,6 +12,9 @@ class Song:
         self.effect_flag = False
         self.channel0 = I.pg.mixer.Channel(0)
         self.channel1 = I.pg.mixer.Channel(5)
+        self.premade = {} # a dictionary filled with every effect if its generated or loaded
+        self.sound_waves = {} # a dictionary filled with sound waves or whatever that can be played.
+
     def generate_song(self, notes):
         i = 0
         chord = []
@@ -417,9 +420,25 @@ class Song:
 
         return stereo_noise
     def play_effect(self, effect):
-        if not self.effect_flag:
-            self.effect_flag = True
-            self.effect_time = I.pg.time.get_ticks()
-            self.channel1.stop()
-            sound = I.pg.sndarray.make_sound(effect)
-            self.channel1.play(sound)
+        if self.premade.get(effect) != None:
+            if not self.effect_flag and self.premade[effect] == False:
+                self.effect_flag = True
+                self.effect_time = I.pg.time.get_ticks()
+                self.channel1.stop()
+                sound = I.pg.sndarray.make_sound(effect)
+                self.channel1.play(sound)
+            elif not self.effect_flag and self.premade[effect] == True:
+                print(effect)
+                self.effect_time = I.pg.time.get_ticks()
+                self.effect_flag = True
+                self.channel1.stop()
+                sound = self.sound_waves[effect]
+                self.channel1.play(sound)
+
+
+    def load_premade_effect(self, file_name, key_name):
+        filepath = S.local_path + "/static/Sounds/" + file_name + ".mp3"
+        self.premade[key_name] = True
+        sound = I.pg.mixer.Sound(filepath)
+        self.sound_waves[key_name] = sound
+

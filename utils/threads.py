@@ -205,7 +205,7 @@ def five_hundred_msec(song): # Fixed ( works better than before, still play's mu
 
 def three_hundred_msec(): # Fixed
     while S.PLAY:
-        I.t.sleep(0.4)
+        I.t.sleep(0.3)
         I.info.CURRENT_STANCE += 1
         if I.info.CURRENT_STANCE > 3:
             I.info.CURRENT_STANCE = 0

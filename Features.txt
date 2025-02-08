@@ -313,6 +313,55 @@
 * NEEDS: willpower
 * ID: 71
 
+* DESC: spells should have describtions under them
+* Priority: HIGH
+* NEEDS: willpower
+* ID: 72
+
+* DESC: ghost is faster than normal walking speed
+* Priority: HIGH
+* NEEDS: willpower
+* ID: 73
+
+* DESC: improved stats improve your skill
+* Priority: HIGH
+* NEEDS: willpower
+* ID: 74
+
+* DESC: puzles in dungeons or somethinggg.
+* Priority: HIGH
+* NEEDS: willpower
+* ID: 75
+
+* DESC: Add tutorials (spells, all tools)
+* Priority: HIGH
+* NEEDS: willpower
+* ID: 76
+
+* DESC: wind effect
+* Priority: HIGH
+* NEEDS: willpower
+* ID: 77
+
+* DESC: sound for (smithing, cooking, talking, ambient (for each biome/house), spells, walking (In doors)
+* Priority: HIGH
+* NEEDS: willpower
+* ID: 78
+
+* DESC: Make sounds fully threaded
+* Priority: HIGH
+* NEEDS: willpower
+* ID: 79
+
+* DESC: Make sounds effect volume slider
+* Priority: HIGH
+* NEEDS: willpower
+* ID: 80
+
+* DESC: Make races matter more than health (speed, mana, damage taken, damage dealt)
+* Priority: HIGH
+* NEEDS: willpower
+* ID: 82
 
 UNTILL FULL ALPHA:
 * 20 QUESTS (16 Remain) (Tutorial quest, get:slimeballs, get:Meat0, get:logs, sticks)
@@ -333,5 +382,5 @@ UNTILL FULL ALPHA:
 * 20 spells (11 remaining) (firebolt, magicbolt, icebolt, healminor, spawnskeletons, flash, Fire Sprite, Necrotic Bolt, Sword Slash)
 * Bow and arrows
 * Add masteries (fishing, smelting, mining, axing, hoeing, planting, hunter, wizard, glassblowing) Done
-* 20 mobs (14 remaining) (pigs, slimeballs, guards, chickens, skeletons, Ents)
+* 20 mobs (12 remaining) (pigs, slimeballs, guards, chickens, skeletons, Ents, fire drake, water elemental)
 * make a house (rundown old building, get the mayor to sell it to you for too much money, ask wood carver for help in fixing it and then later other villagers on how to make other stuff (beds, cupboards, glass stuf etc)

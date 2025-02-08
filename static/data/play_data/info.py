@@ -4,8 +4,6 @@ SELECTED_CHARACTER = ""
 
 DATA = {}
 
-TICK = 50
-
 FAST = 1
 
 SPAWN_POINT = [330, 1]

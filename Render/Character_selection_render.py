@@ -3,30 +3,26 @@ import os.path
 from utils import Imports as I, Frequent_functions as Ff
 from Values import Settings as S
 
-S_LEFT = S.SCREEN_WIDTH / 2 - (S.SCREEN_WIDTH / 5)
-S_TOP = S.SCREEN_HEIGHT / 2 - (S.SCREEN_HEIGHT / 2.2)
-S_F_WIDTH = S.SCREEN_WIDTH - (2 * S_LEFT)
-S_F_HEIGHT = S.SCREEN_HEIGHT / 10 * 9
 
-B_LEFT = S.SCREEN_WIDTH / 2 - (S.SCREEN_WIDTH / 6)
-B_TOP1 = S.SCREEN_HEIGHT / 2 - (S.SCREEN_HEIGHT / (10 / 3))
-B_TOP2 = S.SCREEN_HEIGHT / 2 - (S.SCREEN_HEIGHT / 10)
-B_TOP3 = S.SCREEN_HEIGHT / 2 + (S.SCREEN_HEIGHT / 10)
-BUTTON_WIDTH = S.SCREEN_WIDTH - (2 * B_LEFT)
-BUTTON_HEIGHT = S.SCREEN_HEIGHT / 10
-
-L_ARR_L = S_LEFT + S_F_WIDTH / 4 - S_F_WIDTH / 10
-R_ARR_L = S_LEFT + S_F_WIDTH * 0.8
-ARR_H = S_F_HEIGHT / 12
-ARR_W = S_F_WIDTH / 20
-
-body_sizes = [S_LEFT + S_F_WIDTH / 4, S_TOP + S_F_HEIGHT / 6, S_F_WIDTH / 2, S_F_HEIGHT / 2]
 
 path = 'static/images/'
 
 path_races = path + 'Race/'
 def Char_Select(screen):
     buttons = {}
+    S_LEFT = S.SCREEN_WIDTH / 2 - (S.SCREEN_WIDTH / 5)
+    S_TOP = S.SCREEN_HEIGHT / 2 - (S.SCREEN_HEIGHT / 2.2)
+    S_F_WIDTH = S.SCREEN_WIDTH - (2 * S_LEFT)
+    S_F_HEIGHT = S.SCREEN_HEIGHT / 10 * 9
+
+    B_LEFT = S.SCREEN_WIDTH / 2 - (S.SCREEN_WIDTH / 6)
+    B_TOP1 = S.SCREEN_HEIGHT / 2 - (S.SCREEN_HEIGHT / (10 / 3))
+    B_TOP2 = S.SCREEN_HEIGHT / 2 - (S.SCREEN_HEIGHT / 10)
+    B_TOP3 = S.SCREEN_HEIGHT / 2 + (S.SCREEN_HEIGHT / 10)
+    BUTTON_WIDTH = S.SCREEN_WIDTH - (2 * B_LEFT)
+    BUTTON_HEIGHT = S.SCREEN_HEIGHT / 10
+
+
     frame_main_menu = Ff.add_image_to_screen(screen, path + 'Frame_main_menu.png', [S_LEFT, S_TOP, S_F_WIDTH, S_F_HEIGHT])
     buttons["New"] = Ff.add_image_to_screen(screen, path + 'Empty.png', [B_LEFT, B_TOP1, BUTTON_WIDTH, BUTTON_HEIGHT])
     if number_of_chars() > 9:
@@ -63,6 +59,14 @@ def load_exists():
     return os.path.exists("static/data/created_characters/")
 
 def Character_creation(screen, option, extra):
+    S_LEFT = S.SCREEN_WIDTH / 2 - (S.SCREEN_WIDTH / 5)
+    S_TOP = S.SCREEN_HEIGHT / 2 - (S.SCREEN_HEIGHT / 2.2)
+    S_F_WIDTH = S.SCREEN_WIDTH - (2 * S_LEFT)
+    S_F_HEIGHT = S.SCREEN_HEIGHT / 10 * 9
+
+    B_LEFT = S.SCREEN_WIDTH / 2 - (S.SCREEN_WIDTH / 6)
+
+    body_sizes = [S_LEFT + S_F_WIDTH / 4, S_TOP + S_F_HEIGHT / 6, S_F_WIDTH / 2, S_F_HEIGHT / 2]
     buttons = {}
     profile = {2: "_Back", 3: "_Side", 1: "_Side1", 0: ""}
     if option != "save":
@@ -172,6 +176,18 @@ def Character_creation(screen, option, extra):
     return buttons
 
 def generate_arrow_buttons(option, buttons, screen):
+    S_LEFT = S.SCREEN_WIDTH / 2 - (S.SCREEN_WIDTH / 5)
+    S_TOP = S.SCREEN_HEIGHT / 2 - (S.SCREEN_HEIGHT / 2.2)
+    S_F_WIDTH = S.SCREEN_WIDTH - (2 * S_LEFT)
+    S_F_HEIGHT = S.SCREEN_HEIGHT / 10 * 9
+
+    L_ARR_L = S_LEFT + S_F_WIDTH / 4 - S_F_WIDTH / 10
+    R_ARR_L = S_LEFT + S_F_WIDTH * 0.8
+    ARR_H = S_F_HEIGHT / 12
+    ARR_W = S_F_WIDTH / 20
+
+    body_sizes = [S_LEFT + S_F_WIDTH / 4, S_TOP + S_F_HEIGHT / 6, S_F_WIDTH / 2, S_F_HEIGHT / 2]
+
     if option == "Clothes":
         buttons["Hair_Left"] = Ff.add_image_to_screen(screen, path + "Left_arrow.png",[L_ARR_L, body_sizes[1] * 0.8, ARR_W, ARR_H])
         # buttons["Hair_Left"] = Ff.add_image_to_screen_dif_rect(screen, path + "Left_arrow.png",[L_ARR_L, body_sizes[1] * 0.8, ARR_W, ARR_H], (ARR_W * 0.8, ARR_H * 0.8))
@@ -209,6 +225,11 @@ def generate_arrow_buttons(option, buttons, screen):
     return buttons
 
 def new_character_creation(screen, option, extra, d):
+    S_LEFT = S.SCREEN_WIDTH / 2 - (S.SCREEN_WIDTH / 5)
+    S_TOP = S.SCREEN_HEIGHT / 2 - (S.SCREEN_HEIGHT / 2.2)
+    S_F_WIDTH = S.SCREEN_WIDTH - (2 * S_LEFT)
+    S_F_HEIGHT = S.SCREEN_HEIGHT / 10 * 9
+
     buttons = {}
     frame_main_menu = Ff.add_image_to_screen(screen, path + 'Frame_main_menu.png',[S_LEFT, S_TOP, S_F_WIDTH, S_F_HEIGHT])
     if option == "Gender":

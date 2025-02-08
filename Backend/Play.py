@@ -45,9 +45,42 @@ def reset(rooms, screen):
              "Ghost": I.Songs.Song("Ghost", I.A.dead_music),
              "Playing": "Background",
              }
+    songs["Pavement"] = songs[songs["Playing"]].load_premade_effect("Walk_pavement", "Pavement")
+    songs["Grass-Pavement"] = songs[songs["Playing"]].load_premade_effect("Walk_pavement", "Grass-Pavement")
+    songs["Sand-Pavement"] = songs[songs["Playing"]].load_premade_effect("Walk_pavement", "Sand-Pavement")
+
+    songs["Grass-Flakes"] = songs[songs["Playing"]].load_premade_effect("Walk_grass", "Grass-Flakes")
+    songs["Grass"] = songs[songs["Playing"]].load_premade_effect("Walk_grass", "Grass")
+
+    songs["Sand"] = songs[songs["Playing"]].load_premade_effect("Walk_sand", "Sand")
+    songs["Sand-Flakes"] = songs[songs["Playing"]].load_premade_effect("Walk_sand", "Sand-Flakes")
+    songs["Sand-Grass"] = songs[songs["Playing"]].load_premade_effect("Walk_sand", "Sand-Grass")
+    songs["Sand-Wet"] = songs[songs["Playing"]].load_premade_effect("Walk_wet_sand", "Sand-Wet")
+
+    songs["Sand-Deck"] = songs[songs["Playing"]].load_premade_effect("Walk_deck", "Sand-Deck")
+    songs["Deck"] = songs[songs["Playing"]].load_premade_effect("Walk_deck", "Deck")
+
+    songs["Water"] = songs[songs["Playing"]].load_premade_effect("Walk_water", "Water")
+
+    songs["SandClay-Pavement"] = songs[songs["Playing"]].load_premade_effect("Walk_clay", "SandClay-Pavement")
+    songs["Clay"] = songs[songs["Playing"]].load_premade_effect("Walk_clay", "Clay")
+    songs["Clay-Stairs"] = songs[songs["Playing"]].load_premade_effect("Walk_clay", "Clay-Stairs")
+    songs["Clay-Flakes"] = songs[songs["Playing"]].load_premade_effect("Walk_clay", "Clay-Flakes")
+
+    songs["Dark Grass-Pavement"] = songs[songs["Playing"]].load_premade_effect("Walk_stuffed_grass", "Dark Grass-Pavement")
+    songs["Stuffed Grass"] = songs[songs["Playing"]].load_premade_effect("Walk_stuffed_grass", "Stuffed Grass")
+
+
+
     songs["Slashing"] = songs[songs["Playing"]].generate_slash_sound()
     songs["Blunt"] = songs[songs["Playing"]].generate_blunt_sound()
     songs["Piercing"] = songs[songs["Playing"]].generate_stabbing_sound()
+
+    # songs["Flash"] = songs[songs["Playing"]].load_premade_effect("Spell_flash", "Flash")
+
+
+    songs[songs["Playing"]].channel0.set_volume(S.VOLUME)
+    songs[songs["Playing"]].channel1.set_volume(S.Effect_VOLUME)
 
     dim_surface = I.pg.Surface((S.SCREEN_WIDTH, S.SCREEN_HEIGHT), I.pg.SRCALPHA)
 
@@ -68,9 +101,13 @@ def Start(screen, clock, rooms):
         for event in I.pg.event.get():
             if event.type == I.pg.QUIT:
                 S.PLAY = False
-            if event.type == I.pg.KEYDOWN:
+            elif event.type == I.pg.VIDEORESIZE:
+                # Update window size based on new dimensions
+                S.SCREEN_WIDTH, S.SCREEN_HEIGHT = event.w, event.h
+                screen = I.pg.display.set_mode((S.SCREEN_WIDTH, S.SCREEN_HEIGHT), I.pg.RESIZABLE)
+            elif event.type == I.pg.KEYDOWN:
                 pressed = handle_keydown(event, data, spells, gifs, items, songs, rooms)
-            if event.type == I.pg.KEYUP:
+            elif event.type == I.pg.KEYUP:
                 # I.T.print_coordinates(event, data["Zoom_rect"])
                 pressed = handle_keyup(event, pressed, gifs, songs, screen, items, data, collide, spells, clock, rooms, npc, decorations, mob)
 
@@ -102,7 +139,7 @@ def Start(screen, clock, rooms):
                 screen.blit(dim_surface, (0, 0))
 
             I.pg.display.flip()  # max 4.5 ms
-            clock.tick(I.info.TICK)
+            clock.tick(S.FRAMERATE)
         else:
             if I.info.RESET == "Stairs":
                 pos = I.info.OFFSCREEN
@@ -281,6 +318,8 @@ def keypress_handle(screen, data, song, items, spells, gifs, rooms, clock, decor
     keys = I.pg.key.get_pressed()
     dx = (keys[I.pg.K_RIGHT] - keys[I.pg.K_LEFT])
     dy = (keys[I.pg.K_DOWN] - keys[I.pg.K_UP])
+    if dx != 0 or dy != 0:
+        song[song["Playing"]].play_effect(I.info.WALKING_ON)
     I.QB.tutorial_quest_walk(dx, dy)
     if keys[I.pg.K_z] and data["Player"]["Exhaustion"][0] > 30:
         I.info.FAST = 2
@@ -375,13 +414,11 @@ def handle_music(song, collide, data, items):
     if data["Player"]["dead"]:
         if song["Playing"] != "Ghost":
             song["Playing"] = "Ghost"
-            I.pg.time.set_timer(I.pg.USEREVENT + 10, 1000)
     elif song["Playing"] != "Background":
         song["Playing"] = "Background"
-        I.pg.time.set_timer(I.pg.USEREVENT + 10, 500)
     curr_song = song["Playing"]
     song[curr_song].channel0.set_volume(S.VOLUME)
-    song[curr_song].channel1.set_volume(S.VOLUME)
+    song[curr_song].channel1.set_volume(S.Effect_VOLUME)
     if collide[0] == "mob_collide":
         # bash = song[curr_song].generate_bash_sound()
         # slice = song[curr_song].generate_slicing_sound()
@@ -401,7 +438,8 @@ def handle_music(song, collide, data, items):
     #     I.pg.time.set_timer(I.pg.USEREVENT + 10, duration)
     # print(duration)
 
-    if I.pg.time.get_ticks() - song[curr_song].effect_time > 500: # HARDCODED TO ONLY PLAY 500 ms OF EFFECT
+    if song[curr_song].effect_flag and I.pg.time.get_ticks() - song[curr_song].effect_time > 500: # HARDCODED TO ONLY PLAY 500 ms OF EFFECT
+        print("stoping: ", I.pg.time.get_ticks())
         song[curr_song].channel1.stop()
         song[curr_song].effect_flag = False
 

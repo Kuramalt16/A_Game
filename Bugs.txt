@@ -88,4 +88,72 @@
 
 * DESC: Fix Font's change to something else
 * PRIORITY: LOW
-* ID: 23
+* ID: 37
+
+* DESC: not completing the first tutorial quest going to prison crashes
+* PRIORITY: LOW
+* ID: 24
+
+* DESC: decorations exist in house sprites fucked up?
+* PRIORITY: LOW
+* ID: 25
+
+* DESC: make a delete are youy sure button?
+* PRIORITY: LOW
+* ID: 26
+
+* DESC: try to kiill fire drake with obsidian dageer obtained illegaly in offsdcrean spam dagger sometimes crashes
+* PRIORITY: LOW
+* ID: 27
+
+* DESC: fire spell effect not dcentered on mobs
+* PRIORITY: LOW
+* ID: 28
+
+* DESC: kill fire drake, collect bone, crash
+* PRIORITY: LOW
+* ID: 29
+
+* DESC: fix mob speed
+* PRIORITY: LOW
+* ID: 30
+
+* DESC: background render 980 line error gifs.nextframe(-1) self.current_frame out of index self.images[]
+* PRIORITY: LOW
+* ID: 31
+
+* DESC: cooked food craashed the game after cooking obsiodian dagger
+* PRIORITY: LOW
+* ID: 32
+
+* DESC: fire effect lasts infinite amount when casted several times on one mob
+* PRIORITY: LOW
+* ID: 33
+
+* DESC: Skeleton spawn despawn crashes
+* PRIORITY: LOW
+* ID: 34
+
+* DESC: Fire sprites set fire to only one decor, should be all
+* PRIORITY: LOW
+* ID: 35
+
+* DESC: skeletons spawn crash after second crash
+* PRIORITY: LOW
+* ID: 36
+
+* DESC: Finish redoing the sizing of the play screen. main menu is done. char selection/load/gameplay is not done
+* PRIORITY: LOW
+* ID: 37
+
+* DESC: Game hella laggy fix it.
+* PRIORITY: HIGH
+* ID: 38
+
+* DESC: fix sound effect (Water, Deck, Clay walking)
+* PRIORITY: HIGH
+* ID: 39
+
+* DESC: fix sound effect walking and running should sound faster and slower.
+* PRIORITY: HIGH
+* ID: 40

@@ -6,6 +6,7 @@ from Render import Settings_render as sr
 import json
 
 image_cache = {}
+font_cache = {}
 
 def get_color_by_RGB(rgb):
     try:
@@ -133,48 +134,6 @@ def create_light_mask(radius, color):
 
     return light_surface
 
-# def create_light_mask(radius, color):
-#     # Create a surface to hold the light mask
-#     light_surface = I.pg.Surface((radius * 2, radius * 2), I.pg.SRCALPHA)
-#
-#     # Create a numpy array for the light mask
-#     light_array = I.np.zeros((radius * 2, radius * 2, 4), dtype=I.np.uint8)  # 4 channels for RGBA
-#
-#     # Calculate the center of the mask
-#     center_x, center_y = radius, radius
-#
-#     # Create a grid of coordinates
-#     y, x = I.np.ogrid[-center_y:radius * 2 - center_y, -center_x:radius * 2 - center_x]
-#
-#     # Calculate the squared distance from the center
-#     distance_squared = x ** 2 + y ** 2
-#     mask_area = distance_squared < radius ** 2  # boolean mask for pixels within the radius
-#
-#     # Calculate the intensity based on distance, ensuring it decays smoothly
-#     distance = I.np.sqrt(distance_squared)
-#     intensity = I.np.clip(255 - (distance / radius) * 255, 0, 255)
-#
-#     # Set the color with the calculated intensity for the RGBA channels
-#
-#     light_array[mask_area, 0] = color[0]  # Red
-#     light_array[mask_area, 1] = color[1]  # Green
-#     light_array[mask_area, 2] = color[2]  # Blue
-#     light_array[mask_area, 3] = intensity[mask_area]  # Alpha
-#
-#     # Set RGB channels
-#     pixels = I.pg.surfarray.pixels3d(light_surface)
-#     alpha = I.pg.surfarray.pixels_alpha(light_surface)
-#
-#
-#     # Assign values from light_array to pixels and alpha separately
-#     pixels[:, :, 0] = light_array[:, :, 0]  # Red
-#     pixels[:, :, 1] = light_array[:, :, 1]  # Green
-#     pixels[:, :, 2] = light_array[:, :, 2]  # Blue
-#     alpha[:, :] = light_array[:, :, 3]      # Alpha
-#
-#
-#     return light_surface
-
 
 
 def base_settings_load():
@@ -187,6 +146,36 @@ def display_text(screen ,text ,size, pos_tuple, color="black"):
     text_rect = text_surface.get_rect()
     text_rect.topleft = pos_tuple
     screen.blit(text_surface, text_rect)
+    return text_rect
+
+def display_wraped_text(screen ,text ,max_width, pos_tuple, color="black"):
+    """
+    Display text on the screen, dynamically adjusting the font size to fit within the specified width.
+
+    :param screen: The Pygame screen to render the text on.
+    :param text: The text to display.
+    :param max_size: The maximum font size to start with.
+    :param pos_tuple: The (x, y) position to display the text.
+    :param max_width: The maximum allowable width for the text.
+    :param color: The color of the text (default: "black").
+    :return: The rectangle of the rendered text.
+    """
+    font_size = max_width
+    font = I.pg.font.SysFont('minecraft', font_size)
+
+    # Adjust font size to fit the text within max_width
+    while font.size(text)[0] > max_width and font_size > 1:
+        font_size -= 1
+        font = I.pg.font.SysFont('minecraft', int(font_size / 10))
+
+    # Render the text surface
+    text_surface = font.render(text, True, color)
+    text_rect = text_surface.get_rect()
+    text_rect.topleft = pos_tuple
+
+    # Blit the text onto the screen
+    screen.blit(text_surface, text_rect)
+
     return text_rect
 
 def get_property(item, items, property):

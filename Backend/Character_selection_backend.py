@@ -4,17 +4,20 @@ from Render import Character_selection_render as cr, Load_render as lr
 def Character_Selection(screen):
     select = False
     clicked_button = ""
-    screen.fill("white")
-    I.pg.display.flip()
     was_canceled = False
-    buttons = cr.Char_Select(screen)
     while not select:
+        screen.fill("white")
+        buttons = cr.Char_Select(screen)
         if S.START_APP:
             buttons = cr.Char_Select(screen)
             S.START_APP = False
         for event in I.pg.event.get():
             if event.type == I.pg.QUIT:
                 select = True
+            elif event.type == I.pg.VIDEORESIZE:
+                # Update window size based on new dimensions
+                S.SCREEN_WIDTH, S.SCREEN_HEIGHT = event.w, event.h
+                screen = I.pg.display.set_mode((S.SCREEN_WIDTH, S.SCREEN_HEIGHT), I.pg.RESIZABLE)
             pos = I.pg.mouse.get_pos()
             if event.type == I.pg.MOUSEBUTTONDOWN and not S.BUSY:
                 for key, value in buttons.items():

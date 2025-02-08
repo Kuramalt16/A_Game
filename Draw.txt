@@ -1,3 +1,7 @@
+* DESC: falling leaves (wind effect)
+* PRIORITY: LOW
+* ID: 1
+
 * DESC: Iron Bow
 * PRIORITY: LOW
 * ID: 3
@@ -26,10 +30,11 @@
 * PRIORITY: MEDIUM
 * ID: 21
 
-* DESC: Meat2 ( chicken meat, cooked and uncooked)
+* DESC: Meat2 (chicken meat, cooked and uncooked)
 * PRIORITY: HIGH
 * ID: 24
 
 * DESC: Draw new tree (pine, birtch)
 * PRIORITY: LOW
 * ID: 26
+

@@ -12,10 +12,11 @@ FULLSCREEN_CH = False
 RESOLUTION = (SCREEN_WIDTH - 680) * 1 / 600
 
 # Framerate
-FRAMERATE = 30  #Default 60
+FRAMERATE = 100 #Default 60
 
 # Volume
 VOLUME = 0.0
+Effect_VOLUME = 1
 
 
 #  back-end values
